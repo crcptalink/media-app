@@ -5,12 +5,12 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { db } from "@/lib/db";
 import { displayName } from "@/lib/roster";
 import { asParams, parseRuleLine, RULE_TYPE_LABEL } from "@/lib/rules";
-import { requireLead } from "@/lib/session";
+import { requireScheduleManager } from "@/lib/session";
 import { addLineAction, deleteLineAction, saveLineAction } from "./actions";
 
 export default async function RulesPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const { dept } = await requireLead();
+  const { dept } = await requireScheduleManager();
   const editId = one(sp.edit);
   const [lines, people, templates] = await Promise.all([
     db.ruleNote.findMany({ where: { departmentId: dept.id }, orderBy: [{ sort: "asc" }, { createdAt: "asc" }] }),

@@ -80,7 +80,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
 
       {pending.length > 0 && (
         <section className="space-y-3">
-          <h2 className="h2">Waiting for the lead</h2>
+          <h2 className="h2">Waiting for a leader</h2>
           {pending.map((a) => (
             <div key={a.id} className="card flex items-center gap-3">
               <p className="flex-1">{describe(a)}</p>

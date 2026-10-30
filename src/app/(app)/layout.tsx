@@ -4,7 +4,7 @@ import { APP_NAME } from "@/lib/brand";
 import { departmentTheme } from "@/lib/departments";
 import { db } from "@/lib/db";
 import { getDepartment } from "@/lib/events";
-import { assertDepartmentAccess, isLead, requireUser } from "@/lib/session";
+import { assertDepartmentAccess, canManagePeople, canManageSchedule, requireUser } from "@/lib/session";
 import { signOutAction } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -13,15 +13,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const user = await requireUser();
   const dept = await getDepartment(db);
   assertDepartmentAccess(user, dept.id);
-  const lead = isLead(user, dept.id);
+  const schedule = canManageSchedule(user, dept.id);
+  const people = canManagePeople(user, dept.id);
   const unread = await db.notification.count({ where: { userId: user.id, readAt: null } });
-  const pendingClaims = lead ? await db.assignment.count({ where: { status: "CLAIM_PENDING", slot: { event: { departmentId: dept.id } } } }) : 0;
+  const pendingClaims = schedule ? await db.assignment.count({ where: { status: "CLAIM_PENDING", slot: { event: { departmentId: dept.id } } } }) : 0;
   const links: [string, string, number?][] = [
     ["/me", "My slots", unread],
     ["/roster", "Schedule"],
     ["/me/availability", "Availability"],
   ];
-  if (lead) links.push(["/admin/roster", "Admin", pendingClaims], ["/admin/people", "People"], ["/admin/rules", "Rules"]);
+  if (schedule) links.push(["/admin/roster", "Admin", pendingClaims]);
+  if (people) links.push(["/admin/people", "People"]);
+  if (schedule) links.push(["/admin/rules", "Rules"]);
   if (user.appRole === "ADMIN") links.push(["/admin/setup", "Setup"], ["/admin/outbox", "Emails"]);
   const theme = departmentTheme(dept.slug);
   return (

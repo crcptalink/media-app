@@ -26,7 +26,7 @@ export default async function RosterPage({ searchParams }: { searchParams: SP })
           </Link>
         ))}
       </div>
-      <p className="muted mb-4">Everyone can see the whole schedule. Tap Claim on an open slot to ask for it. The lead approves.</p>
+      <p className="muted mb-4">Everyone can see the whole schedule. Tap Claim on an open slot to ask for it. A leader or 2IC approves.</p>
       <RosterBoard events={events} mode="volunteer" me={{ id: user.id, skills }} back={`/roster?weeks=${weeks}`} />
     </div>
   );

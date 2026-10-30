@@ -8,7 +8,7 @@ import { arrivalStatus, STATUS_LABEL } from "@/lib/checkin";
 import { db } from "@/lib/db";
 import { config } from "@/lib/env";
 import { displayName } from "@/lib/roster";
-import { requireLead } from "@/lib/session";
+import { requireScheduleManager } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
 import { fmtDate, fmtDateTime, localTime } from "@/lib/time";
 import {
@@ -32,7 +32,7 @@ const ARRIVAL_CLS: Record<string, string> = {
 export default async function EventPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: SP }) {
   const { id } = await params;
   const sp = await searchParams;
-  const { dept } = await requireLead();
+  const { dept } = await requireScheduleManager();
   const e = await db.event.findUnique({
     where: { id },
     include: {

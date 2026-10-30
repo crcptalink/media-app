@@ -35,7 +35,7 @@ d("slot workflow (database)", () => {
     const tpl = await db.serviceTemplate.create({
       data: { departmentId: deptId, name: "Sunday 08:30", weekday: 0, startTime: "08:30", arrivalTime: "07:00", preprayerTime: "07:20", slots: { create: [{ positionId: ls.id, count: 1 }] } },
     });
-    lead = await db.user.create({ data: { email: "lead@example.com", name: "Lead", appRole: "ADMIN", memberships: { create: { departmentId: deptId, role: "LEAD" } } } });
+    lead = await db.user.create({ data: { email: "lead@example.com", name: "Lead", appRole: "ADMIN", memberships: { create: { departmentId: deptId, role: "LEADER" } } } });
     vol = await db.user.create({ data: { email: "vol@example.com", name: "Vol", memberships: { create: { departmentId: deptId } } } });
     vol2 = await db.user.create({ data: { email: "vol2@example.com", name: "Vol Two", memberships: { create: { departmentId: deptId } } } });
     const n = await generateEvents(db, deptId, 1, "2026-11-01");

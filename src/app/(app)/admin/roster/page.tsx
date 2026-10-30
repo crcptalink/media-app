@@ -4,7 +4,7 @@ import { RosterBoard } from "@/components/RosterBoard";
 import { describe } from "@/lib/assignments";
 import { db } from "@/lib/db";
 import { loadRoster } from "@/lib/roster";
-import { requireLead } from "@/lib/session";
+import { requireScheduleManager } from "@/lib/session";
 import { addDays, todayLocal } from "@/lib/time";
 import { loadWarnings } from "@/lib/warnings";
 import { decideAction } from "../actions";
@@ -12,7 +12,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 
 export default async function AdminRosterPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const { user, dept } = await requireLead();
+  const { user, dept } = await requireScheduleManager();
   const weeks = Math.min(12, Math.max(1, Number(one(sp.weeks) || 4)));
   const from = todayLocal();
   const events = await loadRoster(db, dept.id, from, addDays(from, weeks * 7));

@@ -4,11 +4,11 @@ import { cancelAssignment, cancelEvent, decideClaim, proposeSlot, rescheduleEven
 import { clearCheckin, markCheckin } from "@/lib/checkin";
 import { db } from "@/lib/db";
 import { processOutbox } from "@/lib/outbox";
-import { requireAdmin, requireLead } from "@/lib/session";
+import { requireAdmin, requireScheduleManager } from "@/lib/session";
 import { atLocal, isHHMM } from "@/lib/time";
 
 export async function proposeAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     const k = str(form, "kind");
     const kind = k === "TRAINEE" || k === "SHADOW" ? k : "SERVING";
@@ -21,7 +21,7 @@ export async function proposeAction(form: FormData) {
 }
 
 export async function decideAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     const approve = str(form, "decision") === "approve";
     await decideClaim(db, { assignmentId: str(form, "assignmentId"), actorId: user.id, approve });
@@ -30,7 +30,7 @@ export async function decideAction(form: FormData) {
 }
 
 export async function removeAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     await cancelAssignment(db, { assignmentId: str(form, "assignmentId"), actorId: user.id, reason: str(form, "reason") || undefined });
     return "Removed.";
@@ -38,7 +38,7 @@ export async function removeAction(form: FormData) {
 }
 
 export async function resendAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     await resendInvite(db, { assignmentId: str(form, "assignmentId"), actorId: user.id });
     return "Invite re-sent.";
@@ -46,7 +46,7 @@ export async function resendAction(form: FormData) {
 }
 
 export async function manualCheckinAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     const id = str(form, "assignmentId");
     if (str(form, "op") === "clear") {
@@ -67,7 +67,7 @@ export async function manualCheckinAction(form: FormData) {
 }
 
 export async function rescheduleAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     const ev = await db.event.findUnique({ where: { id: str(form, "eventId") } });
     if (!ev) throw new WorkflowError("Event not found");
@@ -90,7 +90,7 @@ export async function rescheduleAction(form: FormData) {
 }
 
 export async function renameEventAction(form: FormData) {
-  await requireLead();
+  await requireScheduleManager();
   await runAction(form, async () => {
     await db.event.update({ where: { id: str(form, "eventId") }, data: { title: str(form, "title") || "Service" } });
     return "Saved.";
@@ -98,7 +98,7 @@ export async function renameEventAction(form: FormData) {
 }
 
 export async function cancelEventAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     await cancelEvent(db, { eventId: str(form, "eventId"), actorId: user.id });
     return "Event cancelled and everyone notified.";
@@ -106,7 +106,7 @@ export async function cancelEventAction(form: FormData) {
 }
 
 export async function addSlotAction(form: FormData) {
-  await requireLead();
+  await requireScheduleManager();
   await runAction(form, async () => {
     const eventId = str(form, "eventId");
     const position = await db.position.findUnique({ where: { id: str(form, "positionId") } });
@@ -118,7 +118,7 @@ export async function addSlotAction(form: FormData) {
 }
 
 export async function deleteSlotAction(form: FormData) {
-  await requireLead();
+  await requireScheduleManager();
   await runAction(form, async () => {
     const slot = await db.slot.findUnique({ where: { id: str(form, "slotId") }, include: { assignments: { where: { status: { in: ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"] } } } } });
     if (!slot) throw new WorkflowError("Slot not found");

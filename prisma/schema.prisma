@@ -16,7 +16,8 @@ enum AppRole {
 }
 
 enum DeptRole {
-  LEAD
+  LEADER
+  TWO_IC
   VOLUNTEER
 }
 

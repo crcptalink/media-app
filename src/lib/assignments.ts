@@ -83,7 +83,7 @@ export async function leadsOf(tx: Tx | Db, departmentId: string) {
   return tx.user.findMany({
     where: {
       active: true,
-      OR: [{ appRole: "ADMIN" }, { memberships: { some: { departmentId, role: "LEAD" } } }],
+      OR: [{ appRole: "ADMIN" }, { memberships: { some: { departmentId, role: { in: ["LEADER", "TWO_IC"] } } } }],
     },
   });
 }
@@ -197,7 +197,7 @@ export async function respondToProposal(db: Db, p: { assignmentId: string; userI
 export async function claimSlot(db: Db, p: { slotId: string; userId: string; kind?: AssignmentKind }) {
   return db.$transaction(async (tx) => {
     const a = await createLive(tx, { slotId: p.slotId, userId: p.userId, kind: p.kind ?? "SERVING", status: "CLAIM_PENDING" });
-    await notify(tx, a.userId, a.id, "claim_pending", `Request sent: ${describe(a)}. Waiting for the lead.`);
+      await notify(tx, a.userId, a.id, "claim_pending", `Request sent: ${describe(a)}. Waiting for a leader.`);
     for (const lead of await leadsOf(tx, a.slot.event.departmentId)) {
       if (lead.id === a.userId) continue;
       await notify(tx, lead.id, a.id, "claim_pending", `${a.user.name || a.user.email} asked for ${describe(a)}`);

@@ -89,17 +89,32 @@ Updating later: with auto-deploy, pushing to the default branch is enough (see [
 ### Slot flow
 | Status | Meaning | Next |
 |---|---|---|
-| `PROPOSED` | Lead pressed **Ask** | Volunteer **Yes** → `ACCEPTED`, **No** → `DECLINED` |
-| `CLAIM_PENDING` | Volunteer pressed **Claim** | Lead **Approve** → `ACCEPTED`, **Reject** → `REJECTED` |
+| `PROPOSED` | Leader or 2IC pressed **Ask** | Member **Yes** → `ACCEPTED`, **No** → `DECLINED` |
+| `CLAIM_PENDING` | Member pressed **Claim** | Leader or 2IC **Approve** → `ACCEPTED`, **Reject** → `REJECTED` |
 | `ACCEPTED` | Confirmed, invite sent | Time change → updated invite. Removal → `CANCELLED` + cancellation |
 | `DECLINED` / `REJECTED` / `CANCELLED` | Final, slot open again | — |
 
-**Assign** (lead) confirms immediately. Every change writes an in-app notice and queues an email. A partial unique index allows only one live (proposed / pending / accepted) person per slot and kind, so two people can never hold the same slot.
+**Assign** (leader or 2IC) confirms immediately. Every change writes an in-app notice and queues an email. A partial unique index allows only one live (proposed / pending / accepted) person per slot and kind, so two people can never hold the same slot.
+
+### Roles
+
+Department role is stored on each membership. **Member** is the `VOLUNTEER` value. Existing leads were renamed to **Leader**. **Service Leader** is a Link position, not this role.
+
+| | Admin | Leader | 2IC | Member |
+|---|---|---|---|---|
+| Who | App role Admin | Department role Leader | Department role 2IC | Department role Member |
+| Open departments | All | Ticked departments | Ticked departments | Ticked departments |
+| Own schedule, yes/no, availability, claim | Yes | Yes | Yes | Yes |
+| Department schedule, approve claims, rules, event details | Yes | Their department | Their department | No |
+| People and department permissions | Yes | Their department | No | No |
+| Setup (templates, grace, screens, generate) and the email outbox | Yes | No | No | No |
+
+An Admin can do every row even without a department tick. A 2IC matches a Leader on the schedule and cannot open People or Setup.
 
 ### Training
 Positions: **SL** Service Leader, **LS** Livestream, **L** Link, **LSL** LS + Link (10:30, covers LS and L). Each person has a stage per position: **Shadow** (watches the leader set up, usually once) → **Trainee** (sets up while the trainer watches, until ready) → **Qualified**, plus a **Trainer** flag (LST = livestream trainer, LT = link trainer). Every slot has a serving person plus an optional **trainee / shadow** spot, so a trainee is paired with the trainer in that slot. The roster warns when a trainee has no trainer next to them, or when someone who isn't qualified is put in the serving spot.
 
-**Thursday Training**: everyone can answer Yes/No on *My slots*. People who are scheduled in a Thursday slot are shown as *Required*; everyone else is *Optional*, and the lead sees all RSVPs on the event's *Details* page.
+**Thursday Training**: everyone can answer Yes/No on *My slots*. People who are scheduled in a Thursday slot are shown as *Required*; everyone else is *Optional*, and a leader or 2IC sees all replies on the event's *Details* page.
 
 ### Calendar invites
 `.ics` with `METHOD:REQUEST`, `UID:asg-<id>@crcptalink`, `SEQUENCE:0`, TZID Africa/Johannesburg, starting at the **arrival** time, organizer crcptalink@gmail.com, the volunteer as `ATTENDEE;RSVP=TRUE`, and a reminder 2 hours before. Updates reuse the UID with `SEQUENCE+1`; cancellations send `METHOD:CANCEL` + `STATUS:CANCELLED` with a higher SEQUENCE. Sent through Nodemailer's `icalEvent` (a `text/calendar; method=…` part) plus an `invite.ics` attachment. All mail goes through the `EmailOutbox` table; a worker in the app sends every 30 s and retries failures with backoff (5 tries). *Emails* (admin) shows failed sends with a Retry button. Without SMTP settings, mail (including sign-in links) is printed to the app log: `docker compose logs app`.
@@ -107,7 +122,7 @@ Positions: **SL** Service Leader, **LS** Livestream, **L** Link, **LSL** LS + Li
 ### Check-in
 * **QR at the door**: each event has its own QR (on *Details*) → `/checkin?e=…&t=…`; the signed-in volunteer taps "I'm here".
 * **Kiosk**: `/kiosk?token=KIOSK_TOKEN` lists today's confirmed names; tap, then confirm.
-* **Manual**: the lead marks someone in (optionally with a time) or clears it on *Details*; logged in `AuditLog`.
+* **Manual**: a leader or 2IC marks someone in (optionally with a time) or clears it on *Details*; logged in `AuditLog`.
 
 QR / kiosk check-in is open from 60 min before the arrival time until the event ends. Status is computed: **on time** if checked in by arrival + grace (5 min, change on *Setup*), **late** after that, **absent** if nobody checked in by the start.
 

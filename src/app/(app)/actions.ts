@@ -15,7 +15,7 @@ export async function respondAction(form: FormData) {
   await runAction(form, async () => {
     const accept = str(form, "answer") === "yes";
     await respondToProposal(db, { assignmentId: str(form, "assignmentId"), userId: user.id, accept });
-    return accept ? "Thanks! You're confirmed — a calendar invite is on its way." : "Declined. The lead has been told.";
+    return accept ? "Thanks! You're confirmed — a calendar invite is on its way." : "Declined. A leader has been told.";
   });
 }
 
@@ -24,7 +24,7 @@ export async function claimAction(form: FormData) {
   await runAction(form, async () => {
     const kind = str(form, "kind") === "TRAINEE" ? "TRAINEE" : str(form, "kind") === "SHADOW" ? "SHADOW" : "SERVING";
     await claimSlot(db, { slotId: str(form, "slotId"), userId: user.id, kind });
-    return "Request sent. The lead will approve or reject it.";
+    return "Request sent. A leader or 2IC will approve or reject it.";
   });
 }
 

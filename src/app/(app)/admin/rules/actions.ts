@@ -4,10 +4,10 @@ import { runAction, str } from "@/lib/actions";
 import { WorkflowError } from "@/lib/assignments";
 import { db } from "@/lib/db";
 import { RULE_TYPE_LABEL } from "@/lib/rules";
-import { requireLead } from "@/lib/session";
+import { requireScheduleManager } from "@/lib/session";
 
 export async function addLineAction(form: FormData) {
-  const { user, dept } = await requireLead();
+  const { user, dept } = await requireScheduleManager();
   const text = str(form, "text");
   await runAction(form, async () => {
     if (!text) throw new WorkflowError("Type a line first");
@@ -18,7 +18,7 @@ export async function addLineAction(form: FormData) {
 }
 
 export async function saveLineAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     const id = str(form, "id");
     const text = str(form, "text");
@@ -51,7 +51,7 @@ export async function saveLineAction(form: FormData) {
 }
 
 export async function deleteLineAction(form: FormData) {
-  const { user } = await requireLead();
+  const { user } = await requireScheduleManager();
   await runAction(form, async () => {
     const id = str(form, "id");
     const before = await db.ruleNote.delete({ where: { id } });

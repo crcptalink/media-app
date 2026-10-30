@@ -12,13 +12,64 @@ set -o errtrace
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
+DEPLOY_LOG_FILE="${MEDIA_APP_DEPLOY_LOG:-${HOME:-/tmp}/.media-app-deploy.log}"
+
 log() {
-  printf '%s %s\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*"
+  local line
+  line="$(printf '%s %s' "$(date '+%Y-%m-%dT%H:%M:%S%z')" "$*")"
+  printf '%s\n' "$line"
+  printf '%s\n' "$line" >> "$DEPLOY_LOG_FILE" || true
+}
+
+# Run a command, keep its output in the deploy log, and return its status.
+run_and_log() {
+  set +e
+  "$@" 2>&1 | tee -a "$DEPLOY_LOG_FILE"
+  local code="${PIPESTATUS[0]}"
+  set -e
+  return "$code"
+}
+
+notify_deploy() {
+  local status="$1"
+  local sha="$2"
+  local short="${sha:0:7}"
+  local commit body b64 subject
+  commit="$(git log -1 --format=%B "$sha" 2>/dev/null || git log -1 --format=%B 2>/dev/null || true)"
+  body="$commit"
+  if [[ -n "$sha" ]]; then
+    body+=$'\n\n'"${sha}"
+  fi
+  if [[ "$status" != "ok" ]]; then
+    body+=$'\n\n--- last log lines ---\n'
+    body+="$(tail -n 40 "$DEPLOY_LOG_FILE" 2>/dev/null || true)"
+  fi
+  if [[ "$status" == "ok" ]]; then
+    subject="CRC Media deployed ${short}"
+  else
+    subject="CRC Media deploy FAILED ${short}"
+  fi
+  b64="$(printf '%s' "$body" | base64 -w 0 2>/dev/null || printf '%s' "$body" | base64 | tr -d '\n')"
+  # Mail uses the image's node and nodemailer. A missing script or SMTP
+  # error must not fail the deploy.
+  set +e
+  docker compose run --rm --no-deps -T --entrypoint node \
+    -e DEPLOY_NOTIFY_STATUS="$status" \
+    -e DEPLOY_NOTIFY_SHA="$short" \
+    -e DEPLOY_NOTIFY_SUBJECT="$subject" \
+    -e DEPLOY_NOTIFY_BODY_B64="$b64" \
+    app scripts/notify-deploy.js
+  set -e
+  return 0
 }
 
 on_err() {
   local code=$?
   log "FAILED exit=${code} line=${BASH_LINENO[0]} command=${BASH_COMMAND}"
+  if [[ "${DEPLOY_ATTEMPT:-0}" == "1" && "${DEPLOY_NOTIFIED:-0}" != "1" ]]; then
+    DEPLOY_NOTIFIED=1
+    notify_deploy failed "$(git rev-parse HEAD 2>/dev/null || echo unknown)" || true
+  fi
   exit "$code"
 }
 trap on_err ERR
@@ -50,10 +101,10 @@ deploy_stack() {
   # may use swap on this 3.2 GiB PC, but the site stays up until the image is ready.
   # `up -d` then recreates the container, which is only a short restart.
   log "docker compose build (current app keeps serving)"
-  docker compose build
+  run_and_log docker compose build
 
   log "docker compose up -d --remove-orphans"
-  docker compose up -d --remove-orphans
+  run_and_log docker compose up -d --remove-orphans
 
   log "waiting for the app container to become healthy"
   local deadline=$((SECONDS + 420)) status="" cid=""
@@ -69,18 +120,18 @@ deploy_stack() {
   done
   if [[ "$status" != "healthy" ]]; then
     log "FAILED app did not become healthy (status=${status:-unknown}); recent logs follow"
-    docker compose logs --tail 120 app db || true
-    exit 1
+    docker compose logs --tail 120 app db 2>&1 | tee -a "$DEPLOY_LOG_FILE" || true
+    return 1
   fi
 
   # Entrypoint already runs `npx prisma migrate deploy` before the server.
   # Run it again so a migration error fails this deploy instead of only
   # showing up as a restart loop.
   log "applying Prisma migrations (npx prisma migrate deploy)"
-  if ! docker compose exec -T app npx --no-install prisma migrate deploy; then
+  if ! run_and_log docker compose exec -T app npx --no-install prisma migrate deploy; then
     log "FAILED prisma migrate deploy; recent app logs follow"
-    docker compose logs --tail 80 app || true
-    exit 1
+    docker compose logs --tail 80 app 2>&1 | tee -a "$DEPLOY_LOG_FILE" || true
+    return 1
   fi
 
   # Dangling images only (the previous link-roster:latest). Never prune volumes:
@@ -94,6 +145,10 @@ deploy_stack() {
   fi
 
   log "deploy ok at ${sha}"
+  if [[ "${DEPLOY_NOTIFIED:-0}" != "1" ]]; then
+    DEPLOY_NOTIFIED=1
+    notify_deploy ok "$sha" || true
+  fi
 }
 
 # Re-exec after git update so the build runs the script that just landed.
@@ -132,6 +187,8 @@ if [[ "$local_sha" == "$remote_sha" && "$FORCE" -eq 0 ]]; then
   exit 0
 fi
 
+: > "$DEPLOY_LOG_FILE" || true
+export DEPLOY_ATTEMPT=1
 if [[ "$local_sha" == "$remote_sha" ]]; then
   log "--force: rebuilding ${remote_sha} with no new commits"
 else

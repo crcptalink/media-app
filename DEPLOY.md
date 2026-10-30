@@ -58,6 +58,7 @@ Until `SMTP_APP_PASSWORD` is set, sign-in links and calendar mail are printed in
 4. Otherwise fast-forwards (or resets) to `origin`, runs `docker compose build` while the current app keeps serving, then `docker compose up -d --remove-orphans` to swap in the new image.
 5. Waits until the app is healthy. The container entrypoint runs `npx prisma migrate deploy` before the server; the script runs that same command again so a bad migration fails the deploy.
 6. `docker image prune -f` and `docker builder prune -f` (keeping up to 3 GB of recent build cache). Volumes are not pruned.
+7. Emails the result to `DEPLOY_NOTIFY_EMAIL`, or `SEED_ADMIN_EMAIL` if that is empty. Nothing is sent while the SMTP app password or the address is still a placeholder, and a mail failure does not fail the deploy. A check that finds no new commits does not send mail.
 
 A rebuild with no new commit (the first install, or a manual retry):
 

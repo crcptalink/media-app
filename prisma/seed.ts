@@ -108,8 +108,8 @@ async function main() {
   });
   await db.departmentMember.upsert({
     where: { userId_departmentId: { userId: admin.id, departmentId: dept.id } },
-    create: { userId: admin.id, departmentId: dept.id, role: "LEAD" },
-    update: { role: "LEAD" },
+    create: { userId: admin.id, departmentId: dept.id, role: "LEADER" },
+    update: { role: "LEADER" },
   });
   for (const code of ["SL", "LS", "L", "LSL"]) {
     await db.userSkill.upsert({

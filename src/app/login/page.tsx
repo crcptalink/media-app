@@ -8,11 +8,11 @@ import { APP_NAME } from "@/lib/brand";
 import { magicLinkAction, passwordAction } from "./actions";
 
 const ERRORS: Record<string, string> = {
-  AccessDenied: "That email isn't on the Link schedule yet. Ask the Link lead to add you.",
+  AccessDenied: "That email isn't on the Link schedule yet. Ask a Link leader to add you.",
   Verification: "That sign-in link has expired or was already used. Request a new one.",
   CredentialsSignin: "Wrong email or password (or no password set yet — use the email link).",
   MissingEmail: "Enter your email address.",
-  EmailSignin: "We couldn't send the email. Try again or ask the lead.",
+  EmailSignin: "We couldn't send the email. Try again or ask a leader.",
   Configuration: "Sign-in is not configured correctly on the server.",
 };
 
