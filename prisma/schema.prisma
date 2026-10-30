@@ -95,7 +95,8 @@ enum OutboxStatus {
 
 model User {
   id            String    @id @default(cuid())
-  email         String    @unique
+  /// Null for people imported from the sheet who do not sign in.
+  email         String?   @unique
   name          String?
   phone         String?
   emailVerified DateTime?
@@ -305,6 +306,8 @@ model Assignment {
   decidedAt     DateTime?
   icsUid        String           @unique
   icsSequence   Int              @default(0)
+  /// Sheet code kept as written, e.g. LS, L, SL, T, LST, LT, Shadow.
+  rawCode       String?
   inviteSentAt  DateTime?
   checkedInAt   DateTime?
   checkinMethod CheckinMethod?
@@ -417,4 +420,10 @@ model AuditLog {
 model Setting {
   key   String @id
   value String
+}
+
+/// One row per successful data import. Presence means "do not run again".
+model DataImport {
+  key       String   @id
+  appliedAt DateTime @default(now())
 }

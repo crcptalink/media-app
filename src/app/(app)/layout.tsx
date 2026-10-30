@@ -32,7 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <AppShell
-      user={{ label: user.name || user.email }}
+      user={{ label: user.name || user.email || "Member" }}
       departments={departments}
       currentSlug={dept.slug}
       section={dept.name}

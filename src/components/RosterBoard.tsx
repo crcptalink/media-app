@@ -11,7 +11,7 @@ import { SubmitButton } from "./SubmitButton";
 export interface Person {
   id: string;
   name: string | null;
-  email: string;
+  email: string | null;
   skills: { positionId: string; stage: SkillStage; isTrainer: boolean }[];
 }
 

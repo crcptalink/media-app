@@ -1,0 +1,1323 @@
+{
+ "people": [
+  {
+   "name": "Candice",
+   "positions": [
+    "LS & Link",
+    "LS Training",
+    "Link",
+    "Link Training",
+    "Livestream",
+    "Service Leader"
+   ],
+   "trainingStage": null,
+   "notes": "lady (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Armand",
+   "positions": [
+    "Link",
+    "Link Training",
+    "Service Leader"
+   ],
+   "trainingStage": null,
+   "notes": "guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Carolien",
+   "positions": [
+    "LS Training",
+    "Livestream",
+    "Service Leader"
+   ],
+   "trainingStage": "trainer",
+   "notes": "LS trainer (priority 1st); lady (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Prince",
+   "positions": [
+    "LS Training",
+    "Link",
+    "Link Training",
+    "Livestream",
+    "Service Leader"
+   ],
+   "trainingStage": "trainer",
+   "notes": "LS trainer (priority 4th); Link trainer (priority 4th); guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Daniel",
+   "positions": [
+    "LS & Link",
+    "Link",
+    "Training"
+   ],
+   "trainingStage": "trainer",
+   "notes": "Link trainer (priority 3rd); guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Kevin",
+   "positions": [
+    "LS & Link",
+    "LS Training",
+    "Link",
+    "Link Training",
+    "Livestream",
+    "Service Leader"
+   ],
+   "trainingStage": "trainer",
+   "notes": "LS trainer (priority 3rd); Link trainer (priority 2nd); guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Zee",
+   "positions": [
+    "LS & Link",
+    "LS Training",
+    "Link",
+    "Link Training",
+    "Livestream",
+    "Service Leader"
+   ],
+   "trainingStage": "trainer",
+   "notes": "LS trainer (priority 2nd); Link trainer (priority 1st); lady (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Tshego",
+   "positions": [
+    "LS & Link",
+    "LS Training",
+    "Link",
+    "Livestream",
+    "Service Leader",
+    "Training"
+   ],
+   "trainingStage": "trainer",
+   "notes": "LS trainer; Link trainer (priority 5th); lady (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Katlego",
+   "positions": [
+    "Link",
+    "Livestream",
+    "Service Leader"
+   ],
+   "trainingStage": "trainer",
+   "notes": "Link trainer (priority 7th); guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Karabo",
+   "positions": [
+    "LS & Link",
+    "Link",
+    "Link Training",
+    "Service Leader"
+   ],
+   "trainingStage": "trainer",
+   "notes": "Link trainer (priority 8th); guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Daniel-son",
+   "positions": [
+    "LS Training",
+    "Link",
+    "Livestream"
+   ],
+   "trainingStage": null,
+   "notes": "needs supervision on Livestream; guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Towana",
+   "positions": [
+    "LS & Link",
+    "Link",
+    "Link Training",
+    "Livestream"
+   ],
+   "trainingStage": null,
+   "notes": "needs supervision on Livestream; guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Godfrey",
+   "positions": [
+    "LS & Link",
+    "LS Training",
+    "Link",
+    "Livestream",
+    "Training"
+   ],
+   "trainingStage": null,
+   "notes": "guy (Notes; used for \"1x guy\" rule); sheet header has trailing space: \"Godfrey \""
+  },
+  {
+   "name": "Nqobani",
+   "positions": [
+    "LS Training",
+    "Livestream"
+   ],
+   "trainingStage": "trainee",
+   "notes": "trainee: LINK, LS; needs supervision on Livestream; guy (Notes; used for \"1x guy\" rule); sheet header has trailing space: \"Nqobani \"; shadowed LS 26-Jul & 2-Aug 2026 (\"Shadow LS\")"
+  },
+  {
+   "name": "Dakalo",
+   "positions": [
+    "Link",
+    "Link Training",
+    "Livestream"
+   ],
+   "trainingStage": null,
+   "notes": "needs supervision on Livestream; needs supervision on Link; guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "William",
+   "positions": [
+    "LS & Link",
+    "Link",
+    "Link Training",
+    "Livestream",
+    "Training"
+   ],
+   "trainingStage": "trainee",
+   "notes": "trainee: LINK; needs supervision on Livestream; guy (Notes; used for \"1x guy\" rule)"
+  },
+  {
+   "name": "Aidan",
+   "positions": [
+    "Link",
+    "Link Training"
+   ],
+   "trainingStage": null,
+   "notes": ""
+  },
+  {
+   "name": "Keamo",
+   "positions": [
+    "LS & Link",
+    "Link Training",
+    "Livestream",
+    "Training"
+   ],
+   "trainingStage": null,
+   "notes": ""
+  },
+  {
+   "name": "Namile",
+   "positions": [
+    "Livestream"
+   ],
+   "trainingStage": null,
+   "notes": ""
+  },
+  {
+   "name": "Brett",
+   "positions": [],
+   "trainingStage": null,
+   "notes": "in 2026 header but no 2026 assignments and not in Notes"
+  },
+  {
+   "name": "Luu (JHB)",
+   "positions": [],
+   "trainingStage": null,
+   "notes": "in 2026 header but no 2026 assignments and not in Notes"
+  },
+  {
+   "name": "Stéphan",
+   "positions": [],
+   "trainingStage": null,
+   "notes": "in 2026 header but no 2026 assignments and not in Notes"
+  },
+  {
+   "name": "Veronice-Lee",
+   "positions": [],
+   "trainingStage": null,
+   "notes": "in 2026 header but no 2026 assignments and not in Notes"
+  }
+ ],
+ "positions": [
+  "Service Leader",
+  "Livestream",
+  "Link",
+  "LS & Link",
+  "Training",
+  "LS Training",
+  "Link Training"
+ ],
+ "services": [
+  {
+   "date": "2026-10-04",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Kevin",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Godfrey",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-10-04",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": "Towana",
+     "code": null,
+     "raw": "10:30"
+    },
+    {
+     "position": "Training",
+     "person": "Daniel",
+     "code": "T",
+     "raw": "10:30 T"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-04",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Nqobani",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Dakalo",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link Training",
+     "person": "Candice",
+     "code": "LT",
+     "raw": "18:00 LT"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-11",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Godfrey",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Katlego",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-10-11",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": "Tshego",
+     "code": null,
+     "raw": "10:30"
+    },
+    {
+     "position": "Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-10-11",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Daniel-son",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Zee",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-10-18",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Dakalo",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Armand",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": "Carolien",
+     "code": "SL",
+     "raw": "08:30 SL"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-18",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": "Towana",
+     "code": null,
+     "raw": "10:30"
+    },
+    {
+     "position": "Training",
+     "person": "Daniel",
+     "code": "T",
+     "raw": "10:30 T"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-18",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Nqobani",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Karabo",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": "Kevin",
+     "code": "LST",
+     "raw": "18:00 LST"
+    },
+    {
+     "position": "Link Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-10-25",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Godfrey",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Katlego",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-10-25",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": "Zee",
+     "code": null,
+     "raw": "10:30"
+    },
+    {
+     "position": "Training",
+     "person": "William",
+     "code": "T",
+     "raw": "10:30 T"
+    }
+   ]
+  },
+  {
+   "date": "2026-10-25",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Daniel-son",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Tshego",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": "Prince",
+     "code": "LST",
+     "raw": "18:00 LST"
+    },
+    {
+     "position": "Link Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-11-01",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Dakalo",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Karabo",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": "Kevin",
+     "code": "SL",
+     "raw": "08:30 SL"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-01",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Training",
+     "person": "Daniel",
+     "code": "T",
+     "raw": "10:30 T"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-01",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Nqobani",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Towana",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": "Carolien",
+     "code": "LST",
+     "raw": "18:00 LST"
+    },
+    {
+     "position": "Link Training",
+     "person": "Armand",
+     "code": "LT",
+     "raw": "18:00 LT"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-08",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Godfrey",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Katlego",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": "Prince",
+     "code": "SL",
+     "raw": "08:30 SL"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-08",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": "Tshego",
+     "code": null,
+     "raw": "10:30"
+    },
+    {
+     "position": "Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-11-08",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Daniel-son",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Zee",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": "Candice",
+     "code": "LST",
+     "raw": "18:00 LST"
+    },
+    {
+     "position": "Link Training",
+     "person": "William",
+     "code": "LT",
+     "raw": "18:00 LT"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-15",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Nqobani",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Armand",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": "Carolien",
+     "code": "SL",
+     "raw": "08:30 SL"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-15",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": "William",
+     "code": null,
+     "raw": "10:30"
+    },
+    {
+     "position": "Training",
+     "person": "Daniel",
+     "code": "T",
+     "raw": "10:30 T"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-15",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Dakalo",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Karabo",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link Training",
+     "person": "Kevin",
+     "code": "LT",
+     "raw": "18:00 LT"
+    },
+    {
+     "position": "Link",
+     "person": "Towana",
+     "code": "L",
+     "raw": "18:00 L"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-22",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Nqobani",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Katlego",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": "Zee",
+     "code": "SL",
+     "raw": "08:30 SL"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-22",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": "Tshego",
+     "code": null,
+     "raw": "10:30"
+    },
+    {
+     "position": "Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-11-22",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Daniel-son",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "William",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": "Carolien",
+     "code": "LST",
+     "raw": "18:00 LST"
+    },
+    {
+     "position": "Link Training",
+     "person": "Armand",
+     "code": "LT",
+     "raw": "18:00 LT"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-29",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Godfrey",
+     "code": "LS",
+     "raw": "08:30 LS"
+    },
+    {
+     "position": "Link",
+     "person": "Karabo",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-11-29",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": "Daniel",
+     "code": null,
+     "raw": "10:30"
+    },
+    {
+     "position": "Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-11-29",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": "Nqobani",
+     "code": "LS",
+     "raw": "18:00 LS"
+    },
+    {
+     "position": "Link",
+     "person": "William",
+     "code": "L",
+     "raw": "18:00 L"
+    },
+    {
+     "position": "LS Training",
+     "person": "Kevin",
+     "code": "LST",
+     "raw": "18:00 LST"
+    },
+    {
+     "position": "Link Training",
+     "person": "Prince",
+     "code": "LT",
+     "raw": "18:00 LT"
+    }
+   ]
+  },
+  {
+   "date": "2026-12-06",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Service Leader",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-12-06",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-12-06",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "LS Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-12-13",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link",
+     "person": "Armand",
+     "code": "L",
+     "raw": "08:30 L"
+    },
+    {
+     "position": "Service Leader",
+     "person": "Carolien",
+     "code": "SL",
+     "raw": "08:30 SL"
+    }
+   ]
+  },
+  {
+   "date": "2026-12-13",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Training",
+     "person": "Daniel",
+     "code": "T",
+     "raw": "10:30 T"
+    }
+   ]
+  },
+  {
+   "date": "2026-12-13",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "LS Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-12-20",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Service Leader",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-12-20",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-12-20",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "LS Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link Training",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-12-27",
+   "time": "08:30",
+   "group": "Sunday",
+   "name": "Sunday 08:30 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Service Leader",
+     "person": null,
+     "code": null,
+     "raw": null
+    }
+   ]
+  },
+  {
+   "date": "2026-12-27",
+   "time": "10:30",
+   "group": "Sunday",
+   "name": "Sunday 10:30 Service",
+   "slots": [
+    {
+     "position": "LS & Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Training",
+     "person": "Daniel",
+     "code": "T",
+     "raw": "10:30 T"
+    }
+   ]
+  },
+  {
+   "date": "2026-12-27",
+   "time": "18:00",
+   "group": "Sunday",
+   "name": "Sunday 18:00 Service",
+   "slots": [
+    {
+     "position": "Livestream",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "Link",
+     "person": null,
+     "code": null,
+     "raw": null
+    },
+    {
+     "position": "LS Training",
+     "person": "Carolien",
+     "code": "LST",
+     "raw": "18:00 LST"
+    },
+    {
+     "position": "Link Training",
+     "person": "Armand",
+     "code": "LT",
+     "raw": "18:00 LT"
+    }
+   ]
+  }
+ ],
+ "rules": [
+  "KATLEGO 08:30 only",
+  "Armand Carolien always serve together.",
+  "carolien always 1st option for LS training",
+  "try give everyone one week on and one week off",
+  "rotate 08:30 and 18:00",
+  "Daniel 10:30 only",
+  "karabo no 10:30",
+  "armand carolien no 10:30",
+  "important to change it up with different combinations",
+  "always needs to be 1x guy where possible",
+  "Candice only if no one else is available",
+  "needs supervision means you need a service leader or trainer",
+  "we dont need a service leader for 08:30 if no one needs supervision",
+  "we need to fit trainees in every week for training",
+  "if you need to put someone on again in a 2nd week in order to change up the routine and schedule then do so",
+  "10:30 only need 1x person unless someone is doing training. if no one is training then the person needs to be in link & ls",
+  "armand & carolien - always one week on and one week off and always 08:30 then 18:00 etc",
+  "Temporary: put daniel son with caroline for live stream training please",
+  "Temporary: daniel-son and prince dont do same services together",
+  "Temporary: daniel-son only 18:00 for now",
+  "Link Schedule tab: Arrival AM1 07:00 (pre-prayer 07:20), AM2 09:30, PM 16:15 (pre-prayer 16:45)",
+  "Link Schedule tab: KATLEGO NOT AVAILABLE PMs"
+ ],
+ "flags": [
+  "2026-01-04 Kevin: one cell lists two services \"11:00 17:00 L\" (time with no code + 17:00 Link)",
+  "ST (unknown code) at 2026 tab 2026-01-25 17:00 for Daniel-son: raw \"17:00 ST\"",
+  "ST (unknown code) at 2026 tab 2026-02-01 17:00 for Daniel-son: raw \"17:00 ST\"",
+  "ST (unknown code) at 2026 tab 2026-02-01 17:00 for Towana: raw \"17:00 ST\"",
+  "ST (unknown code) at 2026 tab 2026-02-15 18:00 for Towana: raw \"18:00 ST\"",
+  "Shadow LS without a time at 2026 tab 2026-07-26 for Nqobani (first-time shadow; service time unknown)",
+  "Shadow LS without a time at 2026 tab 2026-08-02 for Nqobani (first-time shadow; service time unknown)",
+  "2026 tab 2026-08-23 Zee: \"Off\" (treated as unavailable, like N/A)",
+  "Code spelled \"Link\" instead of \"L\" at 2026-08-30 08:30 for Armand (treated as L)",
+  "2026-10-11: only partly filled in 2026 tab (5 assignments)",
+  "2026-11-15 18:00: extra Link assignment for Towana beyond standard slot layout (raw \"18:00 L\"); Link Schedule tab does not list this person",
+  "2026-12-06: no assignments yet in 2026 tab (roster not filled)",
+  "2026-12-13: only partly filled in 2026 tab (3 assignments)",
+  "2026-12-20: no assignments yet in 2026 tab (roster not filled)",
+  "2026-12-27: only partly filled in 2026 tab (3 assignments)",
+  "Row \"3-Jan\" after 27-Dec interpreted as 2027-01-03 (next year); excluded from services (empty row)",
+  "Notes temp rule says \"caroline\" - assumed to mean Carolien (not changed in data)",
+  "Notes rule \"Candice only if no one else is available\" but Candice is rostered LS Training 18:00 on 2026-11-08",
+  "Candice: has LST/LT/T codes in 2026 tab but is not on any Notes trainer/trainee list - trainingStage left null",
+  "Daniel-son: has LST/LT/T codes in 2026 tab but is not on any Notes trainer/trainee list - trainingStage left null",
+  "Towana: has LST/LT/T codes in 2026 tab but is not on any Notes trainer/trainee list - trainingStage left null",
+  "Godfrey: has LST/LT/T codes in 2026 tab but is not on any Notes trainer/trainee list - trainingStage left null",
+  "Dakalo: has LST/LT/T codes in 2026 tab but is not on any Notes trainer/trainee list - trainingStage left null",
+  "Aidan: has LST/LT/T codes in 2026 tab but is not on any Notes trainer/trainee list - trainingStage left null",
+  "Keamo: has LST/LT/T codes in 2026 tab but is not on any Notes trainer/trainee list - trainingStage left null",
+  "LST/LT appear to mark the \"LS Training\"/\"Link Training\" slot (matches Link Schedule rows), not strictly a trainer: e.g. William (Notes: link trainee) is \"18:00 LT\" on 2026-11-08 & Candice (not a listed trainer) \"18:00 LST\". Code kept raw; verify meaning.",
+  "\"T\" at 10:30 mostly on Daniel, who Notes list as Link trainer (3rd) - T may mean \"Training session\" slot rather than trainee. Mapped to position \"Training\".",
+  "\"SL\" code (Service Leader) is not in the provided code list; mapped to Service Leader per Link Schedule row.",
+  "Names with trailing spaces in sheet (\"Godfrey \", \"Nqobani \") trimmed (Notes also have the trailing space). No other dedupe performed.",
+  "Jan-Feb 2026 use 11:00 and 17:00 times; from Feb/Mar 2026 times are 08:30/10:30/18:00 (only latter appear in import window).",
+  "Header columns W-AF (index 22-32) are blank; Stéphan and Veronice-Lee are in AH/AI with no 2026 assignments. Brett and Luu (JHB) also have none."
+ ]
+}

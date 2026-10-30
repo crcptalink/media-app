@@ -21,7 +21,7 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
 
   return (
     <AppShell
-      user={user ? { label: user.name || user.email } : null}
+      user={user ? { label: user.name || user.email || "Member" } : null}
       departments={departments}
       currentSlug={dept.slug}
       nav={[]}

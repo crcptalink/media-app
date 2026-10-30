@@ -17,7 +17,7 @@ export default async function Home({ searchParams }: { searchParams: SP }) {
   const departments = cards.map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
 
   return (
-    <AppShell user={user ? { label: user.name || user.email } : null} departments={departments} nav={[]} signOut={user ? signOutAction : undefined}>
+    <AppShell user={user ? { label: user.name || user.email || "Member" } : null} departments={departments} nav={[]} signOut={user ? signOutAction : undefined}>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((d) => (

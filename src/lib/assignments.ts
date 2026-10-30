@@ -51,7 +51,7 @@ export function icsFor(a: FullAssignment, method: "REQUEST" | "CANCEL", sequence
     url: `${config.appUrl}/me`,
     organizerEmail: organizerEmail(),
     organizerName: "CRC PTA Link",
-    attendeeEmail: a.user.email,
+    attendeeEmail: a.user.email || "no-email@local",
     attendeeName: a.user.name || undefined,
   });
 }
@@ -89,6 +89,7 @@ export async function leadsOf(tx: Tx | Db, departmentId: string) {
 }
 
 async function emailUser(tx: Tx, a: FullAssignment, type: string, subject: string, body: string) {
+  if (!a.user.email) return;
   await enqueueEmail(tx, {
     type,
     to: a.user.email,
@@ -99,6 +100,7 @@ async function emailUser(tx: Tx, a: FullAssignment, type: string, subject: strin
 }
 
 async function sendInvite(tx: Tx, a: FullAssignment, type: "invite" | "update", sequence: number) {
+  if (!a.user.email) return;
   await enqueueEmail(tx, {
     type,
     to: a.user.email,
@@ -201,6 +203,7 @@ export async function claimSlot(db: Db, p: { slotId: string; userId: string; kin
     for (const lead of await leadsOf(tx, a.slot.event.departmentId)) {
       if (lead.id === a.userId) continue;
       await notify(tx, lead.id, a.id, "claim_pending", `${a.user.name || a.user.email} asked for ${describe(a)}`);
+      if (!lead.email) continue;
       await enqueueEmail(tx, {
         type: "notice",
         to: lead.email,
@@ -246,7 +249,7 @@ export async function cancelAssignment(db: Db, p: { assignmentId: string; actorI
     if (a.userId !== p.actorId) {
       await notify(tx, a.userId, a.id, "cancelled", `Removed: ${describe(a)}${p.reason ? ` (${p.reason})` : ""}`);
     }
-    if (wasAccepted) {
+    if (wasAccepted && a.user.email) {
       await enqueueEmail(tx, {
         type: "cancel",
         to: a.user.email,
