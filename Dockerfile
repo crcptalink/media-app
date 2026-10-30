@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Link Roster image, sized for the church PC (Core i3-550, 3.2 GiB RAM).
+# CRC Media image, sized for the church PC (Core i3-550, 3.2 GiB RAM).
 # Stages are a single chain so BuildKit does not run npm ci and `next build`
 # at the same time. The runtime image is the Next.js standalone server plus
 # the Prisma CLI (migrations) and tsx (npm run seed).

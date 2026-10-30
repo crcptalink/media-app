@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 import type { BoardEvent, BoardPerson } from "@/lib/today";
 
 export function KioskBoard({ board, token }: { board: { date: string; isToday: boolean; events: BoardEvent[] }; token: string }) {
@@ -33,6 +34,9 @@ export function KioskBoard({ board, token }: { board: { date: string; isToday: b
   const events = board.events.filter((e) => !e.isPast);
   return (
     <main className="min-h-screen bg-slate-900 p-6 text-white">
+      <div className="mb-2 flex justify-center">
+        <BrandLogo className="h-12" />
+      </div>
       <h1 className="text-center text-4xl font-bold">Tap your name to check in</h1>
       {!board.isToday && <p className="mt-2 text-center text-slate-400">No services today — showing {board.date}.</p>}
       {msg && <p className="mx-auto mt-4 max-w-xl rounded-xl bg-white/10 p-4 text-center text-2xl">{msg}</p>}

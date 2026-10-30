@@ -18,6 +18,7 @@ describe("ics", () => {
   it("builds a REQUEST invite with UID, SEQUENCE, TZID, attendee RSVP and a 2h alarm", () => {
     const ics = buildIcs({ ...base, method: "REQUEST", sequence: 0 });
     expect(ics).toContain("METHOD:REQUEST");
+    expect(ics).toContain("PRODID:-//CRC Pretoria//CRC Media//EN");
     expect(ics).toContain("UID:asg-123@crcptalink");
     expect(ics).toContain("SEQUENCE:0");
     expect(ics).toContain("DTSTART;TZID=Africa/Johannesburg:20261101T070000");

@@ -6,6 +6,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { Prisma, type AssignmentKind, type AssignmentStatus } from "@prisma/client";
+import { APP_NAME } from "./brand";
 import type { Db } from "./db";
 import { buildIcs } from "./ics";
 import { config, organizerEmail } from "./env";
@@ -93,7 +94,7 @@ async function emailUser(tx: Tx, a: FullAssignment, type: string, subject: strin
     to: a.user.email,
     assignmentId: a.id,
     subject,
-    text: `Hi ${a.user.name || ""},\n\n${body}\n\nOpen Link Roster: ${config.appUrl}/me\n\n— CRC PTA Link`,
+    text: `Hi ${a.user.name || ""},\n\n${body}\n\nOpen ${APP_NAME}: ${config.appUrl}/me\n\n— CRC PTA Link`,
   });
 }
 

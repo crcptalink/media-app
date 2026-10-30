@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 import type { BoardEvent } from "@/lib/today";
 
 type Board = { date: string; isToday: boolean; grace: number; events: BoardEvent[] };
@@ -39,8 +40,11 @@ export function TvBoard({ initial, token }: { initial: Board; token: string }) {
   const dateLabel = new Date(`${board.date}T12:00:00Z`).toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
   return (
     <main className="min-h-screen bg-black p-8 text-white">
-      <header className="mb-6 flex items-baseline justify-between">
-        <h1 className="text-5xl font-bold">📡 Link · {board.isToday ? "Today" : "Next up"} <span className="text-slate-400">{dateLabel}</span></h1>
+      <header className="mb-6 flex items-center justify-between gap-6">
+        <div className="flex items-center gap-5">
+          <BrandLogo className="h-16" />
+          <h1 className="text-5xl font-bold">Link · {board.isToday ? "Today" : "Next up"} <span className="text-slate-400">{dateLabel}</span></h1>
+        </div>
         <div className="text-6xl font-bold tabular-nums">{time}</div>
       </header>
       {stale && <p className="mb-4 text-xl text-amber-400">Connection lost — retrying…</p>}

@@ -4,6 +4,7 @@ import Nodemailer from "next-auth/providers/nodemailer";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { APP_NAME } from "@/lib/brand";
 import { config } from "@/lib/env";
 import { sendMail } from "@/lib/mailer";
 
@@ -28,16 +29,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async sendVerificationRequest({ identifier, url }) {
         const result = await sendMail({
           to: identifier,
-          subject: "Your Link Roster sign-in link",
-          text: `Tap to sign in to Link Roster:\n${url}\n\nThis link works for 1 hour, on church Wi-Fi only for now.\nIf you didn't ask for it, ignore this email.\n\n— CRC PTA Link`,
-          html: `<p>Tap to sign in to <b>Link Roster</b>:</p><p><a href="${url}" style="display:inline-block;padding:12px 20px;background:#1d4ed8;color:#fff;border-radius:8px;text-decoration:none">Sign in</a></p><p style="color:#666">This link works for 1 hour, on church Wi-Fi only for now. If you didn't ask for it, ignore this email.</p>`,
+          subject: `Your ${APP_NAME} sign-in link`,
+          text: `Tap to sign in to ${APP_NAME}:\n${url}\n\nThis link works for 1 hour, on church Wi-Fi only for now.\nIf you didn't ask for it, ignore this email.\n\n— CRC PTA Link`,
+          html: `<p>Tap to sign in to <b>${APP_NAME}</b>:</p><p><a href="${url}" style="display:inline-block;padding:12px 20px;background:#1d4ed8;color:#fff;border-radius:8px;text-decoration:none">Sign in</a></p><p style="color:#666">This link works for 1 hour, on church Wi-Fi only for now. If you didn't ask for it, ignore this email.</p>`,
         });
         // Keep a record without storing the secret link itself.
         await db.emailOutbox.create({
           data: {
             type: "login",
             to: identifier,
-            subject: "Your Link Roster sign-in link",
+            subject: `Your ${APP_NAME} sign-in link`,
             text: "(magic link redacted)",
             status: "SENT",
             attempts: 1,

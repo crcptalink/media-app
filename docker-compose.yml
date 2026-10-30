@@ -1,4 +1,4 @@
-# Link Roster — app + Postgres + nightly backups.
+# CRC Media — app + Postgres + nightly backups.
 # Tuned for the church PC: Core i3-550 (4 threads), 3.2 GiB RAM
 # (~2.6 GiB available), 3.7 GiB swap, 85 GB free disk.
 # Runtime budget: app 512m + db 384m + backup 128m.

@@ -13,7 +13,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_DIR"
 
 if [[ ! -f "$REPO_DIR/docker-compose.yml" || ! -f "$REPO_DIR/.env.example" ]]; then
-  echo "This does not look like the Link Roster repo ($REPO_DIR)." >&2
+  echo "This does not look like the CRC Media repo ($REPO_DIR)." >&2
   exit 1
 fi
 

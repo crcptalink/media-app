@@ -1,10 +1,10 @@
-# Link Roster
+# CRC Media
 
 Volunteer scheduling for the **CRC Pretoria Link department**: volunteers sign in on the church LAN, say Yes/No to slots, claim open slots (the lead approves), mark when they're unavailable, get calendar invites from `crcptalink@gmail.com`, and check in at the door. A large-type TV dashboard shows who is serving and who has arrived.
 
 Stack: Next.js 15 (App Router, TypeScript) · React 19 · Tailwind · PostgreSQL 16 · Prisma 6 · Auth.js v5 (email magic link + optional password) · Nodemailer (Gmail SMTP) · Docker Compose.
 
-The running app is this Next.js project. `media_app_schema.sql` was already in the repo before Link Roster was imported. It is an earlier PostgreSQL draft for a wider media team (cameras, directors, graphics, comms). Link Roster does not load that file. Schema changes for this app go through Prisma (`prisma/schema.prisma` and `prisma/migrations`).
+The running app is this Next.js project (CRC Media). The Link department keeps its existing pages. `media_app_schema.sql` was already in the repo before this app was imported. It is an earlier PostgreSQL draft for a wider media team (cameras, directors, graphics, comms). CRC Media does not load that file. Schema changes for this app go through Prisma (`prisma/schema.prisma` and `prisma/migrations`).
 
 ## Auto-deploy on the church PC
 

@@ -1,4 +1,4 @@
-# Deploying Link Roster on the church PC
+# Deploying CRC Media on the church PC
 
 The app runs on the Ubuntu PC at **192.168.81.99** (user `deploy`, checkout `/home/deploy/media-app`, port **3000**). Nothing can SSH in from outside the LAN, so the server pulls the default branch itself. Docker Engine is already installed there (the installer leaves it alone when `docker` and `docker compose` are on PATH).
 

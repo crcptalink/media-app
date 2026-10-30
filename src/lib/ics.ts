@@ -3,6 +3,7 @@
  * METHOD:REQUEST for new invites and updates (same UID, higher SEQUENCE),
  * METHOD:CANCEL + STATUS:CANCELLED for removals. Works with Gmail, Apple Calendar and Outlook.
  */
+import { APP_NAME } from "./brand";
 import { APP_TZ } from "./time";
 
 export type IcsMethod = "REQUEST" | "CANCEL";
@@ -79,7 +80,7 @@ export function buildIcs(input: IcsInput): string {
   const cancel = input.method === "CANCEL";
   const lines: string[] = [
     "BEGIN:VCALENDAR",
-    "PRODID:-//CRC Pretoria//Link Roster//EN",
+    `PRODID:-//CRC Pretoria//${APP_NAME}//EN`,
     "VERSION:2.0",
     "CALSCALE:GREGORIAN",
     `METHOD:${input.method}`,

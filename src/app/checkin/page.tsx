@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/BrandLogo";
 import { one, type SP } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
 import { arrivalStatus, checkinWindowOpen, STATUS_LABEL } from "@/lib/checkin";
@@ -10,7 +11,14 @@ import { qrCheckinAction } from "./actions";
 export const dynamic = "force-dynamic";
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-4 px-5 text-center">{children}</main>;
+  return (
+    <main className="min-h-screen">
+      <div className="bg-black py-4">
+        <BrandLogo className="mx-auto h-10" />
+      </div>
+      <div className="mx-auto flex max-w-sm flex-col justify-center gap-4 px-5 py-8 text-center">{children}</div>
+    </main>
+  );
 }
 
 export default async function CheckinPage({ searchParams }: { searchParams: SP }) {

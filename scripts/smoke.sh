@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Quick smoke test against a running Link Roster.
+# Quick smoke test against a running CRC Media app.
 #   scripts/smoke.sh [base_url]      (reads TV_TOKEN / KIOSK_TOKEN from .env if present)
 # Optional: SMOKE_EMAIL / SMOKE_PASSWORD to also test a password sign-in and the signed-in pages.
 set -u

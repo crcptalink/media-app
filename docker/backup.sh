@@ -1,5 +1,5 @@
 #!/bin/sh
-# Nightly pg_dump of the Link Roster database into /backups, keeping KEEP_DAYS days.
+# Nightly pg_dump of the CRC Media database into /backups, keeping KEEP_DAYS days.
 # Runs inside the postgres image (has pg_dump + gzip). Set RUN_NOW=1 to take one backup immediately at start.
 set -eu
 BACKUP_TIME="${BACKUP_TIME:-02:00}"

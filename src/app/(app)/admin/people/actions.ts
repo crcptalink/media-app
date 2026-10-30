@@ -3,6 +3,7 @@ import type { SkillStage } from "@prisma/client";
 import { runAction, str } from "@/lib/actions";
 import { WorkflowError } from "@/lib/assignments";
 import { db } from "@/lib/db";
+import { APP_NAME } from "@/lib/brand";
 import { config } from "@/lib/env";
 import { enqueueEmail } from "@/lib/outbox";
 import { requireLead } from "@/lib/session";
@@ -27,7 +28,7 @@ export async function addPersonAction(form: FormData) {
       await enqueueEmail(db, {
         type: "notice",
         to: email,
-        subject: "Welcome to Link Roster",
+        subject: `Welcome to ${APP_NAME}`,
         text: `Hi ${u.name || ""},\n\nYou've been added to the CRC Pretoria Link roster.\nOn church Wi-Fi, open ${config.appUrl} and sign in with this email address — we'll email you a sign-in link.\n\n— CRC PTA Link`,
       });
     }
