@@ -43,27 +43,30 @@ export function AvailabilityBoard({ dates, slots, marks }: { dates: string[]; sl
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
               {(slots[date] || []).map((slot) => {
                 const marked = whole || off.has(key(date, slot.templateId));
+                const displayTime = weekdayOf(date) === 4 && slot.time.startsWith("19:") ? "18:30" : slot.time;
                 return (
                   <button
                     key={slot.id}
                     type="button"
                     disabled={busy !== null}
                     onClick={() => toggle(date, slot.templateId)}
-                    className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full px-2.5 py-0.5 text-sm font-semibold tabular-nums ${marked ? "bg-red-600 text-white" : timePillClass(slot.time)}`}
+                    className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full px-2.5 py-0.5 text-sm font-semibold tabular-nums ${marked ? "bg-red-600 text-white" : timePillClass(displayTime)}`}
                   >
-                    {slot.time}
+                    {displayTime}
                   </button>
                 );
               })}
             </div>
-            <button
-              type="button"
-              disabled={busy !== null}
-              onClick={() => toggle(date, null)}
-              className={whole ? "btn-red btn-sm shrink-0" : "btn-ghost btn-sm shrink-0"}
-            >
-              Whole Day
-            </button>
+            {weekdayOf(date) !== 4 && (
+              <button
+                type="button"
+                disabled={busy !== null}
+                onClick={() => toggle(date, null)}
+                className={whole ? "btn-red btn-sm shrink-0" : "btn-ghost btn-sm shrink-0"}
+              >
+                Whole Day
+              </button>
+            )}
           </div>
         );
       })}

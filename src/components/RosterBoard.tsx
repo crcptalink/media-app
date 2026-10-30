@@ -81,7 +81,16 @@ function EventCard({
   return (
     <div className={`card ${edge}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <TimePill time={localTime(e.startsAt)} />
+        {weekdayOf(e.date) === 4 || e.kind === "TRAINING" ? (
+          <>
+            <TimePill time="18:30" />
+            <span className="text-xs font-medium text-slate-600">Pre-Prayer</span>
+            <TimePill time="19:00" />
+            <span className="text-xs font-medium text-slate-600">Training</span>
+          </>
+        ) : (
+          <TimePill time={localTime(e.startsAt)} />
+        )}
         {mode === "admin" && (
           <Link href={`/admin/events/${e.id}`} className="ml-auto text-xs text-blue-700 underline">Details</Link>
         )}
@@ -89,7 +98,7 @@ function EventCard({
       <div className="mt-3 text-sm">
         <p className="text-xs font-medium text-slate-500">Arrival</p>
         <p>{localTime(e.arriveBy)}</p>
-        {e.preprayerAt && (
+        {e.preprayerAt && weekdayOf(e.date) !== 4 && e.kind !== "TRAINING" && (
           <>
             <p className="mt-2 text-xs font-medium text-slate-500">Pre-Prayer</p>
             <p>{localTime(e.preprayerAt)}</p>

@@ -58,9 +58,9 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
         return (
           <article key={a.id} className={`card border-l-4 ${sunday ? "border-l-blue-700" : "border-l-amber-500"}`}>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>
-              <span className="text-sm text-slate-600">{fmtDateOnly(e.date)}</span>
               <TimePill time={localTime(e.startsAt)} />
+              <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>
+              <span className="text-base font-bold text-slate-900">{fmtDateOnly(e.date)}</span>
             </div>
             <p className="mt-1 font-medium">{slotTitle(a.slot.position, a.slot.label)}</p>
             <div className="mt-3 text-sm">

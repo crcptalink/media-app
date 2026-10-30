@@ -27,29 +27,9 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <p className="text-sm text-slate-700">If you&apos;re serving this Sunday, you&apos;ll need to be at Thursday training.</p>
-      <section className="space-y-2">
-        <h2 className="h2">Available Slots</h2>
-        {open.length === 0 && <p className="muted">None.</p>}
-        <ul className="space-y-2">
-          {open.slice(0, 12).map(({ e, s }) => (
-            <li key={s.id} className="card flex flex-wrap items-center gap-x-3 gap-y-2">
-              <p className="text-sm font-semibold">{WEEKDAYS[weekdayOf(e.date)]} {fmtDateOnly(e.date)}</p>
-              <TimePill time={localTime(e.startsAt)} />
-              <p className="truncate text-sm text-slate-700">{slotTitle(s.position, s.label)}</p>
-              <form action={claimAction}>
-                <input type="hidden" name="slotId" value={s.id} />
-                <input type="hidden" name="kind" value="SERVING" />
-                <input type="hidden" name="back" value={back} />
-                <SubmitButton className="btn-primary btn-sm">Serve</SubmitButton>
-              </form>
-            </li>
-          ))}
-        </ul>
-      </section>
       <section className="space-y-2">
         <div className="flex items-center">
-          <h2 className="h2 flex-1">Announcements</h2>
+          <h2 className="h2 flex-1 text-red-700">Announcements</h2>
           {notes.some((n) => !n.readAt) && (
             <form action={markReadAction}>
               <input type="hidden" name="back" value={back} />
@@ -60,9 +40,31 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
         {notes.length === 0 && <p className="muted">None.</p>}
         <ul className="space-y-2">
           {notes.map((n) => (
-            <li key={n.id} className={`rounded-lg px-3 py-2 text-sm ${n.readAt ? "bg-white text-slate-600" : "bg-blue-50 font-medium text-slate-900"}`}>
+            <li key={n.id} className={`rounded-lg border-l-4 px-3 py-2 text-sm ${n.readAt ? "border-l-slate-300 bg-white text-slate-600" : "border-l-red-600 bg-red-50 font-medium text-red-900"}`}>
               {n.message}
               <span className="ml-2 text-xs text-slate-400">{fmtDateTime(n.createdAt)}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <p className="text-sm text-slate-700">If you're serving this Sunday, you'll need to be at Thursday training.</p>
+      <section className="space-y-2">
+        <h2 className="h2">Available Slots</h2>
+        {open.length === 0 && <p className="muted">None.</p>}
+        <ul className="space-y-2">
+          {open.slice(0, 12).map(({ e, s }) => (
+            <li key={s.id} className="card flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-x-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <TimePill time={localTime(e.startsAt)} />
+                <p className="text-sm font-semibold">{WEEKDAYS[weekdayOf(e.date)]} {fmtDateOnly(e.date)}</p>
+                <p className="truncate text-sm text-slate-700">{slotTitle(s.position, s.label)}</p>
+              </div>
+              <form action={claimAction} className="sm:ml-auto">
+                <input type="hidden" name="slotId" value={s.id} />
+                <input type="hidden" name="kind" value="SERVING" />
+                <input type="hidden" name="back" value={back} />
+                <SubmitButton className="btn-primary btn-sm w-full sm:w-auto">Serve</SubmitButton>
+              </form>
             </li>
           ))}
         </ul>
