@@ -18,11 +18,11 @@ function titleFor(pathname: string) {
     ["/admin/rules", "Rules And Notes"],
     ["/admin/setup", "Setup"],
     ["/admin/outbox", "Emails"],
-    ["/me/availability", "Availability"],
+    ["/me/availability", "My Availability"],
     ["/me/password", "My Profile"],
     ["/me/training", "My Training"],
     ["/me/announcements", "Announcements"],
-    ["/roster", "Full Schedule"],
+    ["/roster", "Team Schedule"],
     ["/d/", "Coming Soon"],
   ];
   for (const [prefix, title] of rules) {

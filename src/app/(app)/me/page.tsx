@@ -56,7 +56,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
         const st = e.date === today ? arrivalStatus(a, e, grace) : null;
         const sunday = e.kind !== "TRAINING";
         return (
-          <article key={a.id} className={`card border-l-4 ${sunday ? "border-l-blue-700" : "border-l-slate-400 bg-slate-50"}`}>
+          <article key={a.id} className={`card border-l-4 ${sunday ? "border-l-blue-700" : "border-l-amber-500"}`}>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>
               <span className="text-sm text-slate-600">{fmtDateOnly(e.date)}</span>
@@ -73,7 +73,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
                 </>
               )}
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2 overflow-x-auto pb-1">
               {a.status === "PROPOSED" && !closed ? null : <StatusChip status={a.status} serviceDate={e.date} />}
               {a.status === "CLAIM_PENDING" ? (
                 <form action={withdrawAction}>

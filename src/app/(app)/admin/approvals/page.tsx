@@ -25,7 +25,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: SP
         {claims.length === 0 && <p className="muted">None.</p>}
         <ul className="space-y-2">
           {claims.map((a) => (
-            <li key={a.id} className="card grid grid-cols-[11rem_8rem_minmax(6rem,1fr)_auto] items-center gap-x-3">
+            <li key={a.id} className="card flex flex-wrap items-center gap-x-3 gap-y-2">
               <span className="text-sm font-semibold">{WEEKDAYS[weekdayOf(a.slot.event.date)]} {fmtDateOnly(a.slot.event.date)}</span>
               <TimePill time={localTime(a.slot.event.startsAt)} />
               <span className="truncate text-sm">
@@ -47,7 +47,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: SP
         {declines.length === 0 && <p className="muted">None.</p>}
         <ul className="space-y-2">
           {declines.map((a) => (
-            <li key={a.id} className="card grid grid-cols-[11rem_8rem_minmax(6rem,1fr)_auto] items-center gap-x-3">
+            <li key={a.id} className="card flex flex-wrap items-center gap-x-3 gap-y-2">
               <span className="text-sm font-semibold">{WEEKDAYS[weekdayOf(a.slot.event.date)]} {fmtDateOnly(a.slot.event.date)}</span>
               <TimePill time={localTime(a.slot.event.startsAt)} />
               <span className="truncate text-sm">

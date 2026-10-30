@@ -2,9 +2,9 @@ import type { ShellNavItem } from "@/components/AppShell";
 
 export function appNav(opts: { unread?: number; schedule: boolean; people: boolean; admin: boolean; pendingClaims?: number }): ShellNavItem[] {
   const nav: ShellNavItem[] = [
+    { href: "/roster", label: "Team Schedule" },
     { href: "/me", label: "My Schedule" },
-    { href: "/roster", label: "Full Schedule" },
-    { href: "/me/availability", label: "Availability" },
+    { href: "/me/availability", label: "My Availability" },
     { href: "/me/training", label: "My Training" },
     { href: "/me/password", label: "My Profile" },
     { href: "/me/announcements", label: "Announcements", badge: opts.unread || undefined },

@@ -21,7 +21,7 @@ export interface Person {
 function dayBand(date: string) {
   const wd = weekdayOf(date);
   if (wd === 0) return "bg-blue-800 text-white";
-  if (wd === 4) return "bg-slate-600 text-white";
+  if (wd === 4) return "bg-amber-600 text-white";
   return "bg-slate-200 text-slate-800";
 }
 

@@ -2,7 +2,6 @@ import { answerLabel } from "@/lib/answer-window";
 
 const TONE: Record<string, string> = {
   Accepted: "bg-emerald-600 text-white",
-  "Auto-Accepted": "border-2 border-emerald-600 bg-white text-emerald-800",
   Declined: "bg-red-600 text-white",
 };
 

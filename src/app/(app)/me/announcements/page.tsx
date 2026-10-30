@@ -33,7 +33,7 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
         {open.length === 0 && <p className="muted">None.</p>}
         <ul className="space-y-2">
           {open.slice(0, 12).map(({ e, s }) => (
-            <li key={s.id} className="card grid grid-cols-[11rem_5rem_minmax(6rem,1fr)_auto] items-center gap-x-3">
+            <li key={s.id} className="card flex flex-wrap items-center gap-x-3 gap-y-2">
               <p className="text-sm font-semibold">{WEEKDAYS[weekdayOf(e.date)]} {fmtDateOnly(e.date)}</p>
               <TimePill time={localTime(e.startsAt)} />
               <p className="truncate text-sm text-slate-700">{slotTitle(s.position, s.label)}</p>

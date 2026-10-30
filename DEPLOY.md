@@ -92,3 +92,22 @@ Pausing stops the pull. Containers that are already up keep running (`restart: u
 ## Backups
 
 The `backup` service writes `backups/linkroster-YYYY-MM-DD_HHMM.sql.gz` nightly at 02:00 and keeps 30 days. See the main README for a manual dump and the restore command.
+
+## Speeding up the site
+
+If the app feels slow after a deploy or after many changes:
+
+```bash
+cd /home/deploy/media-app
+docker compose exec app rm -rf .next/cache
+docker compose restart app
+```
+
+Or force a clean rebuild:
+
+```bash
+docker compose build --no-cache app
+docker compose up -d
+```
+
+Static assets are already cached with long max-age headers. The church PC is memory-constrained, so the main wins come from the standalone build and the 512m container limit already in place.

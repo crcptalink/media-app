@@ -17,10 +17,8 @@ export function answersClosed(serviceDate: string, now = new Date()) {
   return now.getTime() >= answersCloseAt(serviceDate).getTime();
 }
 
-/** Unanswered and still open has no label: the person sees Accept and Decline. */
+/** Unanswered and still open has no label: the person sees Accept and Decline. After close, still no special label. */
 export function answerLabel(status: string, serviceDate: string, now = new Date()): string | null {
-  const closed = answersClosed(serviceDate, now);
-  if (status === "PROPOSED" && closed) return "Auto-Accepted";
   if (status === "PROPOSED") return null;
   if (status === "ACCEPTED") return "Accepted";
   if (status === "DECLINED") return "Declined";
