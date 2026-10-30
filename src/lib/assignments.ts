@@ -11,7 +11,9 @@ import type { Db } from "./db";
 import { buildIcs } from "./ics";
 import { config, organizerEmail } from "./env";
 import { enqueueEmail } from "./outbox";
-import { fmtDate, localTime } from "./time";
+import { answersClosed } from "./answer-window";
+import { calendarTitle, positionTitle } from "./positions";
+import { fmtDay, localTime } from "./time";
 
 type Tx = Prisma.TransactionClient;
 
@@ -32,7 +34,8 @@ function kindLabel(kind: AssignmentKind) {
 
 export function describe(a: FullAssignment) {
   const e = a.slot.event;
-  return `${a.slot.position.name}${kindLabel(a.kind)} — ${e.title}, ${fmtDate(e.date)} ${localTime(e.startsAt)} (arrive ${localTime(e.arriveBy)})`;
+  const name = positionTitle(a.slot.position.code, a.slot.position.name);
+  return `${name}${kindLabel(a.kind)} — ${fmtDay(e.date)} ${localTime(e.startsAt)}`;
 }
 
 export function icsFor(a: FullAssignment, method: "REQUEST" | "CANCEL", sequence: number) {
@@ -43,10 +46,7 @@ export function icsFor(a: FullAssignment, method: "REQUEST" | "CANCEL", sequence
     sequence,
     start: e.arriveBy,
     end: e.endsAt,
-    summary: `Link: ${a.slot.position.name}${kindLabel(a.kind)} — ${e.title}`,
-    description: `${a.slot.position.name}${kindLabel(a.kind)} for ${e.title}.\nArrive by ${localTime(e.arriveBy)}${
-      e.preprayerAt ? `, pre-prayer ${localTime(e.preprayerAt)}` : ""
-    }, service starts ${localTime(e.startsAt)}.\n${config.appUrl}/me`,
+    summary: calendarTitle(a.slot.position.code, a.slot.position.name, e.date, localTime(e.startsAt)),
     location: config.location,
     url: `${config.appUrl}/me`,
     organizerEmail: organizerEmail(),
@@ -171,12 +171,60 @@ export async function proposeSlot(
   });
 }
 
+/** Member declines before Wednesday 23:59. The slot becomes open and leaders are told. */
+export async function declineAssignment(db: Db, p: { assignmentId: string; userId: string; reason: string }) {
+  const reason = p.reason.trim();
+  if (!reason) throw new WorkflowError("Add a reason");
+  if (reason.length > 500) throw new WorkflowError("Reason is too long");
+  return db.$transaction(async (tx) => {
+    const a = await load(tx, p.assignmentId);
+    if (a.userId !== p.userId) throw new WorkflowError("This slot is not yours");
+    if (a.status !== "PROPOSED" && a.status !== "ACCEPTED") throw new WorkflowError("This slot can't be declined");
+    if (answersClosed(a.slot.event.date)) throw new WorkflowError("Accept and decline are closed");
+    const wasAccepted = a.status === "ACCEPTED";
+    const sequence = wasAccepted ? a.icsSequence + 1 : a.icsSequence;
+    await tx.assignment.update({
+      where: { id: a.id },
+      data: { status: "DECLINED", icsSequence: sequence, decidedById: p.userId, decidedAt: new Date() },
+    });
+    const updated = await load(tx, a.id);
+    const who = a.user.name || a.user.email || "A member";
+    await notify(tx, a.userId, a.id, "declined", `You declined ${describe(a)}. The slot is open.`);
+    if (wasAccepted && a.user.email) {
+      await enqueueEmail(tx, {
+        type: "cancel",
+        to: a.user.email,
+        assignmentId: a.id,
+        subject: `Cancelled: ${describe(a)}`,
+        text: `Hi ${a.user.name || ""},\n\nYou declined ${describe(a)}.\nReason: ${reason}\nThe calendar event will be removed.\n\n— CRC PTA Link`,
+        icsMethod: "CANCEL",
+        icsContent: icsFor(updated, "CANCEL", sequence),
+      });
+    }
+    for (const lead of await leadsOf(tx, a.slot.event.departmentId)) {
+      if (lead.id === a.userId) continue;
+      await notify(tx, lead.id, a.id, "declined", `${who} declined ${describe(a)}. Reason: ${reason}`);
+      if (!lead.email) continue;
+      await enqueueEmail(tx, {
+        type: "notice",
+        to: lead.email,
+        assignmentId: a.id,
+        subject: `Slot open: ${who} declined ${describe(a)}`,
+        text: `${who} declined ${describe(a)}.\nReason: ${reason}\nThe slot is open again.\n\n${config.appUrl}/roster`,
+      });
+    }
+    await audit(tx, p.userId, "decline", a.id, { status: a.status }, { status: "DECLINED", reason });
+    return updated;
+  });
+}
+
 /** Volunteer answers a proposal. */
 export async function respondToProposal(db: Db, p: { assignmentId: string; userId: string; accept: boolean }) {
   return db.$transaction(async (tx) => {
     const a = await load(tx, p.assignmentId);
     if (a.userId !== p.userId) throw new WorkflowError("This slot was offered to someone else");
     if (a.status !== "PROPOSED") throw new WorkflowError("This offer has already been answered");
+    if (answersClosed(a.slot.event.date)) throw new WorkflowError("Accept and decline are closed");
     const status: AssignmentStatus = p.accept ? "ACCEPTED" : "DECLINED";
     await tx.assignment.update({ where: { id: a.id }, data: { status, decidedById: p.userId, decidedAt: new Date() } });
     const updated = await load(tx, a.id);

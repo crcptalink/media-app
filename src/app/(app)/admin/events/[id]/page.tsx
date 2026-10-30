@@ -7,10 +7,11 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { arrivalStatus, STATUS_LABEL } from "@/lib/checkin";
 import { db } from "@/lib/db";
 import { config } from "@/lib/env";
+import { slotTitle } from "@/lib/positions";
 import { displayName } from "@/lib/roster";
 import { requireScheduleManager } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
-import { fmtDate, fmtDateTime, localTime } from "@/lib/time";
+import { fmtDay, fmtDateTime, localTime } from "@/lib/time";
 import {
   addSlotAction,
   cancelEventAction,
@@ -55,10 +56,17 @@ export default async function EventPage({ params, searchParams }: { params: Prom
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <div>
         <Link href="/admin/roster" className="text-sm text-blue-700 underline">← Admin schedule</Link>
-        <h1 className="h1 mt-1">{e.title} · {fmtDate(e.date)}</h1>
-        <p className="muted">
-          {e.status === "CANCELLED" ? "Cancelled · " : ""}Arrive {localTime(e.arriveBy)} · {e.preprayerAt ? `pre-prayer ${localTime(e.preprayerAt)} · ` : ""}starts {localTime(e.startsAt)} · ends {localTime(e.endsAt)} · late after {localTime(new Date(e.arriveBy.getTime() + grace * 60000))}
-        </p>
+        <h1 className="h1 mt-1">{fmtDay(e.date)} <span className="ml-2 tabular-nums">{localTime(e.startsAt)}</span></h1>
+        <div className="mt-2 text-sm text-slate-600">
+          <p className="text-xs font-medium text-slate-500">Arrival</p>
+          <p>{localTime(e.arriveBy)}</p>
+          {e.preprayerAt && (
+            <>
+              <p className="mt-2 text-xs font-medium text-slate-500">Pre-Prayer</p>
+              <p>{localTime(e.preprayerAt)}</p>
+            </>
+          )}
+        </div>
       </div>
 
       <section className="card">
@@ -67,15 +75,14 @@ export default async function EventPage({ params, searchParams }: { params: Prom
           {e.slots.map((s) => (
             <li key={s.id} className="py-3">
               <div className="flex items-center gap-2">
-                <span className="rounded bg-slate-800 px-2 py-0.5 text-xs font-bold text-white">{s.label || s.position.code}</span>
-                <span className="text-sm text-slate-600">{s.position.name}</span>
+                <span className="text-sm font-semibold">{slotTitle(s.position, s.label)}</span>
                 <form action={deleteSlotAction} className="ml-auto">
                   <input type="hidden" name="slotId" value={s.id} />
                   <input type="hidden" name="back" value="/admin/roster" />
                   <SubmitButton className="btn-ghost btn-sm" confirm="Delete this empty slot?">Delete slot</SubmitButton>
                 </form>
               </div>
-              {s.assignments.length === 0 && <p className="muted mt-1">Open. Assign someone from the admin schedule.</p>}
+              {s.assignments.length === 0 && <p className="muted mt-1">Open</p>}
               <ul className="mt-2 space-y-2">
                 {s.assignments.map((a) => {
                   const live = ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"].includes(a.status);
@@ -84,7 +91,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
                     <li key={a.id} className={`flex flex-wrap items-center gap-2 text-sm ${live ? "" : "text-slate-400 line-through"}`}>
                       {a.kind !== "SERVING" && <span className="chip bg-indigo-100 text-indigo-800">{KIND_LABEL[a.kind]}</span>}
                       <b>{displayName(a.user)}</b>
-                      <StatusChip status={a.status} />
+                      <StatusChip status={a.status} serviceDate={e.date} />
                       {a.status === "ACCEPTED" && (
                         <>
                           <span className={`chip ${ARRIVAL_CLS[st]}`}>

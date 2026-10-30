@@ -29,9 +29,7 @@ export default async function LoginPage({ searchParams }: { searchParams: SP }) 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center bg-slate-50 px-5 py-10">
       <div className="mb-8 text-center">
-        <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-700">
-          <BrandLogo className="h-9" alt="" />
-        </span>
+        <BrandLogo className="mx-auto h-12" alt="" />
         <h1 className="mt-4 text-2xl font-semibold text-slate-900">{APP_NAME}</h1>
         <p className="mt-1 text-sm text-slate-500">CRC Pretoria</p>
       </div>

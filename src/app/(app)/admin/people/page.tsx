@@ -5,6 +5,7 @@ import { startViewAsAction } from "@/app/(app)/impersonation-actions";
 import { db } from "@/lib/db";
 import { config } from "@/lib/env";
 import { canGrantLogin, safeInviteLink } from "@/lib/login-access";
+import { positionTitle } from "@/lib/positions";
 import { requirePeopleManager } from "@/lib/session";
 import { addPersonAction, sendInviteAction, setLoginAction, updatePersonAction } from "./actions";
 
@@ -87,7 +88,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                       if (!pos) return null;
                       return (
                         <span key={s.positionId} className={`chip ${s.stage === "QUALIFIED" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                          {pos.code}
+                          {positionTitle(pos.code, pos.name)}
                           {s.stage === "QUALIFIED" ? "" : s.stage === "TRAINEE" ? " · Trainee" : " · Shadow"}
                           {s.isTrainer ? " · Trainer" : ""}
                         </span>

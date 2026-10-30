@@ -15,9 +15,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <main className="min-h-screen bg-slate-50">
       <div className="border-b border-slate-200 bg-white py-4">
         <span className="mx-auto flex w-fit items-center gap-2">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue-700">
-            <BrandLogo className="h-7" alt="" />
-          </span>
+          <BrandLogo className="h-9" alt="" />
           <span className="text-sm font-semibold text-slate-900">CRC Media</span>
         </span>
       </div>

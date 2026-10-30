@@ -2,7 +2,8 @@
 import bcrypt from "bcryptjs";
 import { signOut } from "@/auth";
 import { runAction, str } from "@/lib/actions";
-import { cancelAssignment, claimSlot, respondToProposal, WorkflowError } from "@/lib/assignments";
+import { answersClosed } from "@/lib/answer-window";
+import { cancelAssignment, claimSlot, declineAssignment, respondToProposal, WorkflowError } from "@/lib/assignments";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
@@ -13,9 +14,18 @@ export async function signOutAction() {
 export async function respondAction(form: FormData) {
   const user = await requireUser();
   await runAction(form, async () => {
-    const accept = str(form, "answer") === "yes";
-    await respondToProposal(db, { assignmentId: str(form, "assignmentId"), userId: user.id, accept });
-    return accept ? "Thanks! You're confirmed — a calendar invite is on its way." : "Declined. A leader has been told.";
+    const row = await db.assignment.findUnique({ where: { id: str(form, "assignmentId") }, include: { slot: { include: { event: true } } } });
+    if (!row || answersClosed(row.slot.event.date)) throw new WorkflowError("Accept and decline are closed");
+    await respondToProposal(db, { assignmentId: row.id, userId: user.id, accept: true });
+    return "Accepted.";
+  });
+}
+
+export async function declineAction(form: FormData) {
+  const user = await requireUser();
+  await runAction(form, async () => {
+    await declineAssignment(db, { assignmentId: str(form, "assignmentId"), userId: user.id, reason: str(form, "reason") });
+    return "Declined. The slot is open.";
   });
 }
 
@@ -24,7 +34,7 @@ export async function claimAction(form: FormData) {
   await runAction(form, async () => {
     const kind = str(form, "kind") === "TRAINEE" ? "TRAINEE" : str(form, "kind") === "SHADOW" ? "SHADOW" : "SERVING";
     await claimSlot(db, { slotId: str(form, "slotId"), userId: user.id, kind });
-    return "Request sent. A leader or 2IC will approve or reject it.";
+    return "Request sent.";
   });
 }
 

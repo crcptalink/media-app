@@ -35,9 +35,7 @@ export function KioskBoard({ board, token }: { board: { date: string; isToday: b
   return (
     <main className="min-h-screen bg-slate-50 p-6 text-slate-900">
       <div className="mb-4 flex items-center justify-center gap-3">
-        <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-700">
-          <BrandLogo className="h-9" alt="" />
-        </span>
+        <BrandLogo className="h-12" alt="" />
         <h1 className="text-4xl font-semibold">Tap your name to check in</h1>
       </div>
       {!board.isToday && <p className="mt-2 text-center text-slate-500">No services today. Showing {board.date}.</p>}
@@ -57,7 +55,7 @@ export function KioskBoard({ board, token }: { board: { date: string; isToday: b
                     className={`flex items-center justify-between rounded-xl border px-5 py-4 text-left text-2xl font-semibold ${p.checkedInAt ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-slate-200 bg-slate-50 text-slate-900 active:bg-blue-50"}`}
                   >
                     <span>{p.name}</span>
-                    <span className="text-base font-normal">{p.checkedInAt ? `✓ ${p.checkedInAt}` : s.code}</span>
+                    <span className="text-base font-normal">{p.checkedInAt ? `✓ ${p.checkedInAt}` : s.position}</span>
                   </button>
                 )),
               )}

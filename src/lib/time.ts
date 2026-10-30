@@ -50,6 +50,13 @@ export function fmtDate(date: string): string {
   );
 }
 
+/** "Sunday 1 Nov" */
+export function fmtDay(date: string): string {
+  return new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" })
+    .format(new Date(`${date}T12:00:00Z`))
+    .replace(/,/g, "");
+}
+
 export function fmtDateTime(d: Date): string {
   return `${fmtDate(localDate(d))} ${localTime(d)}`;
 }

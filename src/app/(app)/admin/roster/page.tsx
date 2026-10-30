@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Flash, one, type SP } from "@/components/Flash";
 import { RosterBoard } from "@/components/RosterBoard";
+import { SCHEDULE_DAYS, WeekNav } from "@/components/WeekNav";
 import { describe } from "@/lib/assignments";
 import { db } from "@/lib/db";
 import { loadRoster } from "@/lib/roster";
@@ -10,12 +10,15 @@ import { loadWarnings } from "@/lib/warnings";
 import { decideAction } from "../actions";
 import { SubmitButton } from "@/components/SubmitButton";
 
+function fromParam(raw: string | undefined) {
+  return raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : todayLocal();
+}
+
 export default async function AdminRosterPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const { user, dept } = await requireScheduleManager();
-  const weeks = Math.min(12, Math.max(1, Number(one(sp.weeks) || 4)));
-  const from = todayLocal();
-  const events = await loadRoster(db, dept.id, from, addDays(from, weeks * 7));
+  const from = fromParam(one(sp.from));
+  const events = await loadRoster(db, dept.id, from, addDays(from, SCHEDULE_DAYS - 1));
   const people = await db.user.findMany({
     where: { active: true, memberships: { some: { departmentId: dept.id } } },
     orderBy: { name: "asc" },
@@ -28,17 +31,11 @@ export default async function AdminRosterPage({ searchParams }: { searchParams: 
     orderBy: { createdAt: "asc" },
   });
   const skills = await db.userSkill.findMany({ where: { userId: user.id } });
-  const back = `/admin/roster?weeks=${weeks}`;
+  const back = `/admin/roster?from=${from}`;
   return (
     <div>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
-        {[2, 4, 8].map((w) => (
-          <Link key={w} href={`/admin/roster?weeks=${w}`} className={`chip ${w === weeks ? "bg-blue-700 text-white" : "bg-slate-200"}`}>
-            {w} weeks
-          </Link>
-        ))}
-      </div>
+      <WeekNav from={from} base="/admin/roster" />
       {claims.length > 0 && (
         <div className="card mb-6 border-purple-200">
           <h2 className="h2 mb-2">Slot requests ({claims.length})</h2>
@@ -57,9 +54,6 @@ export default async function AdminRosterPage({ searchParams }: { searchParams: 
           </ul>
         </div>
       )}
-      <p className="muted mb-4">
-        <b>Ask</b> sends the person a Yes/No request. <b>Assign</b> confirms immediately and emails the calendar invite. Warnings come from availability, training stages and the <Link className="underline" href="/admin/rules">Rules</Link>.
-      </p>
       <RosterBoard events={events} mode="admin" me={{ id: user.id, skills }} people={people} warnings={warnings} back={back} />
     </div>
   );

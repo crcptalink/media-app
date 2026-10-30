@@ -1,6 +1,7 @@
 import type { Db } from "./db";
 import { arrivalStatus, type ArrivalStatus } from "./checkin";
 import { getDepartment } from "./events";
+import { positionTitle } from "./positions";
 import { displayName } from "./roster";
 import { getGraceMinutes } from "./settings";
 import { localTime, todayLocal } from "./time";
@@ -63,8 +64,8 @@ export async function loadBoard(db: Db, now = new Date()): Promise<{ date: strin
       isPast: e.endsAt <= now,
       slots: e.slots.map((s) => ({
         id: s.id,
-        code: s.label || s.position.code,
-        position: s.position.name,
+        code: s.position.code,
+        position: positionTitle(s.position.code, s.position.name),
         people: s.assignments.map((a) => ({
           assignmentId: a.id,
           name: displayName(a.user),

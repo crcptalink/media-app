@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { answersClosed } from "@/lib/answer-window";
 import { icsFor } from "@/lib/assignments";
 import { db } from "@/lib/db";
 import { canManageSchedule, currentUser } from "@/lib/session";
@@ -12,7 +13,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ assignm
   const a = await db.assignment.findUnique({ where: { id: assignmentId }, include: { user: true, slot: { include: { position: true, event: true } } } });
   if (!a) return NextResponse.json({ error: "not found" }, { status: 404 });
   if (a.userId !== user.id && !canManageSchedule(user, a.slot.event.departmentId)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  const method = a.status === "ACCEPTED" ? "REQUEST" : "CANCEL";
+  const kept = a.status === "ACCEPTED" || (a.status === "PROPOSED" && answersClosed(a.slot.event.date));
+  const method = kept ? "REQUEST" : "CANCEL";
   return new NextResponse(icsFor(a, method, a.icsSequence), {
     headers: {
       "Content-Type": `text/calendar; charset=utf-8; method=${method}`,

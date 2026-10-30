@@ -21,8 +21,7 @@ export default async function AvailabilityPage({ searchParams }: { searchParams:
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <h1 className="h1">When I&apos;m unavailable</h1>
-      <p className="muted">Tap a whole day, or just one service. Red means you can&apos;t serve. Tap again to undo.</p>
+      <h1 className="h1">Not available</h1>
       {dates.map((date) => {
         const whole = marks.find((m) => m.date === date && m.templateId === null);
         return (

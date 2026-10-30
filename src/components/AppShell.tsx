@@ -18,19 +18,21 @@ function titleFor(pathname: string) {
     ["/admin/setup", "Setup"],
     ["/admin/outbox", "Emails"],
     ["/me/availability", "Availability"],
-    ["/me/password", "Profile and password"],
-    ["/me", "My slots"],
-    ["/roster", "Schedule"],
+    ["/me/password", "My profile"],
+    ["/me/training", "My training"],
+    ["/me/announcements", "Announcements"],
+    ["/roster", "Full schedule"],
     ["/d/", "Coming soon"],
   ];
   for (const [prefix, title] of rules) {
     if (pathname === prefix || pathname.startsWith(prefix)) return title;
   }
+  if (pathname === "/me") return "My schedule";
   return "Department";
 }
 
 function navActive(pathname: string, href: string) {
-  if (href === "/me") return pathname === "/me" || pathname === "/me/password";
+  if (href === "/me") return pathname === "/me";
   if (href === "/admin/roster") return pathname === "/admin/roster" || pathname.startsWith("/admin/events/");
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -62,9 +64,7 @@ export function AppShell({
   const sidebar = (
     <div className="flex h-full flex-col">
       <Link href="/" className="flex items-center gap-2.5 px-4 py-4" onClick={() => setOpen(false)}>
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue-700">
-          <BrandLogo className="h-7" alt="" />
-        </span>
+        <BrandLogo className="h-9" alt="" />
         <span className="text-sm font-semibold tracking-tight text-slate-900">{APP_NAME}</span>
       </Link>
       <div className="flex-1 overflow-y-auto px-3 pb-4">

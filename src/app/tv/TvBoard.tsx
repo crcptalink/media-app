@@ -42,9 +42,7 @@ export function TvBoard({ initial, token }: { initial: Board; token: string }) {
     <main className="min-h-screen bg-slate-50 p-8 text-slate-900">
       <header className="mb-6 flex items-center justify-between gap-6">
         <div className="flex items-center gap-5">
-          <span className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-700">
-            <BrandLogo className="h-12" alt="" />
-          </span>
+          <BrandLogo className="h-16" alt="" />
           <h1 className="text-5xl font-semibold">Link · {board.isToday ? "Today" : "Next up"} <span className="text-slate-500">{dateLabel}</span></h1>
         </div>
         <div className="text-6xl font-semibold tabular-nums text-blue-800">{time}</div>

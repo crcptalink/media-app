@@ -3,8 +3,9 @@ import type { SkillStage } from "@prisma/client";
 import { claimAction } from "@/app/(app)/actions";
 import { decideAction, proposeAction, removeAction } from "@/app/(app)/admin/actions";
 import { displayName, type RosterEvent } from "@/lib/roster";
+import { slotTitle } from "@/lib/positions";
 import type { Warning } from "@/lib/rules";
-import { addDays, fmtDate, localTime, weekdayOf } from "@/lib/time";
+import { fmtDay, localTime, weekdayOf } from "@/lib/time";
 import { KIND_LABEL, StatusChip } from "./StatusChip";
 import { SubmitButton } from "./SubmitButton";
 
@@ -15,8 +16,17 @@ export interface Person {
   skills: { positionId: string; stage: SkillStage; isTrainer: boolean }[];
 }
 
-function weekStart(date: string) {
-  return addDays(date, -((weekdayOf(date) + 6) % 7));
+function dayBand(date: string) {
+  const wd = weekdayOf(date);
+  if (wd === 0) return "bg-blue-800 text-white";
+  if (wd === 4) return "bg-slate-600 text-white";
+  return "bg-slate-200 text-slate-800";
+}
+
+function serviceBadge(date: string, kind: string) {
+  if (kind === "TRAINING" || weekdayOf(date) === 4) return { label: "Thursday", cls: "bg-slate-200 text-slate-700" };
+  if (weekdayOf(date) === 0) return { label: "Sunday", cls: "bg-blue-100 text-blue-900" };
+  return { label: "Service", cls: "bg-slate-100 text-slate-600" };
 }
 
 export function RosterBoard({
@@ -34,17 +44,14 @@ export function RosterBoard({
   warnings?: Warning[];
   back: string;
 }) {
-  const weeks = new Map<string, RosterEvent[]>();
-  for (const e of events) {
-    const k = weekStart(e.date);
-    weeks.set(k, [...(weeks.get(k) ?? []), e]);
-  }
-  if (!events.length) return <p className="muted">No events in this range. An admin can generate them on Setup.</p>;
+  const days = new Map<string, RosterEvent[]>();
+  for (const e of events) days.set(e.date, [...(days.get(e.date) ?? []), e]);
+  if (!events.length) return <p className="muted">Nothing in these weeks.</p>;
   return (
-    <div className="space-y-8">
-      {[...weeks.entries()].map(([wk, evs]) => (
-        <section key={wk}>
-          <h2 className="mb-3 text-sm font-semibold text-slate-500">Week of {fmtDate(wk)}</h2>
+    <div className="space-y-6">
+      {[...days.entries()].map(([date, evs]) => (
+        <section key={date}>
+          <h2 className={`mb-3 rounded-md px-3 py-2 text-sm font-semibold ${dayBand(date)}`}>{fmtDay(date)}</h2>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {evs.map((e) => (
               <EventCard key={e.id} e={e} mode={mode} me={me} people={people} warnings={warnings.filter((w) => w.eventId === e.id)} back={back} />
@@ -71,20 +78,29 @@ function EventCard({
   warnings: Warning[];
   back: string;
 }) {
+  const badge = serviceBadge(e.date, e.kind);
+  const edge = weekdayOf(e.date) === 0 ? "border-l-4 border-l-blue-700" : weekdayOf(e.date) === 4 || e.kind === "TRAINING" ? "border-l-4 border-l-slate-400 bg-slate-50" : "";
   return (
-    <div className={`card ${e.kind === "TRAINING" ? "border-blue-200 bg-blue-50/40" : ""}`}>
-      <div className="mb-2 flex items-baseline gap-2">
-        <h3 className="font-semibold">{e.title}</h3>
-        <span className="muted">{fmtDate(e.date)}</span>
+    <div className={`card ${edge}`}>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h3 className="font-semibold">{fmtDay(e.date)}</h3>
+        <span className="text-lg font-semibold tabular-nums">{localTime(e.startsAt)}</span>
+        <span className={`chip ${badge.cls}`}>{badge.label}</span>
         {mode === "admin" && (
           <Link href={`/admin/events/${e.id}`} className="ml-auto text-xs text-blue-700 underline">Details</Link>
         )}
       </div>
-      <p className="mb-3 text-xs text-slate-500">
-        Arrive {localTime(e.arriveBy)}
-        {e.preprayerAt ? ` · pre-prayer ${localTime(e.preprayerAt)}` : ""} · starts {localTime(e.startsAt)}
-      </p>
-      <ul className="divide-y divide-slate-100">
+      <div className="mt-3 text-sm">
+        <p className="text-xs font-medium text-slate-500">Arrival</p>
+        <p>{localTime(e.arriveBy)}</p>
+        {e.preprayerAt && (
+          <>
+            <p className="mt-2 text-xs font-medium text-slate-500">Pre-Prayer</p>
+            <p>{localTime(e.preprayerAt)}</p>
+          </>
+        )}
+      </div>
+      <ul className="mt-3 divide-y divide-slate-100">
         {e.slots.map((s) => {
           const serving = s.assignments.find((a) => a.kind === "SERVING");
           const learner = s.assignments.find((a) => a.kind !== "SERVING");
@@ -93,46 +109,44 @@ function EventCard({
           return (
             <li key={s.id} className="py-2">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="w-14 shrink-0 rounded bg-slate-800 px-1.5 py-0.5 text-center text-xs font-bold text-white" title={s.position.name}>
-                  {s.label || s.position.code}
-                </span>
+                <span className="min-w-[8.5rem] text-sm font-semibold text-slate-800">{slotTitle(s.position, s.label)}</span>
                 {serving ? (
-                  <AssignmentLine a={serving} mode={mode} me={me.id} back={back} />
+                  <AssignmentLine a={serving} mode={mode} me={me.id} back={back} serviceDate={e.date} />
                 ) : mode === "admin" ? (
                   <ProposeForm slotId={s.id} positionId={s.positionId} people={people} kind="SERVING" back={back} />
                 ) : (
                   <>
-                    <span className="text-sm italic text-slate-400">Open</span>
+                    <span className="text-sm text-slate-400">Open</span>
                     {!mineHere && (
                       <form action={claimAction} className="ml-auto">
                         <input type="hidden" name="slotId" value={s.id} />
                         <input type="hidden" name="kind" value="SERVING" />
                         <input type="hidden" name="back" value={back} />
-                        <SubmitButton className="btn-primary btn-sm">Claim</SubmitButton>
+                        <SubmitButton className="btn-primary btn-sm">Serve</SubmitButton>
                       </form>
                     )}
                   </>
                 )}
               </div>
               {learner ? (
-                <div className="ml-16 mt-1 flex flex-wrap items-center gap-2">
-                  <span className="chip bg-blue-50 text-blue-800">{KIND_LABEL[learner.kind]}</span>
-                  <AssignmentLine a={learner} mode={mode} me={me.id} back={back} />
+                <div className="mt-1 flex flex-wrap items-center gap-2 pl-2">
+                  <span className="chip bg-slate-100 text-slate-700">{KIND_LABEL[learner.kind]}</span>
+                  <AssignmentLine a={learner} mode={mode} me={me.id} back={back} serviceDate={e.date} />
                 </div>
               ) : mode === "admin" ? (
-                <details className="ml-16 mt-1">
-                  <summary className="cursor-pointer text-xs text-slate-500">Add trainee or shadow</summary>
+                <details className="mt-1 pl-2">
+                  <summary className="cursor-pointer text-xs text-slate-500">Trainee</summary>
                   <ProposeForm slotId={s.id} positionId={s.positionId} people={people} kind="TRAINEE" back={back} />
                 </details>
               ) : (
                 !mineHere &&
                 myStage &&
                 myStage !== "QUALIFIED" && (
-                  <form action={claimAction} className="ml-16 mt-1">
+                  <form action={claimAction} className="mt-1 pl-2">
                     <input type="hidden" name="slotId" value={s.id} />
                     <input type="hidden" name="kind" value={myStage === "SHADOW" ? "SHADOW" : "TRAINEE"} />
                     <input type="hidden" name="back" value={back} />
-                    <SubmitButton className="btn-ghost btn-sm">Join as {myStage === "SHADOW" ? "shadow" : "trainee"}</SubmitButton>
+                    <SubmitButton className="btn-ghost btn-sm">Serve as {myStage === "SHADOW" ? "shadow" : "trainee"}</SubmitButton>
                   </form>
                 )
               )}
@@ -144,7 +158,7 @@ function EventCard({
         <ul className="mt-3 space-y-1">
           {warnings.map((w, i) => (
             <li key={i} className={`rounded px-2 py-1 text-xs ${w.severity === "WARN" ? "bg-amber-50 text-amber-900" : "bg-slate-100 text-slate-700"}`}>
-              ⚠️ {w.message}
+              {w.message}
             </li>
           ))}
         </ul>
@@ -158,16 +172,18 @@ function AssignmentLine({
   mode,
   me,
   back,
+  serviceDate,
 }: {
   a: RosterEvent["slots"][number]["assignments"][number];
   mode: "volunteer" | "admin";
   me: string;
   back: string;
+  serviceDate: string;
 }) {
   return (
     <>
       <span className={`text-sm font-medium ${a.userId === me ? "text-blue-800" : ""}`}>{displayName(a.user)}</span>
-      {a.status !== "ACCEPTED" && <StatusChip status={a.status} />}
+      <StatusChip status={a.status} serviceDate={serviceDate} />
       {mode === "admin" && (
         <span className="ml-auto flex gap-1">
           {a.status === "CLAIM_PENDING" && (
@@ -181,7 +197,7 @@ function AssignmentLine({
           <form action={removeAction}>
             <input type="hidden" name="assignmentId" value={a.id} />
             <input type="hidden" name="back" value={back} />
-            <SubmitButton className="btn-ghost btn-sm" confirm={`Remove ${displayName(a.user)}?${a.status === "ACCEPTED" ? " A cancellation will be emailed." : ""}`}>✕</SubmitButton>
+            <SubmitButton className="btn-ghost btn-sm" confirm={`Remove ${displayName(a.user)}?`}>Remove</SubmitButton>
           </form>
         </span>
       )}
@@ -217,12 +233,10 @@ function ProposeForm({
         <input type="hidden" name="kind" value="SERVING" />
       )}
       <select name="userId" required className="min-w-0 flex-1 rounded border border-slate-300 px-1 py-1 text-sm" defaultValue="">
-        <option value="" disabled>
-          Open — choose…
-        </option>
+        <option value="" disabled>Choose</option>
         {people.map((p) => {
           const sk = p.skills.find((k) => k.positionId === positionId);
-          const hint = sk ? [STAGE_HINT[sk.stage], sk.isTrainer ? "trainer" : ""].filter(Boolean).join(", ") : "no skill";
+          const hint = sk ? [STAGE_HINT[sk.stage], sk.isTrainer ? "trainer" : ""].filter(Boolean).join(", ") : "";
           return (
             <option key={p.id} value={p.id}>
               {p.name || p.email}
