@@ -23,7 +23,8 @@ FROM deps AS build
 COPY . .
 ENV NODE_OPTIONS="--max-old-space-size=1536" \
     UV_THREADPOOL_SIZE=1
-RUN npm run build && node docker/stage-runtime-deps.mjs
+# Drop any Next cache that arrived with the sources so the compile cannot reuse a stale .next.
+RUN rm -rf .next && npm run build && node docker/stage-runtime-deps.mjs
 
 FROM base AS run
 ENV NODE_ENV=production \

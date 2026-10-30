@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
     config.parallelism = 1;
     return config;
   },
+  async headers() {
+    return [
+      {
+        source: "/_next/static/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/:file(.*\\.(?:png|jpg|jpeg|webp|svg|ico|gif))",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

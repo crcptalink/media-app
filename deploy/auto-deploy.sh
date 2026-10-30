@@ -100,6 +100,9 @@ deploy_stack() {
   # Leave the current app serving. The compile still uses a 1536 MB heap and
   # may use swap on this 3.2 GiB PC, but the site stays up until the image is ready.
   # `up -d` then recreates the container, which is only a short restart.
+  # Host .next is not the image, but clear it so nothing stale is left beside the repo.
+  # The image build also deletes .next before `next build` (see Dockerfile).
+  rm -rf .next
   log "docker compose build (current app keeps serving)"
   run_and_log docker compose build
 

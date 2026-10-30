@@ -1,4 +1,5 @@
 import type { Db } from "./db";
+import { countsAsServing } from "./answer-window";
 import { arrivalStatus, type ArrivalStatus } from "./checkin";
 import { getDepartment } from "./events";
 import { positionTitle } from "./positions";
@@ -42,7 +43,7 @@ export async function loadBoard(db: Db, now = new Date()): Promise<{ date: strin
     include: {
       slots: {
         orderBy: { sort: "asc" },
-        include: { position: true, assignments: { where: { status: "ACCEPTED" }, include: { user: true }, orderBy: { kind: "asc" } } },
+        include: { position: true, assignments: { where: { status: { in: ["ACCEPTED", "PROPOSED"] } }, include: { user: true }, orderBy: { kind: "asc" } } },
       },
     },
   });
@@ -66,7 +67,7 @@ export async function loadBoard(db: Db, now = new Date()): Promise<{ date: strin
         id: s.id,
         code: s.position.code,
         position: positionTitle(s.position.code, s.position.name),
-        people: s.assignments.map((a) => ({
+        people: s.assignments.filter((a) => countsAsServing(a.status, e.date, now)).map((a) => ({
           assignmentId: a.id,
           name: displayName(a.user),
           kind: a.kind,

@@ -2,7 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { signOutAction } from "@/app/(app)/actions";
 import { stopViewingAsAction } from "@/app/(app)/impersonation-actions";
 import { db } from "@/lib/db";
-import { DEPARTMENT_ORDER, departmentHref } from "@/lib/departments";
+import { menuDepartments } from "@/lib/departments";
 import { getDepartment } from "@/lib/events";
 import { appNav } from "@/lib/shell-nav";
 import { canManagePeople, canManageSchedule, requireUser } from "@/lib/session";
@@ -18,9 +18,7 @@ export default async function PasswordLayout({ children }: { children: React.Rea
   const nav = appNav({ schedule, people, admin: user.appRole === "ADMIN" });
 
   const all = await db.department.findMany({ where: { active: true } });
-  const departments = DEPARTMENT_ORDER.map((slug) => all.find((d) => d.slug === slug))
-    .filter((d) => d != null)
-    .map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
+  const departments = menuDepartments(user, all);
 
   return (
     <AppShell

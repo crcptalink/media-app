@@ -40,7 +40,7 @@ export default async function LoginPage({ searchParams }: { searchParams: SP }) 
             <input type="hidden" name="callbackUrl" value={callbackUrl} />
             <label className="block text-sm font-medium" htmlFor="email">Email</label>
             <input id="email" name="email" type="email" required autoComplete="email" defaultValue={email} className="input" placeholder="you@example.com" />
-            <SubmitButton className="btn-primary w-full">Email me a sign-in link</SubmitButton>
+            <SubmitButton className="btn-primary w-full">Email Me A Sign-In Link</SubmitButton>
             <p className="muted text-center">
               Have a password? <Link className="text-blue-700 underline" href={`/login?mode=password&callbackUrl=${encodeURIComponent(callbackUrl)}`}>Sign in with password</Link>
             </p>
@@ -52,7 +52,7 @@ export default async function LoginPage({ searchParams }: { searchParams: SP }) 
             <input id="email" name="email" type="email" required autoComplete="email" defaultValue={email} className="input" />
             <label className="block text-sm font-medium" htmlFor="password">Password</label>
             <input id="password" name="password" type="password" required autoComplete="current-password" className="input" />
-            <SubmitButton className="btn-primary w-full">Sign in</SubmitButton>
+            <SubmitButton className="btn-primary w-full">Sign In</SubmitButton>
             <p className="muted text-center">
               <Link className="text-blue-700 underline" href={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}>Use an email link instead</Link>
             </p>

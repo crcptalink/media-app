@@ -21,9 +21,10 @@ describe("answer window", () => {
     expect(answersCloseAt("2026-11-01").toISOString()).toBe("2026-10-28T22:00:00.000Z");
     expect(answersClosed("2026-11-01", new Date("2026-10-28T21:59:00.000Z"))).toBe(false);
     expect(answersClosed("2026-11-01", new Date("2026-10-28T22:00:00.000Z"))).toBe(true);
-    expect(answerLabel("PROPOSED", "2026-11-01", new Date("2026-10-28T22:00:00.000Z"))).toBe("Auto-accepted");
-    expect(answerLabel("PROPOSED", "2026-11-01", new Date("2026-10-27T12:00:00.000Z"))).toBe("Awaiting answer");
+    expect(answerLabel("PROPOSED", "2026-11-01", new Date("2026-10-28T22:00:00.000Z"))).toBe("Auto-Accepted");
+    expect(answerLabel("PROPOSED", "2026-11-01", new Date("2026-10-27T12:00:00.000Z"))).toBeNull();
     expect(answerLabel("ACCEPTED", "2026-11-01", new Date("2026-10-27T12:00:00.000Z"))).toBe("Accepted");
+    expect(answerLabel("DECLINED", "2026-11-01", new Date("2026-10-27T12:00:00.000Z"))).toBe("Declined");
   });
 
   it("closes a Thursday service at Thursday 00:00", () => {

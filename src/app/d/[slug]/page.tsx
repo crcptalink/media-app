@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { db } from "@/lib/db";
-import { DEPARTMENT_ORDER, departmentHref } from "@/lib/departments";
+import { menuDepartments } from "@/lib/departments";
 import { currentUser, redirectIfPasswordChangeRequired } from "@/lib/session";
 import { signOutAction } from "@/app/(app)/actions";
 import { stopViewingAsAction } from "@/app/(app)/impersonation-actions";
@@ -17,9 +17,7 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
   const user = await currentUser();
   await redirectIfPasswordChangeRequired(user);
   const all = await db.department.findMany({ where: { active: true } });
-  const departments = DEPARTMENT_ORDER.map((s) => all.find((d) => d.slug === s))
-    .filter((d) => d != null)
-    .map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
+  const departments = menuDepartments(user, all);
 
   return (
     <AppShell
@@ -32,7 +30,7 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
     >
       <div className="card max-w-lg">
         <h2 className="h2">{dept.name}</h2>
-        <p className="mt-2 text-slate-600">Coming soon</p>
+        <p className="mt-2 text-slate-600">Coming Soon</p>
         <Link href="/" className="mt-4 inline-block text-sm font-medium text-blue-700 hover:text-blue-800">All departments</Link>
       </div>
     </AppShell>

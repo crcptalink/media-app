@@ -1,7 +1,9 @@
 import { AppShell } from "@/components/AppShell";
 import { stopViewingAsAction } from "@/app/(app)/impersonation-actions";
 import { db } from "@/lib/db";
-import { DEPARTMENT_ORDER, departmentHref } from "@/lib/departments";
+import { approvalBadge } from "@/lib/approvals";
+import { menuDepartments } from "@/lib/departments";
+import { todayLocal } from "@/lib/time";
 import { getDepartment } from "@/lib/events";
 import { appNav } from "@/lib/shell-nav";
 import { assertDepartmentAccess, canManagePeople, canManageSchedule, redirectIfPasswordChangeRequired, requireUser } from "@/lib/session";
@@ -16,14 +18,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   assertDepartmentAccess(user, dept.id);
   const schedule = canManageSchedule(user, dept.id);
   const people = canManagePeople(user, dept.id);
-  const unread = await db.notification.count({ where: { userId: user.id, readAt: null } });
-  const pendingClaims = schedule ? await db.assignment.count({ where: { status: "CLAIM_PENDING", slot: { event: { departmentId: dept.id } } } }) : 0;
+  const [unread, pendingClaims, all] = await Promise.all([
+    db.notification.count({ where: { userId: user.id, readAt: null } }),
+    schedule ? approvalBadge(db, dept.id, todayLocal()) : Promise.resolve(0),
+    db.department.findMany({ where: { active: true } }),
+  ]);
   const nav = appNav({ unread, schedule, people, admin: user.appRole === "ADMIN", pendingClaims });
-
-  const all = await db.department.findMany({ where: { active: true } });
-  const departments = DEPARTMENT_ORDER.map((slug) => all.find((d) => d.slug === slug))
-    .filter((d) => d != null)
-    .map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
+  const departments = menuDepartments(user, all);
 
   return (
     <AppShell

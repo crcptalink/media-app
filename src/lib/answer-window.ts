@@ -17,12 +17,17 @@ export function answersClosed(serviceDate: string, now = new Date()) {
   return now.getTime() >= answersCloseAt(serviceDate).getTime();
 }
 
-export function answerLabel(status: string, serviceDate: string, now = new Date()) {
+/** Unanswered and still open has no label: the person sees Accept and Decline. */
+export function answerLabel(status: string, serviceDate: string, now = new Date()): string | null {
   const closed = answersClosed(serviceDate, now);
-  if (status === "PROPOSED" && closed) return "Auto-accepted";
-  if (status === "PROPOSED") return "Awaiting answer";
+  if (status === "PROPOSED" && closed) return "Auto-Accepted";
+  if (status === "PROPOSED") return null;
   if (status === "ACCEPTED") return "Accepted";
-  if (status === "CLAIM_PENDING") return "Awaiting approval";
   if (status === "DECLINED") return "Declined";
-  return status.charAt(0) + status.slice(1).toLowerCase();
+  if (status === "CLAIM_PENDING") return null;
+  return null;
+}
+
+export function countsAsServing(status: string, serviceDate: string, now = new Date()) {
+  return status === "ACCEPTED" || (status === "PROPOSED" && answersClosed(serviceDate, now));
 }

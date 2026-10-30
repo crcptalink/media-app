@@ -62,7 +62,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
         <label className="flex items-center gap-2 text-sm sm:col-span-3">
           <input type="checkbox" name="welcome" /> Email them a welcome note with the app link
         </label>
-        <SubmitButton className="btn-primary sm:col-span-2">Add person</SubmitButton>
+        <SubmitButton className="btn-primary sm:col-span-2">Add Person</SubmitButton>
       </form>}
       <p className="muted">
         Training stages per position: <b>Shadow</b> watches the leader set up (usually once) → <b>Trainee</b> sets up while the trainer watches → <b>Qualified</b> serves alone. Tick <b>Trainer</b> for LST / LT.
@@ -219,7 +219,7 @@ function SignInControls({
               <input name="confirm" type="password" required minLength={8} autoComplete="new-password" className="input mt-1" />
             </label>
             <p className="muted sm:col-span-2">They must choose a new password the first time they sign in. This does not send an email.</p>
-            <SubmitButton className="btn-primary sm:col-span-2 sm:w-fit">Set login</SubmitButton>
+            <SubmitButton className="btn-primary sm:col-span-2 sm:w-fit">Set Login</SubmitButton>
           </form>
           <form action={sendInviteAction} className="grid gap-2 border-t border-slate-100 pt-4 sm:grid-cols-2">
             <input type="hidden" name="userId" value={personId} />
@@ -231,7 +231,7 @@ function SignInControls({
               <input name="emailConfirm" type="email" required defaultValue={email} autoComplete="off" className="input mt-1" />
             </label>
             <p className="muted sm:col-span-2">Sends a one-time link that expires in 7 days. They choose their own password.</p>
-            <SubmitButton className="btn-ghost sm:col-span-2 sm:w-fit">Send invite</SubmitButton>
+            <SubmitButton className="btn-ghost sm:col-span-2 sm:w-fit">Send Invite</SubmitButton>
           </form>
         </>
       )}
@@ -239,7 +239,7 @@ function SignInControls({
       {viewAs && (
         <form action={startViewAsAction}>
           <input type="hidden" name="userId" value={personId} />
-          <SubmitButton className="btn-ghost" confirm={`View the app as ${name}?`}>View as</SubmitButton>
+          <SubmitButton className="btn-ghost" confirm={`View the app as ${name}?`}>View As</SubmitButton>
         </form>
       )}
     </div>

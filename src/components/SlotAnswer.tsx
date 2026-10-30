@@ -33,7 +33,7 @@ export function SlotAnswer({
       )}
       {showDecline && (
         <>
-          <button type="button" className="btn-ghost" disabled={!canDecline} onClick={() => dialog.current?.showModal()}>
+          <button type="button" className="btn btn-ghost" disabled={!canDecline} onClick={() => dialog.current?.showModal()}>
             Decline
           </button>
           <dialog ref={dialog} className="w-[min(100%,24rem)] rounded-xl border border-slate-200 bg-white p-4 text-slate-900 shadow-lg backdrop:bg-slate-900/40">

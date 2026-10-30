@@ -87,6 +87,11 @@ enum RsvpResponse {
   NO
 }
 
+enum TrainingPart {
+  PREPRAYER
+  SESSION
+}
+
 enum OutboxStatus {
   PENDING
   SENT
@@ -359,13 +364,14 @@ model Unavailability {
 model TrainingRsvp {
   eventId   String
   userId    String
+  part      TrainingPart @default(SESSION)
   response  RsvpResponse
   note      String?
   updatedAt DateTime     @updatedAt
   event     Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([eventId, userId])
+  @@id([eventId, userId, part])
 }
 
 model RuleNote {

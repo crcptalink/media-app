@@ -57,6 +57,11 @@ export function fmtDay(date: string): string {
     .replace(/,/g, "");
 }
 
+/** "1 Nov", without the weekday. */
+export function fmtDateOnly(date: string): string {
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T12:00:00Z`));
+}
+
 export function fmtDateTime(d: Date): string {
   return `${fmtDate(localDate(d))} ${localTime(d)}`;
 }

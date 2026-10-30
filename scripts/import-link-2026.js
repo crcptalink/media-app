@@ -214,10 +214,10 @@ async function main() {
         const rawCode = spec.raw || spec.code || null;
         const ours = await prisma.assignment.findUnique({ where: { icsUid } });
         if (ours) {
-          if (!ours.checkedInAt) {
+          if (!ours.checkedInAt && !ours.decidedById && ours.status === "ACCEPTED") {
             await prisma.assignment.update({
               where: { id: ours.id },
-              data: { userId: user.id, slotId: slot.id, kind, status: "ACCEPTED", rawCode },
+              data: { userId: user.id, slotId: slot.id, kind, status: "PROPOSED", rawCode, decidedAt: null },
             });
           }
           assignments++;
@@ -230,10 +230,9 @@ async function main() {
             slotId: slot.id,
             userId: user.id,
             kind,
-            status: "ACCEPTED",
+            status: "PROPOSED",
             rawCode,
             icsUid,
-            decidedAt: new Date(),
           },
         });
         assignments++;

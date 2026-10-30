@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
+import { countsAsServing } from "@/lib/answer-window";
 import { checkinWindowOpen, markCheckin } from "@/lib/checkin";
 import { db } from "@/lib/db";
 import { config } from "@/lib/env";
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
   if (body.kioskToken !== undefined) {
     if (!config.kioskToken || body.kioskToken !== config.kioskToken) return NextResponse.json({ error: "This check-in display link is not valid" }, { status: 401 });
     const a = await db.assignment.findUnique({ where: { id: String(body.assignmentId || "") }, include: { slot: { include: { event: true } } } });
-    if (!a || a.status !== "ACCEPTED") return NextResponse.json({ error: "not found" }, { status: 404 });
+    if (!a || !countsAsServing(a.status, a.slot.event.date)) return NextResponse.json({ error: "not found" }, { status: 404 });
     if (!checkinWindowOpen(a.slot.event)) return NextResponse.json({ error: "Check-in is not open for this service" }, { status: 409 });
     const r = await markCheckin(db, { assignmentId: a.id, method: "KIOSK", actorId: null });
     return NextResponse.json({ ok: true, checkedInAt: r.checkedInAt });
@@ -27,7 +28,8 @@ export async function POST(req: NextRequest) {
   const ev = await db.event.findUnique({ where: { id: String(body.eventId || "") } });
   if (!ev || ev.checkinToken !== body.token) return NextResponse.json({ error: "bad check-in code" }, { status: 400 });
   if (!checkinWindowOpen(ev)) return NextResponse.json({ error: "Check-in is not open for this service" }, { status: 409 });
-  const mine = await db.assignment.findMany({ where: { userId, status: "ACCEPTED", slot: { eventId: ev.id } } });
+  const rows = await db.assignment.findMany({ where: { userId, status: { in: ["ACCEPTED", "PROPOSED"] }, slot: { eventId: ev.id } } });
+  const mine = rows.filter((a) => countsAsServing(a.status, ev.date));
   if (!mine.length) return NextResponse.json({ error: "You're not on the schedule for this service" }, { status: 404 });
   for (const a of mine) await markCheckin(db, { assignmentId: a.id, method: "QR", actorId: userId });
   return NextResponse.json({ ok: true, count: mine.length });

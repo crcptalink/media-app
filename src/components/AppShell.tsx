@@ -12,23 +12,24 @@ export type ShellDepartment = { slug: string; name: string; href: string; ready:
 function titleFor(pathname: string) {
   const rules: [string, string][] = [
     ["/admin/events/", "Event"],
-    ["/admin/roster", "Admin schedule"],
+    ["/admin/approvals", "My Approvals"],
+    ["/admin/roster", "Admin Schedule"],
     ["/admin/people", "People"],
-    ["/admin/rules", "Rules and notes"],
+    ["/admin/rules", "Rules And Notes"],
     ["/admin/setup", "Setup"],
     ["/admin/outbox", "Emails"],
     ["/me/availability", "Availability"],
-    ["/me/password", "My profile"],
-    ["/me/training", "My training"],
+    ["/me/password", "My Profile"],
+    ["/me/training", "My Training"],
     ["/me/announcements", "Announcements"],
-    ["/roster", "Full schedule"],
-    ["/d/", "Coming soon"],
+    ["/roster", "Full Schedule"],
+    ["/d/", "Coming Soon"],
   ];
   for (const [prefix, title] of rules) {
     if (pathname === prefix || pathname.startsWith(prefix)) return title;
   }
-  if (pathname === "/me") return "My schedule";
-  return "Department";
+  if (pathname === "/me") return "My Schedule";
+  return "Departments";
 }
 
 function navActive(pathname: string, href: string) {
@@ -68,7 +69,7 @@ export function AppShell({
         <span className="text-sm font-semibold tracking-tight text-slate-900">{APP_NAME}</span>
       </Link>
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        <p className="px-2 pb-1 pt-2 text-xs font-medium text-slate-500">Departments</p>
+        {departments.length > 0 && <p className="px-2 pb-1 pt-2 text-xs font-medium text-slate-500">Departments</p>}
         <ul className="space-y-0.5">
           {departments.map((d) => {
             const current = d.slug === currentSlug;
@@ -81,7 +82,7 @@ export function AppShell({
                   }`}
                 >
                   <span className="truncate">{d.name}</span>
-                  {!d.ready && <span className="ml-auto pl-2 text-[11px] font-medium text-slate-400">Soon</span>}
+                  {!d.ready && <span className="ml-auto pl-2 text-[11px] font-medium text-slate-400">Coming Soon</span>}
                 </Link>
               </li>
             );
@@ -124,7 +125,7 @@ export function AppShell({
             Viewing as {viewingAs.name}
             {" — "}
             <form action={viewingAs.stop} className="inline">
-              <button type="submit" className="font-medium underline decoration-white/70 underline-offset-2">Return to my account</button>
+              <button type="submit" className="font-medium underline decoration-white/70 underline-offset-2">Return To My Account</button>
             </form>
           </p>
         </div>
@@ -147,12 +148,12 @@ export function AppShell({
                 <span className="hidden max-w-[12rem] truncate text-sm text-slate-600 sm:inline">{user.label}</span>
                 {signOut && (
                   <form action={signOut}>
-                    <button className="text-sm font-medium text-slate-600 hover:text-slate-900">Sign out</button>
+                    <button className="text-sm font-medium text-slate-600 hover:text-slate-900">Sign Out</button>
                   </form>
                 )}
               </>
             ) : (
-              <Link href="/login?callbackUrl=/" className="text-sm font-medium text-blue-700 hover:text-blue-800">Sign in</Link>
+              <Link href="/login?callbackUrl=/" className="text-sm font-medium text-blue-700 hover:text-blue-800">Sign In</Link>
             )}
           </div>
         </header>

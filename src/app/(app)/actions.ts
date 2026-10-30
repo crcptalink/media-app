@@ -2,6 +2,7 @@
 import bcrypt from "bcryptjs";
 import { signOut } from "@/auth";
 import { runAction, str } from "@/lib/actions";
+import { revalidatePath } from "next/cache";
 import { answersClosed } from "@/lib/answer-window";
 import { cancelAssignment, claimSlot, declineAssignment, respondToProposal, WorkflowError } from "@/lib/assignments";
 import { db } from "@/lib/db";
@@ -55,35 +56,50 @@ export async function markReadAction(form: FormData) {
   });
 }
 
+async function flipUnavailable(userId: string, date: string, templateId: string | null) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new WorkflowError("Bad date");
+  const existing = await db.unavailability.findFirst({ where: { userId, date, templateId } });
+  if (existing) {
+    await db.unavailability.delete({ where: { id: existing.id } });
+    return false;
+  }
+  await db.unavailability.create({ data: { userId, date, templateId } });
+  return true;
+}
+
 export async function toggleUnavailableAction(form: FormData) {
   const user = await requireUser();
   await runAction(form, async () => {
-    const date = str(form, "date");
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new WorkflowError("Bad date");
-    const templateId = str(form, "templateId") || null;
-    const existing = await db.unavailability.findFirst({ where: { userId: user.id, date, templateId } });
-    if (existing) {
-      await db.unavailability.delete({ where: { id: existing.id } });
-      return "Marked available.";
-    }
-    await db.unavailability.create({ data: { userId: user.id, date, templateId, note: str(form, "note") || null } });
-    return "Marked unavailable.";
+    const off = await flipUnavailable(user.id, str(form, "date"), str(form, "templateId") || null);
+    return off ? "Marked unavailable." : "Marked available.";
   });
 }
 
-export async function rsvpAction(form: FormData) {
+/** Used by the availability page so the row updates before the server round-trip finishes. */
+export async function toggleUnavailableNow(date: string, templateId: string | null) {
   const user = await requireUser();
+  await flipUnavailable(user.id, date, templateId);
+  revalidatePath("/me/availability");
+}
+
+export async function setTrainingRsvp(eventId: string, part: "PREPRAYER" | "SESSION", response: "YES" | "NO") {
+  const user = await requireUser();
+  const ev = await db.event.findUnique({ where: { id: eventId } });
+  if (!ev || ev.kind !== "TRAINING") throw new WorkflowError("Not a training event");
+  await db.trainingRsvp.upsert({
+    where: { eventId_userId_part: { eventId, userId: user.id, part } },
+    create: { eventId, userId: user.id, part, response },
+    update: { response },
+  });
+  revalidatePath("/me");
+}
+
+export async function rsvpAction(form: FormData) {
   await runAction(form, async () => {
-    const eventId = str(form, "eventId");
+    const part = str(form, "part") === "PREPRAYER" ? "PREPRAYER" : "SESSION";
     const response = str(form, "answer") === "yes" ? "YES" : "NO";
-    const ev = await db.event.findUnique({ where: { id: eventId } });
-    if (!ev || ev.kind !== "TRAINING") throw new WorkflowError("Not a training event");
-    await db.trainingRsvp.upsert({
-      where: { eventId_userId: { eventId, userId: user.id } },
-      create: { eventId, userId: user.id, response },
-      update: { response },
-    });
-    return response === "YES" ? "See you at training!" : "Thanks for letting us know.";
+    await setTrainingRsvp(str(form, "eventId"), part, response);
+    return response === "YES" ? "Saved." : "Saved.";
   });
 }
 

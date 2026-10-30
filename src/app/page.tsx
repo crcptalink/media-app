@@ -4,8 +4,9 @@ import { Flash, one, type SP } from "@/components/Flash";
 import { signOutAction } from "@/app/(app)/actions";
 import { stopViewingAsAction } from "@/app/(app)/impersonation-actions";
 import { db } from "@/lib/db";
-import { DEPARTMENT_ORDER, departmentHref } from "@/lib/departments";
+import { menuDepartments, showDepartmentMenu } from "@/lib/departments";
 import { currentUser, redirectIfPasswordChangeRequired } from "@/lib/session";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Department" };
@@ -14,9 +15,10 @@ export default async function Home({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const user = await currentUser();
   await redirectIfPasswordChangeRequired(user);
+  if (user && !showDepartmentMenu(user)) redirect("/me");
   const all = await db.department.findMany({ where: { active: true } });
-  const cards = DEPARTMENT_ORDER.map((slug) => all.find((d) => d.slug === slug)).filter((d) => d != null);
-  const departments = cards.map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
+  const departments = menuDepartments(user, all);
+  const cards = departments;
 
   return (
     <AppShell
@@ -29,9 +31,9 @@ export default async function Home({ searchParams }: { searchParams: SP }) {
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((d) => (
-          <li key={d.id}>
+          <li key={d.slug}>
             <Link
-              href={departmentHref(d)}
+              href={d.href}
               className={`flex min-h-[7.5rem] flex-col items-center justify-center rounded-xl border px-5 py-8 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
                 d.ready
                   ? "border-slate-200 bg-white text-slate-900 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-800"
@@ -39,7 +41,7 @@ export default async function Home({ searchParams }: { searchParams: SP }) {
               }`}
             >
               <span className="text-lg font-semibold">{d.name}</span>
-              {!d.ready && <span className="mt-1 text-xs font-medium text-slate-400">Coming soon</span>}
+              {!d.ready && <span className="mt-1 text-xs font-medium text-slate-400">Coming Soon</span>}
             </Link>
           </li>
         ))}

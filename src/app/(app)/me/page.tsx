@@ -2,6 +2,8 @@ import { Flash, one, type SP } from "@/components/Flash";
 import { SlotAnswer } from "@/components/SlotAnswer";
 import { StatusChip } from "@/components/StatusChip";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ThursdayRows } from "@/components/ThursdayRows";
+import { TimePill } from "@/components/TimePill";
 import { answersClosed } from "@/lib/answer-window";
 import { arrivalStatus, STATUS_LABEL } from "@/lib/checkin";
 import { db } from "@/lib/db";
@@ -9,8 +11,8 @@ import { getDepartment } from "@/lib/events";
 import { slotTitle } from "@/lib/positions";
 import { requireUser } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
-import { fmtDay, localTime, todayLocal } from "@/lib/time";
-import { rsvpAction, withdrawAction } from "../actions";
+import { addDays, fmtDateOnly, localTime, todayLocal, WEEKDAYS, weekdayOf } from "@/lib/time";
+import { withdrawAction } from "../actions";
 
 export default async function MePage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
@@ -31,12 +33,20 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
     take: 4,
     include: { rsvps: { where: { userId: user.id } } },
   });
+  const sundayDates = trainings.map((t) => addDays(t.date, 3));
+  const sundaySlots = sundayDates.length
+    ? await db.assignment.findMany({
+        where: { userId: user.id, status: { in: ["PROPOSED", "ACCEPTED"] }, slot: { event: { date: { in: sundayDates }, kind: "SERVICE", status: { not: "CANCELLED" } } } },
+        select: { slot: { select: { event: { select: { date: true } } } } },
+      })
+    : [];
+  const servingSunday = new Set(sundaySlots.map((a) => a.slot.event.date));
   const back = "/me";
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      {pending > 0 && <h1 className="h1">Pending approvals <span className="text-slate-500">{pending}</span></h1>}
+      {pending > 0 && <h1 className="h1">Pending Approvals <span className="text-slate-500">{pending}</span></h1>}
       {mine.length === 0 && <p className="muted">Nothing scheduled.</p>}
       {mine.map((a) => {
         const e = a.slot.event;
@@ -47,9 +57,10 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
         const sunday = e.kind !== "TRAINING";
         return (
           <article key={a.id} className={`card border-l-4 ${sunday ? "border-l-blue-700" : "border-l-slate-400 bg-slate-50"}`}>
-            <div className="flex flex-wrap items-baseline gap-x-3">
-              <h2 className="font-semibold">{fmtDay(e.date)}</h2>
-              <span className="text-lg font-semibold tabular-nums">{localTime(e.startsAt)}</span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>
+              <span className="text-sm text-slate-600">{fmtDateOnly(e.date)}</span>
+              <TimePill time={localTime(e.startsAt)} />
             </div>
             <p className="mt-1 font-medium">{slotTitle(a.slot.position, a.slot.label)}</p>
             <div className="mt-3 text-sm">
@@ -63,7 +74,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
               )}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <StatusChip status={a.status} serviceDate={e.date} />
+              {a.status === "PROPOSED" && !closed ? null : <StatusChip status={a.status} serviceDate={e.date} />}
               {a.status === "CLAIM_PENDING" ? (
                 <form action={withdrawAction}>
                   <input type="hidden" name="assignmentId" value={a.id} />
@@ -74,7 +85,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
                 <SlotAnswer assignmentId={a.id} back={back} canAccept={canAccept} canDecline={canDecline} closed={closed} />
               )}
               {(a.status === "ACCEPTED" || (a.status === "PROPOSED" && closed)) && (
-                <a className="btn-primary btn-sm" href={`/api/ics/${a.id}`}>Add to my calendar</a>
+                <a className="btn-primary btn-sm" href={`/api/ics/${a.id}`}>Add To My Calendar</a>
               )}
             </div>
             {st && <p className="muted mt-2">{STATUS_LABEL[st]}{a.checkedInAt ? ` ${localTime(a.checkedInAt)}` : ""}</p>}
@@ -83,25 +94,15 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
       })}
 
       {trainings.length > 0 && (
-        <section className="space-y-2 pt-2">
-          <h2 className="h2">Thursday training</h2>
-          {trainings.map((t) => {
-            const r = t.rsvps[0]?.response;
-            return (
-              <div key={t.id} className="card flex flex-wrap items-center gap-3 border-l-4 border-l-slate-400">
-                <p className="flex-1 font-semibold">
-                  {fmtDay(t.date)} <span className="ml-2 tabular-nums">{localTime(t.startsAt)}</span>
-                </p>
-                <form action={rsvpAction} className="flex gap-2">
-                  <input type="hidden" name="eventId" value={t.id} />
-                  <input type="hidden" name="back" value={back} />
-                  <SubmitButton className={r === "YES" ? "btn-green btn-sm" : "btn-ghost btn-sm"} name="answer" value="yes">Yes</SubmitButton>
-                  <SubmitButton className={r === "NO" ? "btn-red btn-sm" : "btn-ghost btn-sm"} name="answer" value="no">No</SubmitButton>
-                </form>
-              </div>
-            );
-          })}
-        </section>
+        <ThursdayRows
+          rows={trainings.map((t) => ({
+            eventId: t.id,
+            date: t.date,
+            required: servingSunday.has(addDays(t.date, 3)),
+            preprayer: t.rsvps.find((r) => r.part === "PREPRAYER")?.response ?? null,
+            session: t.rsvps.find((r) => r.part === "SESSION")?.response ?? null,
+          }))}
+        />
       )}
     </div>
   );

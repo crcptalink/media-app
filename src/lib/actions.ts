@@ -25,7 +25,7 @@ export async function runAction(form: FormData, fn: () => Promise<ActionResult>)
     if (!(e instanceof WorkflowError)) console.error(e);
   }
   kickOutbox(db);
-  revalidatePath("/", "layout");
+  revalidatePath(back.split("?")[0] || "/me");
   const clean = back.replace(/([?&])(ok|error)=[^&]*&?/g, "$1").replace(/[?&]+$/, "");
   const sep2 = clean.includes("?") ? "&" : "?";
   if (error) redirect(`${clean}${sep2}error=${encodeURIComponent(error)}`);

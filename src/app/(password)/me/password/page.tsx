@@ -10,7 +10,7 @@ export default async function PasswordPage({ searchParams }: { searchParams: SP 
   return (
     <div className="mx-auto max-w-md space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <h1 className="h1">My profile</h1>
+      <h1 className="h1">My Profile</h1>
       {user.mustChangePassword && !user.impersonatorId && (
         <div className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-950 ring-1 ring-blue-200">Set a new password to continue.</div>
       )}

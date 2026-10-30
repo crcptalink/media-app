@@ -1,6 +1,7 @@
 "use server";
 import { runAction, str } from "@/lib/actions";
-import { cancelAssignment, cancelEvent, decideClaim, proposeSlot, rescheduleEvent, resendInvite, WorkflowError } from "@/lib/assignments";
+import { answersClosed } from "@/lib/answer-window";
+import { LIVE_STATUSES, cancelAssignment, cancelEvent, decideClaim, proposeSlot, rescheduleEvent, resendInvite, WorkflowError } from "@/lib/assignments";
 import { clearCheckin, markCheckin } from "@/lib/checkin";
 import { db } from "@/lib/db";
 import { processOutbox } from "@/lib/outbox";
@@ -26,6 +27,26 @@ export async function decideAction(form: FormData) {
     const approve = str(form, "decision") === "approve";
     await decideClaim(db, { assignmentId: str(form, "assignmentId"), actorId: user.id, approve });
     return approve ? "Approved — invite queued." : "Rejected — volunteer notified.";
+  });
+}
+
+export async function coverAction(form: FormData) {
+  const { user } = await requireScheduleManager();
+  await runAction(form, async () => {
+    const id = str(form, "assignmentId");
+    const a = await db.assignment.findUnique({ where: { id }, include: { slot: { include: { event: true } } } });
+    if (!a || a.status !== "DECLINED") throw new WorkflowError("That decline is already handled");
+    if (str(form, "decision") === "approve") {
+      await db.auditLog.create({ data: { actorId: user.id, action: "cover_ok", entity: "assignment", entityId: id } });
+      return "Slot left open.";
+    }
+    const taken = await db.assignment.findFirst({
+      where: { slotId: a.slotId, kind: a.kind, status: { in: LIVE_STATUSES } },
+    });
+    if (taken) throw new WorkflowError("Someone else already has this slot");
+    const status = answersClosed(a.slot.event.date) ? "ACCEPTED" : "PROPOSED";
+    await db.assignment.update({ where: { id }, data: { status, decidedById: user.id, decidedAt: new Date() } });
+    return "Put back on the slot.";
   });
 }
 

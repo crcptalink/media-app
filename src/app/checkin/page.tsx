@@ -3,6 +3,7 @@ import { one, type SP } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
 import { arrivalStatus, checkinWindowOpen, STATUS_LABEL } from "@/lib/checkin";
 import { db } from "@/lib/db";
+import { countsAsServing } from "@/lib/answer-window";
 import { assertDepartmentAccess, redirectIfPasswordChangeRequired, requireUser } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
 import { fmtDate, localTime } from "@/lib/time";
@@ -34,7 +35,8 @@ export default async function CheckinPage({ searchParams }: { searchParams: SP }
   if (!ev || ev.checkinToken !== t) return <Shell><h1 className="h1">Unknown check-in code</h1><p className="muted">Scan the QR code at the door again.</p></Shell>;
   assertDepartmentAccess(user, ev.departmentId);
   const grace = await getGraceMinutes(db);
-  const mine = await db.assignment.findMany({ where: { userId: user.id, status: "ACCEPTED", slot: { eventId: ev.id } }, include: { slot: { include: { position: true } } } });
+  const rows = await db.assignment.findMany({ where: { userId: user.id, status: { in: ["ACCEPTED", "PROPOSED"] }, slot: { eventId: ev.id } }, include: { slot: { include: { position: true } } } });
+  const mine = rows.filter((a) => countsAsServing(a.status, ev.date));
   const open = checkinWindowOpen(ev);
   const done = mine.length > 0 && mine.every((a) => a.checkedInAt);
   return (

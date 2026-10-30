@@ -5,7 +5,8 @@ import { getDepartment } from "@/lib/events";
 import { slotTitle } from "@/lib/positions";
 import { loadRoster } from "@/lib/roster";
 import { requireUser } from "@/lib/session";
-import { addDays, fmtDateTime, fmtDay, localTime, todayLocal } from "@/lib/time";
+import { addDays, fmtDateOnly, fmtDateTime, localTime, todayLocal, WEEKDAYS, weekdayOf } from "@/lib/time";
+import { TimePill } from "@/components/TimePill";
 import { claimAction, markReadAction } from "../../actions";
 
 export default async function AnnouncementsPage({ searchParams }: { searchParams: SP }) {
@@ -28,17 +29,14 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <p className="text-sm text-slate-700">If you&apos;re serving this Sunday, you&apos;ll need to be at Thursday training.</p>
       <section className="space-y-2">
-        <h2 className="h2">Available slots</h2>
+        <h2 className="h2">Available Slots</h2>
         {open.length === 0 && <p className="muted">None.</p>}
         <ul className="space-y-2">
           {open.slice(0, 12).map(({ e, s }) => (
-            <li key={s.id} className="card flex flex-wrap items-center gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold">
-                  {fmtDay(e.date)} <span className="ml-2 tabular-nums">{localTime(e.startsAt)}</span>
-                </p>
-                <p className="text-sm text-slate-700">{slotTitle(s.position, s.label)}</p>
-              </div>
+            <li key={s.id} className="card grid grid-cols-[11rem_5rem_minmax(6rem,1fr)_auto] items-center gap-x-3">
+              <p className="text-sm font-semibold">{WEEKDAYS[weekdayOf(e.date)]} {fmtDateOnly(e.date)}</p>
+              <TimePill time={localTime(e.startsAt)} />
+              <p className="truncate text-sm text-slate-700">{slotTitle(s.position, s.label)}</p>
               <form action={claimAction}>
                 <input type="hidden" name="slotId" value={s.id} />
                 <input type="hidden" name="kind" value="SERVING" />
@@ -55,7 +53,7 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
           {notes.some((n) => !n.readAt) && (
             <form action={markReadAction}>
               <input type="hidden" name="back" value={back} />
-              <SubmitButton className="btn-ghost btn-sm">Mark all read</SubmitButton>
+              <SubmitButton className="btn-ghost btn-sm">Mark All Read</SubmitButton>
             </form>
           )}
         </div>

@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { SkillStage } from "@prisma/client";
 import { claimAction } from "@/app/(app)/actions";
 import { decideAction, proposeAction, removeAction } from "@/app/(app)/admin/actions";
+import { answersClosed } from "@/lib/answer-window";
 import { displayName, type RosterEvent } from "@/lib/roster";
 import { slotTitle } from "@/lib/positions";
 import type { Warning } from "@/lib/rules";
-import { fmtDay, localTime, weekdayOf } from "@/lib/time";
+import { fmtDateOnly, localTime, WEEKDAYS, weekdayOf } from "@/lib/time";
+import { TimePill } from "./TimePill";
 import { KIND_LABEL, StatusChip } from "./StatusChip";
 import { SubmitButton } from "./SubmitButton";
 
@@ -21,12 +23,6 @@ function dayBand(date: string) {
   if (wd === 0) return "bg-blue-800 text-white";
   if (wd === 4) return "bg-slate-600 text-white";
   return "bg-slate-200 text-slate-800";
-}
-
-function serviceBadge(date: string, kind: string) {
-  if (kind === "TRAINING" || weekdayOf(date) === 4) return { label: "Thursday", cls: "bg-slate-200 text-slate-700" };
-  if (weekdayOf(date) === 0) return { label: "Sunday", cls: "bg-blue-100 text-blue-900" };
-  return { label: "Service", cls: "bg-slate-100 text-slate-600" };
 }
 
 export function RosterBoard({
@@ -51,7 +47,10 @@ export function RosterBoard({
     <div className="space-y-6">
       {[...days.entries()].map(([date, evs]) => (
         <section key={date}>
-          <h2 className={`mb-3 rounded-md px-3 py-2 text-sm font-semibold ${dayBand(date)}`}>{fmtDay(date)}</h2>
+          <h2 className={`mb-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold ${dayBand(date)}`}>
+            <span>{WEEKDAYS[weekdayOf(date)]}</span>
+            <span className="font-medium">{fmtDateOnly(date)}</span>
+          </h2>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {evs.map((e) => (
               <EventCard key={e.id} e={e} mode={mode} me={me} people={people} warnings={warnings.filter((w) => w.eventId === e.id)} back={back} />
@@ -78,14 +77,11 @@ function EventCard({
   warnings: Warning[];
   back: string;
 }) {
-  const badge = serviceBadge(e.date, e.kind);
   const edge = weekdayOf(e.date) === 0 ? "border-l-4 border-l-blue-700" : weekdayOf(e.date) === 4 || e.kind === "TRAINING" ? "border-l-4 border-l-slate-400 bg-slate-50" : "";
   return (
     <div className={`card ${edge}`}>
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h3 className="font-semibold">{fmtDay(e.date)}</h3>
-        <span className="text-lg font-semibold tabular-nums">{localTime(e.startsAt)}</span>
-        <span className={`chip ${badge.cls}`}>{badge.label}</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <TimePill time={localTime(e.startsAt)} />
         {mode === "admin" && (
           <Link href={`/admin/events/${e.id}`} className="ml-auto text-xs text-blue-700 underline">Details</Link>
         )}
@@ -107,23 +103,27 @@ function EventCard({
           const myStage = me.skills.find((k) => k.positionId === s.positionId)?.stage;
           const mineHere = s.assignments.some((a) => a.userId === me.id);
           return (
-            <li key={s.id} className="py-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="min-w-[8.5rem] text-sm font-semibold text-slate-800">{slotTitle(s.position, s.label)}</span>
+            <li key={s.id} className="py-1.5">
+              <div className="grid grid-cols-[9.5rem_minmax(0,1fr)_auto] items-center gap-x-3">
+                <span className="truncate text-sm font-semibold text-slate-800">{slotTitle(s.position, s.label)}</span>
                 {serving ? (
                   <AssignmentLine a={serving} mode={mode} me={me.id} back={back} serviceDate={e.date} />
                 ) : mode === "admin" ? (
-                  <ProposeForm slotId={s.id} positionId={s.positionId} people={people} kind="SERVING" back={back} />
+                  <div className="col-span-2">
+                    <ProposeForm slotId={s.id} positionId={s.positionId} people={people} kind="SERVING" back={back} />
+                  </div>
                 ) : (
                   <>
                     <span className="text-sm text-slate-400">Open</span>
-                    {!mineHere && (
-                      <form action={claimAction} className="ml-auto">
+                    {!mineHere ? (
+                      <form action={claimAction} className="justify-self-end">
                         <input type="hidden" name="slotId" value={s.id} />
                         <input type="hidden" name="kind" value="SERVING" />
                         <input type="hidden" name="back" value={back} />
                         <SubmitButton className="btn-primary btn-sm">Serve</SubmitButton>
                       </form>
+                    ) : (
+                      <span />
                     )}
                   </>
                 )}
@@ -182,25 +182,29 @@ function AssignmentLine({
 }) {
   return (
     <>
-      <span className={`text-sm font-medium ${a.userId === me ? "text-blue-800" : ""}`}>{displayName(a.user)}</span>
-      <StatusChip status={a.status} serviceDate={serviceDate} />
-      {mode === "admin" && (
-        <span className="ml-auto flex gap-1">
-          {a.status === "CLAIM_PENDING" && (
-            <form action={decideAction} className="flex gap-1">
+      <span className={`truncate text-sm ${(a.status === "PROPOSED" && !answersClosed(serviceDate)) || a.status === "CLAIM_PENDING" ? "text-slate-500" : a.userId === me ? "font-medium text-blue-800" : "font-medium text-slate-900"}`}>
+        {displayName(a.user)}
+      </span>
+      <span className="flex items-center justify-end gap-2">
+        {a.status === "PROPOSED" && !answersClosed(serviceDate) ? null : <StatusChip status={a.status} serviceDate={serviceDate} />}
+        {mode === "admin" && (
+          <span className="flex gap-1">
+            {a.status === "CLAIM_PENDING" && (
+              <form action={decideAction} className="flex gap-1">
+                <input type="hidden" name="assignmentId" value={a.id} />
+                <input type="hidden" name="back" value={back} />
+                <SubmitButton className="btn-green btn-sm" name="decision" value="approve">Approve</SubmitButton>
+                <SubmitButton className="btn-red btn-sm" name="decision" value="reject">Reject</SubmitButton>
+              </form>
+            )}
+            <form action={removeAction}>
               <input type="hidden" name="assignmentId" value={a.id} />
               <input type="hidden" name="back" value={back} />
-              <SubmitButton className="btn-green btn-sm" name="decision" value="approve">Approve</SubmitButton>
-              <SubmitButton className="btn-red btn-sm" name="decision" value="reject">Reject</SubmitButton>
+              <SubmitButton className="btn-ghost btn-sm" confirm={`Remove ${displayName(a.user)}?`}>Remove</SubmitButton>
             </form>
-          )}
-          <form action={removeAction}>
-            <input type="hidden" name="assignmentId" value={a.id} />
-            <input type="hidden" name="back" value={back} />
-            <SubmitButton className="btn-ghost btn-sm" confirm={`Remove ${displayName(a.user)}?`}>Remove</SubmitButton>
-          </form>
-        </span>
-      )}
+          </span>
+        )}
+      </span>
     </>
   );
 }

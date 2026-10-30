@@ -17,3 +17,19 @@ export function departmentHref(dept: { slug: string; ready: boolean }) {
   if (dept.ready && dept.slug === "link") return "/me";
   return `/d/${dept.slug}`;
 }
+
+/** Admins, and people in more than one department, see the department list. */
+export function showDepartmentMenu(user: { appRole: string; memberships: { departmentId: string }[] } | null) {
+  if (!user) return true;
+  return user.appRole === "ADMIN" || user.memberships.length > 1;
+}
+
+export function menuDepartments(
+  user: { appRole: string; memberships: { departmentId: string }[] } | null,
+  all: { id: string; slug: string; name: string; ready: boolean }[],
+) {
+  const ordered = DEPARTMENT_ORDER.map((slug) => all.find((d) => d.slug === slug)).filter((d) => d != null);
+  const visible = !user || user.appRole === "ADMIN" ? ordered : ordered.filter((d) => user.memberships.some((m) => m.departmentId === d.id));
+  if (user && !showDepartmentMenu(user)) return [];
+  return visible.map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
+}
