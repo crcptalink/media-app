@@ -1,0 +1,11 @@
+[Unit]
+Description=Check for Link Roster updates every 2 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=2min
+AccuracySec=15s
+Unit=media-app-deploy.service
+
+[Install]
+WantedBy=timers.target

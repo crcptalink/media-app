@@ -1,0 +1,114 @@
+# Link Roster — app + Postgres + nightly backups.
+# Tuned for the church PC: Core i3-550 (4 threads), 3.2 GiB RAM
+# (~2.6 GiB available), 3.7 GiB swap, 85 GB free disk.
+# Runtime budget: app 512m + db 384m + backup 128m.
+#   cp .env.example .env
+#   docker compose build && docker compose up -d
+name: link-roster
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    mem_limit: 384m
+    shm_size: 64mb
+    command:
+      - postgres
+      - -c
+      - shared_buffers=64MB
+      - -c
+      - max_connections=20
+      - -c
+      - superuser_reserved_connections=3
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - effective_cache_size=128MB
+      - -c
+      - huge_pages=off
+      - -c
+      - max_worker_processes=2
+      - -c
+      - max_parallel_workers=0
+      - -c
+      - max_parallel_workers_per_gather=0
+      - -c
+      - autovacuum_max_workers=1
+      - -c
+      - wal_buffers=2MB
+      - -c
+      - max_wal_size=256MB
+      - -c
+      - checkpoint_timeout=15min
+    environment:
+      POSTGRES_USER: link
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: linkroster
+      TZ: Africa/Johannesburg
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U link -d linkroster"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # no published port: only the app (and backup) can reach the database
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: link-roster:latest
+    restart: unless-stopped
+    mem_limit: 512m
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://link:${POSTGRES_PASSWORD}@db:5432/linkroster?connection_limit=5&pool_timeout=20
+      TZ: Africa/Johannesburg
+      # Heap stays under the 512m cgroup; the rest is for the Prisma query engine.
+      NODE_OPTIONS: --max-old-space-size=384
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    mem_limit: 128m
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: link
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: linkroster
+      BACKUP_TIME: ${BACKUP_TIME:-02:00}
+      KEEP_DAYS: ${BACKUP_KEEP_DAYS:-30}
+      TZ: Africa/Johannesburg
+    volumes:
+      - ./backups:/backups
+      - ./docker/backup.sh:/backup.sh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  pgdata:

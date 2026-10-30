@@ -1,0 +1,400 @@
+// Link Roster data model. Multi-department from day one; only "Link" is seeded.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppRole {
+  ADMIN
+  VOLUNTEER
+}
+
+enum DeptRole {
+  LEAD
+  VOLUNTEER
+}
+
+/// Training progression per person per position.
+/// SHADOW: watches the leader set up (usually once). TRAINEE: sets up while a trainer watches.
+/// QUALIFIED: serves alone. isTrainer marks LST / LT (livestream trainer / link trainer).
+enum SkillStage {
+  SHADOW
+  TRAINEE
+  QUALIFIED
+}
+
+enum EventKind {
+  SERVICE
+  TRAINING
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+}
+
+/// SERVING = the person responsible for the slot. TRAINEE / SHADOW = paired learner in the same slot.
+enum AssignmentKind {
+  SERVING
+  TRAINEE
+  SHADOW
+}
+
+enum AssignmentStatus {
+  PROPOSED
+  CLAIM_PENDING
+  ACCEPTED
+  DECLINED
+  REJECTED
+  CANCELLED
+}
+
+enum CheckinMethod {
+  QR
+  KIOSK
+  MANUAL
+}
+
+enum RuleKind {
+  NOTE
+  RULE
+}
+
+enum RuleType {
+  ONLY_SERVICE
+  NOT_SERVICE
+  PAIR_APART
+  PAIR_TOGETHER
+  ALTERNATE_WEEKS
+  SUPERVISION
+}
+
+enum Severity {
+  INFO
+  WARN
+}
+
+enum RsvpResponse {
+  YES
+  NO
+}
+
+enum OutboxStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  phone         String?
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  appRole       AppRole   @default(VOLUNTEER)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  memberships    DepartmentMember[]
+  skills         UserSkill[]
+  assignments    Assignment[]       @relation("assignee")
+  unavailability Unavailability[]
+  notifications  Notification[]
+  rsvps          TrainingRsvp[]
+}
+
+// --- Auth.js (Prisma adapter) ---
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// --- Organisation ---
+model Department {
+  id        String             @id @default(cuid())
+  name      String
+  slug      String             @unique
+  active    Boolean            @default(true)
+  members   DepartmentMember[]
+  positions Position[]
+  templates ServiceTemplate[]
+  events    Event[]
+  rules     RuleNote[]
+}
+
+model DepartmentMember {
+  userId       String
+  departmentId String
+  role         DeptRole   @default(VOLUNTEER)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, departmentId])
+}
+
+model Position {
+  id            String         @id @default(cuid())
+  departmentId  String
+  code          String
+  name          String
+  sort          Int            @default(0)
+  isTraining    Boolean        @default(false)
+  active        Boolean        @default(true)
+  /// For combined roles (e.g. 10:30 LS + Link): codes of the positions this one covers, for trainer matching.
+  coversCodes   String[]       @default([])
+  department    Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  skills        UserSkill[]
+  templateSlots TemplateSlot[]
+  slots         Slot[]
+
+  @@unique([departmentId, code])
+}
+
+model UserSkill {
+  userId           String
+  positionId       String
+  stage            SkillStage @default(SHADOW)
+  isTrainer        Boolean    @default(false)
+  needsSupervision Boolean    @default(false)
+  notes            String?
+  updatedAt        DateTime   @updatedAt
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position         Position   @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, positionId])
+}
+
+model ServiceTemplate {
+  id            String           @id @default(cuid())
+  departmentId  String
+  name          String
+  kind          EventKind        @default(SERVICE)
+  /// 0 = Sunday ... 6 = Saturday
+  weekday       Int
+  /// "HH:MM" local time (Africa/Johannesburg)
+  startTime     String
+  arrivalTime   String
+  preprayerTime String?
+  durationMin   Int              @default(120)
+  active        Boolean          @default(true)
+  sort          Int              @default(0)
+  department    Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  slots         TemplateSlot[]
+  events        Event[]
+  unavailable   Unavailability[]
+  rules         RuleNote[]       @relation("ruleTemplates")
+}
+
+model TemplateSlot {
+  id         String          @id @default(cuid())
+  templateId String
+  positionId String
+  count      Int             @default(1)
+  template   ServiceTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  position   Position        @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, positionId])
+}
+
+model Event {
+  id           String         @id @default(cuid())
+  departmentId String
+  templateId   String?
+  kind         EventKind      @default(SERVICE)
+  title        String
+  /// local calendar date "YYYY-MM-DD" (Africa/Johannesburg), for availability lookups
+  date         String
+  startsAt     DateTime
+  endsAt       DateTime
+  arriveBy     DateTime
+  preprayerAt  DateTime?
+  checkinToken String         @unique
+  status       EventStatus    @default(PUBLISHED)
+  createdAt    DateTime       @default(now())
+  department   Department     @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  template     ServiceTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  slots        Slot[]
+  rsvps        TrainingRsvp[]
+
+  @@unique([templateId, date])
+  @@index([date])
+}
+
+model Slot {
+  id          String       @id @default(cuid())
+  eventId     String
+  positionId  String
+  label       String?
+  sort        Int          @default(0)
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  position    Position     @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  assignments Assignment[]
+}
+
+model Assignment {
+  id            String           @id @default(cuid())
+  slotId        String
+  userId        String
+  kind          AssignmentKind   @default(SERVING)
+  status        AssignmentStatus
+  proposedById  String?
+  decidedById   String?
+  decidedAt     DateTime?
+  icsUid        String           @unique
+  icsSequence   Int              @default(0)
+  inviteSentAt  DateTime?
+  checkedInAt   DateTime?
+  checkinMethod CheckinMethod?
+  checkedInById String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  slot          Slot             @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  user          User             @relation("assignee", fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+  emails        EmailOutbox[]
+
+  @@index([userId, status])
+  // A partial unique index (see migration) allows only one live
+  // (PROPOSED / CLAIM_PENDING / ACCEPTED) assignment per slot and kind.
+}
+
+model Unavailability {
+  id         String           @id @default(cuid())
+  userId     String
+  /// local date "YYYY-MM-DD"
+  date       String
+  /// null = the whole day
+  templateId String?
+  note       String?
+  createdAt  DateTime         @default(now())
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template   ServiceTemplate? @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+}
+
+model TrainingRsvp {
+  eventId   String
+  userId    String
+  response  RsvpResponse
+  note      String?
+  updatedAt DateTime     @updatedAt
+  event     Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+}
+
+model RuleNote {
+  id           String            @id @default(cuid())
+  departmentId String
+  text         String
+  kind         RuleKind          @default(NOTE)
+  ruleType     RuleType?
+  /// { userIds: string[], templateIds?: string[], parity?: 0 | 1 }
+  params       Json?
+  severity     Severity          @default(WARN)
+  active       Boolean           @default(true)
+  sort         Int               @default(0)
+  createdById  String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  department   Department        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  templates    ServiceTemplate[] @relation("ruleTemplates")
+}
+
+model Notification {
+  id           String      @id @default(cuid())
+  userId       String
+  assignmentId String?
+  type         String
+  message      String
+  readAt       DateTime?
+  createdAt    DateTime    @default(now())
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignment   Assignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, readAt])
+}
+
+model EmailOutbox {
+  id           String       @id @default(cuid())
+  assignmentId String?
+  /// login / proposed / approved / rejected / declined / invite / update / cancel / notice
+  type         String
+  to           String
+  subject      String
+  text         String
+  html         String?
+  icsMethod    String?
+  icsContent   String?
+  status       OutboxStatus @default(PENDING)
+  attempts     Int          @default(0)
+  error        String?
+  nextAttempt  DateTime     @default(now())
+  sentAt       DateTime?
+  createdAt    DateTime     @default(now())
+  assignment   Assignment?  @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+
+  @@index([status, nextAttempt])
+}
+
+model AuditLog {
+  id       String   @id @default(cuid())
+  actorId  String?
+  action   String
+  entity   String
+  entityId String?
+  before   Json?
+  after    Json?
+  at       DateTime @default(now())
+}
+
+/// Key/value app settings editable on /admin/setup (e.g. checkin_grace_min).
+model Setting {
+  key   String @id
+  value String
+}
