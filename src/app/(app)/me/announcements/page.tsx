@@ -47,7 +47,7 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
           ))}
         </ul>
       </section>
-      <p className="text-sm text-slate-700">If you're serving this Sunday, you'll need to be at Thursday training.</p>
+      <p className="text-sm text-slate-700">If you are serving this Sunday, you will need to be at Thursday training.</p>
       <section className="space-y-2">
         <h2 className="h2">Available Slots</h2>
         {open.length === 0 && <p className="muted">None.</p>}
