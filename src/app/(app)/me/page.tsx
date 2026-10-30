@@ -59,7 +59,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
         <h2 className="h2">My upcoming slots</h2>
         {accepted.length === 0 && (
           <p className="muted">
-            None yet. <Link href="/roster" className="text-blue-700 underline">See open slots on the roster</Link>.
+            None yet. <Link href="/roster" className="text-blue-700 underline">See open slots on the schedule</Link>.
           </p>
         )}
         {accepted.map((a) => {

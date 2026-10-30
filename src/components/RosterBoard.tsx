@@ -44,7 +44,7 @@ export function RosterBoard({
     <div className="space-y-8">
       {[...weeks.entries()].map(([wk, evs]) => (
         <section key={wk}>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Week of {fmtDate(wk)}</h2>
+          <h2 className="mb-3 text-sm font-semibold text-slate-500">Week of {fmtDate(wk)}</h2>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {evs.map((e) => (
               <EventCard key={e.id} e={e} mode={mode} me={me} people={people} warnings={warnings.filter((w) => w.eventId === e.id)} back={back} />
@@ -121,7 +121,7 @@ function EventCard({
                 </div>
               ) : mode === "admin" ? (
                 <details className="ml-16 mt-1">
-                  <summary className="cursor-pointer text-xs text-slate-500">+ trainee / shadow</summary>
+                  <summary className="cursor-pointer text-xs text-slate-500">Add trainee or shadow</summary>
                   <ProposeForm slotId={s.id} positionId={s.positionId} people={people} kind="TRAINEE" back={back} />
                 </details>
               ) : (

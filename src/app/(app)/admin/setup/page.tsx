@@ -5,24 +5,30 @@ import { config } from "@/lib/env";
 import { requireAdmin } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
 import { WEEKDAYS } from "@/lib/time";
-import { generateAction, saveGraceAction, savePositionAction, saveTemplateAction } from "./actions";
+import { generateAction, saveGraceAction, saveGroupAction, savePositionAction, saveTemplateAction } from "./actions";
 
 export default async function SetupPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const { dept } = await requireAdmin();
-  const [positions, templates, grace] = await Promise.all([
+  const [positions, groups, ungrouped, grace] = await Promise.all([
     db.position.findMany({ where: { departmentId: dept.id }, orderBy: { sort: "asc" } }),
-    db.serviceTemplate.findMany({ where: { departmentId: dept.id }, orderBy: [{ sort: "asc" }], include: { slots: true } }),
+    db.templateGroup.findMany({
+      where: { departmentId: dept.id },
+      orderBy: [{ sort: "asc" }, { name: "asc" }],
+      include: { templates: { orderBy: [{ startTime: "asc" }, { sort: "asc" }], include: { slots: true } } },
+    }),
+    db.serviceTemplate.findMany({ where: { departmentId: dept.id, groupId: null }, orderBy: { startTime: "asc" }, include: { slots: true } }),
     getGraceMinutes(db),
   ]);
   const back = "/admin/setup";
   const tv = `${config.appUrl}/tv?token=${config.tvToken}`;
-  const kiosk = `${config.appUrl}/kiosk?token=${config.kioskToken}`;
+  const checkinDisplay = `${config.appUrl}/checkin-display?token=${config.kioskToken}`;
 
-  const templateForm = (t?: (typeof templates)[number]) => (
+  const templateForm = (groupId: string, t?: (typeof ungrouped)[number]) => (
     <form key={t?.id ?? "new"} action={saveTemplateAction} className="card space-y-3">
       <input type="hidden" name="back" value={back} />
       {t && <input type="hidden" name="id" value={t.id} />}
+      <input type="hidden" name="groupId" value={groupId} />
       <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
         <label className="col-span-2">Name<input name="name" defaultValue={t?.name ?? ""} required className="input" /></label>
         <label>Kind
@@ -41,11 +47,11 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
         <label>Start<input name="startTime" defaultValue={t?.startTime ?? ""} placeholder="08:30" className="input" /></label>
         <label>Arrive<input name="arrivalTime" defaultValue={t?.arrivalTime ?? ""} placeholder="07:00" className="input" /></label>
         <label>Pre-prayer<input name="preprayerTime" defaultValue={t?.preprayerTime ?? ""} placeholder="optional" className="input" /></label>
-        <label>Duration min<input name="durationMin" type="number" defaultValue={t?.durationMin ?? 120} className="input" /></label>
+        <label>Duration (minutes)<input name="durationMin" type="number" defaultValue={t?.durationMin ?? 120} className="input" /></label>
         <label>Sort<input name="sort" type="number" defaultValue={t?.sort ?? 0} className="input" /></label>
       </div>
       <div className="flex flex-wrap gap-3 text-sm">
-        <span className="font-medium">Slots:</span>
+        <span className="font-medium">Positions</span>
         {positions.filter((p) => p.active).map((p) => (
           <label key={p.id} className="flex items-center gap-1">
             {p.code}
@@ -56,7 +62,7 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
       <div className="flex flex-wrap items-center gap-3 text-sm">
         {t && <label className="flex items-center gap-1"><input type="checkbox" name="active" defaultChecked={t.active} /> Active</label>}
         {t && <label className="flex items-center gap-1"><input type="checkbox" name="applyFuture" /> Apply new times to future events (sends invite updates)</label>}
-        <SubmitButton className="btn-primary ml-auto">{t ? "Save" : "Add template"}</SubmitButton>
+        <SubmitButton className="btn-primary ml-auto">{t ? "Save" : "Add slot"}</SubmitButton>
       </div>
     </form>
   );
@@ -69,7 +75,8 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
       <section className="card space-y-2">
         <h2 className="h2">Screens</h2>
         <p className="text-sm">TV dashboard: <a className="break-all text-blue-700 underline" href={tv}>{tv}</a></p>
-        <p className="text-sm">Door kiosk: <a className="break-all text-blue-700 underline" href={kiosk}>{kiosk}</a></p>
+        <p className="text-sm">Check-in display: <a className="break-all text-blue-700 underline" href={checkinDisplay}>{checkinDisplay}</a></p>
+        <p className="muted">The old address /kiosk still opens the same display.</p>
         {(!config.tvToken || !config.kioskToken) && <p className="text-sm text-red-700">Set TV_TOKEN and KIOSK_TOKEN in .env — these pages are locked until you do.</p>}
       </section>
 
@@ -94,13 +101,41 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
         </form>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="h2">Service templates</h2>
-        {templates.map((t) => templateForm(t))}
-        <details>
-          <summary className="cursor-pointer text-sm text-blue-700">+ Add a template</summary>
-          <div className="mt-2">{templateForm()}</div>
-        </details>
+      <section className="space-y-4">
+        <div>
+          <h2 className="h2">Service templates</h2>
+          <p className="muted mt-1">A group is an event type, such as Sunday or Thursday. Add a group, then add each service inside it.</p>
+        </div>
+        {groups.map((g) => (
+          <div key={g.id} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <form action={saveGroupAction} className="flex flex-wrap items-center gap-2">
+              <input type="hidden" name="back" value={back} />
+              <input type="hidden" name="id" value={g.id} />
+              <label className="text-sm font-medium">Group
+                <input name="name" defaultValue={g.name} required className="input mt-1 min-w-48" />
+              </label>
+              <SubmitButton className="btn-ghost mt-5">Rename group</SubmitButton>
+            </form>
+            {g.templates.map((t) => templateForm(g.id, t))}
+            <details>
+              <summary className="cursor-pointer text-sm text-blue-700">Add slot</summary>
+              <div className="mt-2">{templateForm(g.id)}</div>
+            </details>
+          </div>
+        ))}
+        {ungrouped.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="h2">Not in a group yet</h3>
+            {groups[0] ? ungrouped.map((t) => templateForm(groups[0].id, t)) : <p className="muted">Add a group, then save these slots into it.</p>}
+          </div>
+        )}
+        <form action={saveGroupAction} className="card flex flex-wrap items-end gap-2">
+          <input type="hidden" name="back" value={back} />
+          <label className="min-w-48 flex-1 text-sm font-medium">New group
+            <input name="name" required placeholder="Sunday" className="input mt-1" />
+          </label>
+          <SubmitButton className="btn-primary">Add group</SubmitButton>
+        </form>
       </section>
 
       <section className="space-y-2">

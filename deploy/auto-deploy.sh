@@ -46,13 +46,10 @@ export COMPOSE_ANSI=never
 deploy_stack() {
   local sha="$1"
 
-  # The Next.js compile wants a 1.5 GiB heap. Stop the app (512m) and the
-  # backup helper first so that heap fits beside Postgres on this 3.2 GiB PC.
-  # Do not stop db: waking Postgres costs more than the 384m it is capped at.
-  log "stopping app and backup so the build has RAM"
-  docker compose stop app backup || log "app was not running yet"
-
-  log "docker compose build"
+  # Leave the current app serving. The compile still uses a 1536 MB heap and
+  # may use swap on this 3.2 GiB PC, but the site stays up until the image is ready.
+  # `up -d` then recreates the container, which is only a short restart.
+  log "docker compose build (current app keeps serving)"
   docker compose build
 
   log "docker compose up -d --remove-orphans"

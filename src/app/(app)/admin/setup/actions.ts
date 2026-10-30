@@ -56,14 +56,37 @@ function readTemplate(form: FormData) {
   };
 }
 
+export async function saveGroupAction(form: FormData) {
+  const { dept } = await requireAdmin();
+  await runAction(form, async () => {
+    const id = str(form, "id");
+    const name = str(form, "name");
+    if (!name) throw new WorkflowError("Give the group a name");
+    const clash = await db.templateGroup.findFirst({
+      where: { departmentId: dept.id, name, ...(id ? { NOT: { id } } : {}) },
+    });
+    if (clash) throw new WorkflowError("That group name is already used");
+    if (id) {
+      await db.templateGroup.update({ where: { id }, data: { name } });
+      return "Group renamed.";
+    }
+    const max = await db.templateGroup.aggregate({ where: { departmentId: dept.id }, _max: { sort: true } });
+    await db.templateGroup.create({ data: { departmentId: dept.id, name, sort: (max._max.sort ?? 0) + 1 } });
+    return "Group added. Add slots inside it.";
+  });
+}
+
 export async function saveTemplateAction(form: FormData) {
   const { user, dept } = await requireAdmin();
   await runAction(form, async () => {
     const id = str(form, "id");
     const data = readTemplate(form);
+    const groupId = str(form, "groupId");
+    const group = await db.templateGroup.findFirst({ where: { id: groupId, departmentId: dept.id } });
+    if (!group) throw new WorkflowError("Add the slot inside a group");
     const tpl = id
-      ? await db.serviceTemplate.update({ where: { id }, data: { ...data, active: form.get("active") === "on" } })
-      : await db.serviceTemplate.create({ data: { ...data, departmentId: dept.id } });
+      ? await db.serviceTemplate.update({ where: { id }, data: { ...data, groupId, active: form.get("active") === "on" } })
+      : await db.serviceTemplate.create({ data: { ...data, groupId, departmentId: dept.id } });
     const positions = await db.position.findMany({ where: { departmentId: dept.id } });
     for (const p of positions) {
       const raw = form.get(`count_${p.id}`);

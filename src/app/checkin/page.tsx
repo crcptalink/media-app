@@ -3,7 +3,7 @@ import { one, type SP } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
 import { arrivalStatus, checkinWindowOpen, STATUS_LABEL } from "@/lib/checkin";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/session";
+import { assertDepartmentAccess, requireUser } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
 import { fmtDate, localTime } from "@/lib/time";
 import { qrCheckinAction } from "./actions";
@@ -28,6 +28,7 @@ export default async function CheckinPage({ searchParams }: { searchParams: SP }
   const user = await requireUser(`/checkin?e=${encodeURIComponent(e)}&t=${encodeURIComponent(t)}`);
   const ev = await db.event.findUnique({ where: { id: e }, include: { slots: { include: { position: true } } } });
   if (!ev || ev.checkinToken !== t) return <Shell><h1 className="h1">Unknown check-in code</h1><p className="muted">Scan the QR code at the door again.</p></Shell>;
+  assertDepartmentAccess(user, ev.departmentId);
   const grace = await getGraceMinutes(db);
   const mine = await db.assignment.findMany({ where: { userId: user.id, status: "ACCEPTED", slot: { eventId: ev.id } }, include: { slot: { include: { position: true } } } });
   const open = checkinWindowOpen(ev);
@@ -38,7 +39,7 @@ export default async function CheckinPage({ searchParams }: { searchParams: SP }
       <h1 className="h1">Hi {user.name?.split(" ")[0] || ""}</h1>
       <p className="text-sm text-slate-600">Arrive by {localTime(ev.arriveBy)} · late after {localTime(new Date(ev.arriveBy.getTime() + grace * 60000))}</p>
       {mine.length === 0 ? (
-        <p className="rounded-lg bg-amber-50 p-4 text-amber-900">You&apos;re not on the roster for this service. If you&apos;re helping anyway, ask the lead to add you.</p>
+        <p className="rounded-lg bg-amber-50 p-4 text-amber-900">You&apos;re not on the schedule for this service. If you&apos;re helping anyway, ask the lead to add you.</p>
       ) : done ? (
         <div className="rounded-xl bg-green-50 p-6 text-green-900">
           <div className="text-5xl">✅</div>

@@ -10,7 +10,7 @@ export default async function KioskPage({ searchParams }: { searchParams: SP }) 
   const sp = await searchParams;
   const token = one(sp.token) || "";
   if (!config.kioskToken || token !== config.kioskToken) {
-    return <main className="p-10 text-center text-xl">Kiosk link is missing or wrong. Open it from Admin → Setup.</main>;
+    return <main className="p-10 text-center text-xl">Check-in display link is missing or wrong. Open it from Setup.</main>;
   }
   const board = await loadBoard(db);
   return <KioskBoard board={board} token={token} />;

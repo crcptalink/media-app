@@ -8,8 +8,28 @@ import { config } from "@/lib/env";
 import { enqueueEmail } from "@/lib/outbox";
 import { requireLead } from "@/lib/session";
 
+async function setDepartmentAccess(userId: string, form: FormData, linkRole: "LEAD" | "VOLUNTEER") {
+  const all = await db.department.findMany({ where: { active: true } });
+  const selected = new Set(form.getAll("dept").map(String));
+  if (selected.size === 0) throw new WorkflowError("Tick at least one department");
+  const link = all.find((d) => d.slug === "link");
+  for (const d of all) {
+    if (!selected.has(d.id)) {
+      await db.departmentMember.deleteMany({ where: { userId, departmentId: d.id } });
+      continue;
+    }
+    const existing = await db.departmentMember.findUnique({ where: { userId_departmentId: { userId, departmentId: d.id } } });
+    const role = d.id === link?.id ? linkRole : existing?.role ?? "VOLUNTEER";
+    await db.departmentMember.upsert({
+      where: { userId_departmentId: { userId, departmentId: d.id } },
+      create: { userId, departmentId: d.id, role },
+      update: { role },
+    });
+  }
+}
+
 export async function addPersonAction(form: FormData) {
-  const { user, dept } = await requireLead();
+  const { user } = await requireLead();
   await runAction(form, async () => {
     const email = str(form, "email").toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new WorkflowError("Enter a valid email");
@@ -18,11 +38,7 @@ export async function addPersonAction(form: FormData) {
     const u = existing
       ? await db.user.update({ where: { id: existing.id }, data: { active: true, name: existing.name || str(form, "name") || null } })
       : await db.user.create({ data: { email, name: str(form, "name") || null, phone: str(form, "phone") || null } });
-    await db.departmentMember.upsert({
-      where: { userId_departmentId: { userId: u.id, departmentId: dept.id } },
-      create: { userId: u.id, departmentId: dept.id, role },
-      update: { role },
-    });
+    await setDepartmentAccess(u.id, form, role);
     await db.auditLog.create({ data: { actorId: user.id, action: "add_person", entity: "user", entityId: u.id, after: { email, role } } });
     if (form.get("welcome")) {
       await enqueueEmail(db, {
@@ -54,11 +70,7 @@ export async function updatePersonAction(form: FormData) {
         ...(user.appRole === "ADMIN" && id !== user.id ? { appRole: form.get("admin") === "on" ? "ADMIN" : "VOLUNTEER" } : {}),
       },
     });
-    await db.departmentMember.upsert({
-      where: { userId_departmentId: { userId: id, departmentId: dept.id } },
-      create: { userId: id, departmentId: dept.id, role },
-      update: { role },
-    });
+    await setDepartmentAccess(id, form, role);
     const positions = await db.position.findMany({ where: { departmentId: dept.id } });
     for (const p of positions) {
       const stage = str(form, `stage_${p.id}`);

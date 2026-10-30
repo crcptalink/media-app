@@ -1,15 +1,21 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/(app)/actions";
 import { BrandLogo } from "@/components/BrandLogo";
+import { Flash, one, type SP } from "@/components/Flash";
 import { APP_NAME } from "@/lib/brand";
-import { departments } from "@/lib/departments";
+import { db } from "@/lib/db";
+import { departmentHref } from "@/lib/departments";
 import { currentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Departments" };
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: SP }) {
+  const sp = await searchParams;
   const user = await currentUser();
+  const all = await db.department.findMany({ where: { active: true }, orderBy: [{ sort: "asc" }, { name: "asc" }] });
+  const visible = !user ? [] : user.appRole === "ADMIN" ? all : all.filter((d) => user.memberships.some((m) => m.departmentId === d.id));
+
   return (
     <div className="min-h-screen">
       <header className="bg-black text-white">
@@ -31,14 +37,19 @@ export default async function Home() {
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">
+        <Flash ok={one(sp.ok)} error={one(sp.error)} />
         <h1 className="h1">Departments</h1>
-        <p className="muted mt-1">Choose your team.</p>
+        {!user && <p className="muted mt-2">Sign in to see the departments you can open.</p>}
+        {user && visible.length === 0 && <p className="muted mt-2">You don’t have a department yet. Ask a lead to give you access.</p>}
         <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {departments.map((d) => (
-            <li key={d.slug}>
-              <Link href={d.href} className="card block h-full hover:ring-2 hover:ring-black">
-                <h2 className="h2">{d.name}</h2>
-                <p className="muted mt-2">{d.blurb}</p>
+          {visible.map((d) => (
+            <li key={d.id}>
+              <Link href={departmentHref(d)} className="card block h-full hover:ring-2 hover:ring-black">
+                <div className="flex items-start justify-between gap-2">
+                  <h2 className="h2">{d.name}</h2>
+                  {!d.ready && <span className="chip shrink-0 bg-slate-100 text-slate-600">Coming soon</span>}
+                </div>
+                {d.blurb ? <p className="muted mt-2">{d.blurb}</p> : null}
               </Link>
             </li>
           ))}

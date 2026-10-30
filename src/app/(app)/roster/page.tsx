@@ -19,14 +19,14 @@ export default async function RosterPage({ searchParams }: { searchParams: SP })
     <div>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <div className="mb-4 flex items-center gap-2">
-        <h1 className="h1 flex-1">Roster</h1>
+        <h1 className="h1 flex-1">Schedule</h1>
         {[4, 8].map((w) => (
           <Link key={w} href={`/roster?weeks=${w}`} className={`chip ${w === weeks ? "bg-blue-700 text-white" : "bg-slate-200"}`}>
             {w} weeks
           </Link>
         ))}
       </div>
-      <p className="muted mb-4">Everyone can see the whole roster. Tap Claim on an open slot to ask for it — the lead approves.</p>
+      <p className="muted mb-4">Everyone can see the whole schedule. Tap Claim on an open slot to ask for it. The lead approves.</p>
       <RosterBoard events={events} mode="volunteer" me={{ id: user.id, skills }} back={`/roster?weeks=${weeks}`} />
     </div>
   );

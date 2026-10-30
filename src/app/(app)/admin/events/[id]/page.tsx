@@ -54,10 +54,10 @@ export default async function EventPage({ params, searchParams }: { params: Prom
     <div className="mx-auto max-w-4xl space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <div>
-        <Link href="/admin/roster" className="text-sm text-blue-700 underline">← Admin roster</Link>
+        <Link href="/admin/roster" className="text-sm text-blue-700 underline">← Admin schedule</Link>
         <h1 className="h1 mt-1">{e.title} · {fmtDate(e.date)}</h1>
         <p className="muted">
-          {e.status === "CANCELLED" ? "CANCELLED · " : ""}Arrive {localTime(e.arriveBy)} · {e.preprayerAt ? `pre-prayer ${localTime(e.preprayerAt)} · ` : ""}starts {localTime(e.startsAt)} · ends {localTime(e.endsAt)} · late after {localTime(new Date(e.arriveBy.getTime() + grace * 60000))}
+          {e.status === "CANCELLED" ? "Cancelled · " : ""}Arrive {localTime(e.arriveBy)} · {e.preprayerAt ? `pre-prayer ${localTime(e.preprayerAt)} · ` : ""}starts {localTime(e.startsAt)} · ends {localTime(e.endsAt)} · late after {localTime(new Date(e.arriveBy.getTime() + grace * 60000))}
         </p>
       </div>
 
@@ -75,7 +75,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
                   <SubmitButton className="btn-ghost btn-sm" confirm="Delete this empty slot?">Delete slot</SubmitButton>
                 </form>
               </div>
-              {s.assignments.length === 0 && <p className="muted mt-1">Open — assign from the admin roster.</p>}
+              {s.assignments.length === 0 && <p className="muted mt-1">Open. Assign someone from the admin schedule.</p>}
               <ul className="mt-2 space-y-2">
                 {s.assignments.map((a) => {
                   const live = ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"].includes(a.status);
@@ -145,7 +145,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
 
       {e.kind === "TRAINING" && (
         <section className="card">
-          <h2 className="h2 mb-2">Training RSVPs</h2>
+          <h2 className="h2 mb-2">Training replies</h2>
           <p className="muted mb-2">People scheduled in a slot are required; everyone else is optional.</p>
           <table className="w-full text-sm">
             <tbody>

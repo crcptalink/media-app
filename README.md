@@ -25,7 +25,7 @@ docker compose ps
 sudo systemctl disable --now media-app-deploy.timer
 ```
 
-The PC is a Core i3-550 with 3.2 GiB of RAM. Compose limits the app to 512m, Postgres to 384m, and backups to 128m. Auto-deploy stops the app, runs `docker compose build`, then `docker compose up -d`, so the Next.js compile (Node heap capped at 1536 MB) is not competing with the running server.
+The PC is a Core i3-550 with 3.2 GiB of RAM. Compose limits the app to 512m, Postgres to 384m, and backups to 128m. Auto-deploy builds the new image while the current app keeps serving, then `docker compose up -d` swaps it in. The Next.js compile heap is capped at 1536 MB.
 
 ---
 
@@ -60,9 +60,8 @@ The timer above is how this checkout is deployed (`deploy` at `/home/deploy/medi
    nano .env    # set SMTP_APP_PASSWORD and SEED_ADMIN_EMAIL (your email)
    ```
    `DATABASE_URL` in `.env` is only for running outside Docker; Compose builds its own from `POSTGRES_PASSWORD`.
-7. **Start**: on this 3.2 GiB PC, stop the app first so the compile has RAM, then build and start separately:
+7. **Start**: build, then start. If the app is already up, leave it running during the build so the site stays available:
    ```bash
-   docker compose stop app backup
    docker compose build
    docker compose up -d
    curl -fsS localhost:3000/api/health    # {"ok":true,...}

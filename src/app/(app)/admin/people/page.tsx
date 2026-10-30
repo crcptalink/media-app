@@ -14,9 +14,12 @@ const STAGES = [
 export default async function PeoplePage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const { user: me, dept } = await requireLead();
-  const positions = await db.position.findMany({ where: { departmentId: dept.id, active: true }, orderBy: { sort: "asc" } });
+  const [positions, departments] = await Promise.all([
+    db.position.findMany({ where: { departmentId: dept.id, active: true }, orderBy: { sort: "asc" } }),
+    db.department.findMany({ where: { active: true }, orderBy: [{ sort: "asc" }, { name: "asc" }] }),
+  ]);
   const people = await db.user.findMany({
-    where: { memberships: { some: { departmentId: dept.id } } },
+    where: me.appRole === "ADMIN" ? {} : { memberships: { some: { departmentId: dept.id } } },
     include: { memberships: true, skills: true },
     orderBy: [{ active: "desc" }, { name: "asc" }],
   });
@@ -34,6 +37,17 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
           <option value="VOLUNTEER">Volunteer</option>
           <option value="LEAD">Lead</option>
         </select>
+        <fieldset className="sm:col-span-5">
+          <legend className="text-sm font-medium">Departments</legend>
+          <p className="muted">Tick the departments this person can open.</p>
+          <div className="mt-2 flex flex-wrap gap-3 text-sm">
+            {departments.map((d) => (
+              <label key={d.id} className="flex items-center gap-1">
+                <input type="checkbox" name="dept" value={d.id} defaultChecked={d.slug === "link"} /> {d.name}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <label className="flex items-center gap-2 text-sm sm:col-span-3">
           <input type="checkbox" name="welcome" /> Email them a welcome note with the app link
         </label>
@@ -61,8 +75,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                       return (
                         <span key={s.positionId} className={`chip ${s.stage === "QUALIFIED" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
                           {pos.code}
-                          {s.stage === "QUALIFIED" ? "" : s.stage === "TRAINEE" ? " T" : " shadow"}
-                          {s.isTrainer ? " ★trainer" : ""}
+                          {s.stage === "QUALIFIED" ? "" : s.stage === "TRAINEE" ? " · Trainee" : " · Shadow"}
+                          {s.isTrainer ? " · Trainer" : ""}
                         </span>
                       );
                     })}
@@ -74,10 +88,12 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                   <div className="grid gap-2 sm:grid-cols-4">
                     <input name="name" defaultValue={p.name || ""} placeholder="Name" className="input" />
                     <input name="phone" defaultValue={p.phone || ""} placeholder="Phone" className="input" />
-                    <select name="role" defaultValue={m?.role || "VOLUNTEER"} className="input">
-                      <option value="VOLUNTEER">Volunteer</option>
-                      <option value="LEAD">Lead</option>
-                    </select>
+                    <label className="text-sm">Link role
+                      <select name="role" defaultValue={m?.role || "VOLUNTEER"} className="input">
+                        <option value="VOLUNTEER">Volunteer</option>
+                        <option value="LEAD">Lead</option>
+                      </select>
+                    </label>
                     <div className="flex items-center gap-3 text-sm">
                       <label className="flex items-center gap-1"><input type="checkbox" name="active" defaultChecked={p.active} /> Active</label>
                       {me.appRole === "ADMIN" && p.id !== me.id && (
@@ -85,6 +101,17 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                       )}
                     </div>
                   </div>
+                  <fieldset>
+                    <legend className="text-sm font-medium">Departments</legend>
+                    <p className="muted">Tick the departments this person can open. Admins can open every department even when it is not ticked.</p>
+                    <div className="mt-2 flex flex-wrap gap-3 text-sm">
+                      {departments.map((d) => (
+                        <label key={d.id} className="flex items-center gap-1">
+                          <input type="checkbox" name="dept" value={d.id} defaultChecked={p.memberships.some((x) => x.departmentId === d.id)} /> {d.name}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-slate-500">

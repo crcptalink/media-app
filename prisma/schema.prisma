@@ -158,11 +158,28 @@ model Department {
   name      String
   slug      String             @unique
   active    Boolean            @default(true)
+  sort      Int                @default(0)
+  blurb     String             @default("")
+  /// false = the card opens a coming-soon page; Link is the only ready department.
+  ready     Boolean            @default(false)
   members   DepartmentMember[]
   positions Position[]
+  groups    TemplateGroup[]
   templates ServiceTemplate[]
   events    Event[]
   rules     RuleNote[]
+}
+
+/// An event type such as Sunday or Thursday. Slots (08:30, training, …) live inside it.
+model TemplateGroup {
+  id           String            @id @default(cuid())
+  departmentId String
+  name         String
+  sort         Int               @default(0)
+  department   Department        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  templates    ServiceTemplate[]
+
+  @@unique([departmentId, name])
 }
 
 model DepartmentMember {
@@ -221,7 +238,9 @@ model ServiceTemplate {
   durationMin   Int              @default(120)
   active        Boolean          @default(true)
   sort          Int              @default(0)
+  groupId       String?
   department    Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  group         TemplateGroup?   @relation(fields: [groupId], references: [id], onDelete: SetNull)
   slots         TemplateSlot[]
   events        Event[]
   unavailable   Unavailability[]

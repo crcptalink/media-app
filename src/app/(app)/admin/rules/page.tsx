@@ -26,9 +26,9 @@ export default async function RulesPage({ searchParams }: { searchParams: SP }) 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <h1 className="h1">Rules &amp; Notes</h1>
+      <h1 className="h1">Rules and notes</h1>
       <p className="muted">
-        One line per item. A note is just text. A rule is a note linked to people and services, and shows warnings on the admin roster. Tap Edit on a line to change it — when a line looks like a known rule, a suggestion is filled in for you to check.
+        One line per item. A note is just text. A rule is a note linked to people and services, and shows warnings on the admin schedule. Tap Edit on a line to change it. When a line looks like a known rule, a suggestion is filled in for you to check.
       </p>
       <ol className="space-y-2">
         {lines.map((l) => {
@@ -69,7 +69,7 @@ export default async function RulesPage({ searchParams }: { searchParams: SP }) 
                 <div className="flex flex-wrap gap-2 text-sm">
                   <select name="kind" defaultValue={kind} className="input w-auto">
                     <option value="NOTE">Note (text only)</option>
-                    <option value="RULE">Rule (warns on roster)</option>
+                    <option value="RULE">Rule (warns on the schedule)</option>
                   </select>
                   <select name="ruleType" defaultValue={ruleType} className="input w-auto">
                     <option value="">— rule type —</option>

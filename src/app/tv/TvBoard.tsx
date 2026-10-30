@@ -53,7 +53,7 @@ export function TvBoard({ initial, token }: { initial: Board; token: string }) {
           <section key={e.id} className={`rounded-3xl p-6 ${e.isNext ? "bg-blue-950 ring-8 ring-blue-500" : e.isPast ? "bg-zinc-900 opacity-50" : "bg-zinc-900"}`}>
             <div className="flex items-baseline justify-between">
               <h2 className="text-6xl font-extrabold">{e.start}</h2>
-              {e.isNext && <span className="rounded-full bg-blue-500 px-4 py-1 text-2xl font-bold">NEXT</span>}
+              {e.isNext && <span className="rounded-full bg-blue-500 px-4 py-1 text-2xl font-bold">Next</span>}
             </div>
             <p className="mt-1 text-2xl text-slate-300">{e.kind === "TRAINING" ? "Training · " : ""}Arrive {e.arrive}{e.preprayer ? ` · prayer ${e.preprayer}` : ""} · late after {e.lateAfter}</p>
             <ul className="mt-6 space-y-4">

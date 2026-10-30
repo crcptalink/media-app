@@ -55,7 +55,7 @@ Until `SMTP_APP_PASSWORD` is set, sign-in links and calendar mail are printed in
 1. Takes a lock so two runs never overlap.
 2. `git fetch`es the default branch quietly.
 3. If local `HEAD` already matches the remote, exits 0 and does nothing else.
-4. Otherwise fast-forwards (or resets) to `origin`, stops the app to free RAM, runs `docker compose build`, then `docker compose up -d --remove-orphans`.
+4. Otherwise fast-forwards (or resets) to `origin`, runs `docker compose build` while the current app keeps serving, then `docker compose up -d --remove-orphans` to swap in the new image.
 5. Waits until the app is healthy. The container entrypoint runs `npx prisma migrate deploy` before the server; the script runs that same command again so a bad migration fails the deploy.
 6. `docker image prune -f` and `docker builder prune -f` (keeping up to 3 GB of recent build cache). Volumes are not pruned.
 

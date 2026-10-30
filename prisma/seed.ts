@@ -7,7 +7,9 @@
  */
 import { PrismaClient, type EventKind } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { DEPARTMENT_CATALOG } from "../src/lib/departments";
 import { generateEvents } from "../src/lib/events";
+import { groupNameForTemplate, groupSortForName } from "../src/lib/template-groups";
 
 const db = new PrismaClient();
 
@@ -53,11 +55,14 @@ async function main() {
   if (!adminEmail) throw new Error("Set SEED_ADMIN_EMAIL (in .env) before seeding.");
   const adminName = process.env.SEED_ADMIN_NAME || "Tech Boost";
 
-  const dept = await db.department.upsert({
-    where: { slug: "link" },
-    create: { name: "Link", slug: "link" },
-    update: {},
-  });
+  for (const row of DEPARTMENT_CATALOG) {
+    await db.department.upsert({
+      where: { slug: row.slug },
+      create: { ...row },
+      update: { name: row.name, sort: row.sort, blurb: row.blurb, ready: row.ready, active: true },
+    });
+  }
+  const dept = await db.department.findUniqueOrThrow({ where: { slug: "link" } });
 
   const pos: Record<string, string> = {};
   for (const p of POSITIONS) {
@@ -71,8 +76,15 @@ async function main() {
 
   for (const t of TEMPLATES) {
     const { slots, ...data } = t;
+    const groupName = groupNameForTemplate(t.name, t.weekday);
+    const group = await db.templateGroup.upsert({
+      where: { departmentId_name: { departmentId: dept.id, name: groupName } },
+      create: { departmentId: dept.id, name: groupName, sort: groupSortForName(groupName) },
+      update: {},
+    });
     let tpl = await db.serviceTemplate.findFirst({ where: { departmentId: dept.id, name: t.name } });
-    if (!tpl) tpl = await db.serviceTemplate.create({ data: { departmentId: dept.id, ...data } });
+    if (!tpl) tpl = await db.serviceTemplate.create({ data: { departmentId: dept.id, groupId: group.id, ...data } });
+    else if (!tpl.groupId) await db.serviceTemplate.update({ where: { id: tpl.id }, data: { groupId: group.id } });
     for (const code of slots) {
       await db.templateSlot.upsert({
         where: { templateId_positionId: { templateId: tpl.id, positionId: pos[code] } },

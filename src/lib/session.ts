@@ -18,6 +18,17 @@ export function isLead(u: CurrentUser, departmentId: string) {
   return u.appRole === "ADMIN" || u.memberships.some((m) => m.departmentId === departmentId && m.role === "LEAD");
 }
 
+/** Admins can open every department. Everyone else needs a membership row. */
+export function canAccessDepartment(u: CurrentUser, departmentId: string) {
+  return u.appRole === "ADMIN" || u.memberships.some((m) => m.departmentId === departmentId);
+}
+
+export function assertDepartmentAccess(u: CurrentUser, departmentId: string) {
+  if (!canAccessDepartment(u, departmentId)) {
+    redirect("/?error=" + encodeURIComponent("You don't have access to that department."));
+  }
+}
+
 export async function requireUser(callbackUrl = "/me") {
   const u = await currentUser();
   if (!u) redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
