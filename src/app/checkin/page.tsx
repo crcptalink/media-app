@@ -3,7 +3,7 @@ import { one, type SP } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
 import { arrivalStatus, checkinWindowOpen, STATUS_LABEL } from "@/lib/checkin";
 import { db } from "@/lib/db";
-import { assertDepartmentAccess, requireUser } from "@/lib/session";
+import { assertDepartmentAccess, redirectIfPasswordChangeRequired, requireUser } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
 import { fmtDate, localTime } from "@/lib/time";
 import { qrCheckinAction } from "./actions";
@@ -31,6 +31,7 @@ export default async function CheckinPage({ searchParams }: { searchParams: SP }
   const e = one(sp.e) || "";
   const t = one(sp.t) || "";
   const user = await requireUser(`/checkin?e=${encodeURIComponent(e)}&t=${encodeURIComponent(t)}`);
+  await redirectIfPasswordChangeRequired(user);
   const ev = await db.event.findUnique({ where: { id: e }, include: { slots: { include: { position: true } } } });
   if (!ev || ev.checkinToken !== t) return <Shell><h1 className="h1">Unknown check-in code</h1><p className="muted">Scan the QR code at the door again.</p></Shell>;
   assertDepartmentAccess(user, ev.departmentId);

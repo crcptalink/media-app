@@ -101,14 +101,17 @@ model User {
   phone         String?
   emailVerified DateTime?
   image         String?
-  passwordHash  String?
-  appRole       AppRole   @default(VOLUNTEER)
-  active        Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  passwordHash       String?
+  /// Set when an admin or leader saves a temporary password. Cleared once they choose their own.
+  mustChangePassword Boolean   @default(false)
+  appRole            AppRole   @default(VOLUNTEER)
+  active             Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   accounts       Account[]
   sessions       Session[]
+  loginInvites   LoginInvite[]
   memberships    DepartmentMember[]
   skills         UserSkill[]
   assignments    Assignment[]       @relation("assignee")
@@ -152,6 +155,20 @@ model VerificationToken {
   expires    DateTime
 
   @@id([identifier, token])
+}
+
+/// One-time link so a person with no password can choose one. Only the hash is stored.
+model LoginInvite {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // --- Organisation ---

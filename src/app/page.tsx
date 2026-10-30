@@ -2,9 +2,10 @@ import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { Flash, one, type SP } from "@/components/Flash";
 import { signOutAction } from "@/app/(app)/actions";
+import { stopViewingAsAction } from "@/app/(app)/impersonation-actions";
 import { db } from "@/lib/db";
 import { DEPARTMENT_ORDER, departmentHref } from "@/lib/departments";
-import { currentUser } from "@/lib/session";
+import { currentUser, redirectIfPasswordChangeRequired } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Department" };
@@ -12,12 +13,19 @@ export const metadata = { title: "Department" };
 export default async function Home({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const user = await currentUser();
+  await redirectIfPasswordChangeRequired(user);
   const all = await db.department.findMany({ where: { active: true } });
   const cards = DEPARTMENT_ORDER.map((slug) => all.find((d) => d.slug === slug)).filter((d) => d != null);
   const departments = cards.map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
 
   return (
-    <AppShell user={user ? { label: user.name || user.email || "Member" } : null} departments={departments} nav={[]} signOut={user ? signOutAction : undefined}>
+    <AppShell
+      user={user ? { label: user.name || user.email || "Member" } : null}
+      departments={departments}
+      nav={[]}
+      signOut={user ? signOutAction : undefined}
+      viewingAs={user?.impersonatorId ? { name: user.name || user.email || "this person", stop: stopViewingAsAction } : undefined}
+    >
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((d) => (

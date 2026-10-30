@@ -1,18 +1,45 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { db } from "./db";
 import { getDepartment } from "./events";
+import { readViewAs, VIEW_AS_COOKIE, viewAsSecret } from "./view-as-token";
 
-export async function currentUser() {
+async function loadUser(id: string) {
+  return db.user.findUnique({ where: { id }, include: { memberships: true } });
+}
+
+export type CurrentUser = NonNullable<Awaited<ReturnType<typeof loadUser>>> & {
+  /** Set while an admin is viewing the app as this person. The Auth.js session stays the admin. */
+  impersonatorId?: string;
+  impersonatorName?: string;
+};
+
+export async function currentUser(): Promise<CurrentUser | null> {
   const session = await auth();
   const id = session?.user?.id;
   if (!id) return null;
-  const user = await db.user.findUnique({ where: { id }, include: { memberships: true } });
-  if (!user || !user.active) return null;
-  return user;
+  const real = await loadUser(id);
+  if (!real || !real.active) return null;
+
+  const jar = await cookies();
+  const view = readViewAs(jar.get(VIEW_AS_COOKIE)?.value, viewAsSecret());
+  if (!view || view.adminId !== real.id || real.appRole !== "ADMIN") return real;
+
+  const target = await loadUser(view.targetId);
+  if (!target || !target.active) return real;
+  return { ...target, impersonatorId: real.id, impersonatorName: real.name || real.email || "Admin" };
 }
 
-export type CurrentUser = NonNullable<Awaited<ReturnType<typeof currentUser>>>;
+/**
+ * First sign-in with a temporary password must land on /me/password.
+ * That page lives outside the main app layout, so this does not loop.
+ * Skipped while an admin is viewing as this person.
+ */
+export async function redirectIfPasswordChangeRequired(user: CurrentUser | null) {
+  if (!user?.mustChangePassword || user.impersonatorId) return;
+  redirect("/me/password");
+}
 
 export function departmentRole(u: CurrentUser, departmentId: string) {
   return u.memberships.find((m) => m.departmentId === departmentId)?.role ?? null;

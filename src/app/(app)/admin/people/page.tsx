@@ -1,8 +1,12 @@
+import { CopyInvite } from "@/components/CopyInvite";
 import { Flash, one, type SP } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
+import { startViewAsAction } from "@/app/(app)/impersonation-actions";
 import { db } from "@/lib/db";
+import { config } from "@/lib/env";
+import { canGrantLogin, safeInviteLink } from "@/lib/login-access";
 import { requirePeopleManager } from "@/lib/session";
-import { addPersonAction, updatePersonAction } from "./actions";
+import { addPersonAction, sendInviteAction, setLoginAction, updatePersonAction } from "./actions";
 
 const STAGES = [
   ["NONE", "—"],
@@ -24,10 +28,13 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
     orderBy: [{ active: "desc" }, { name: "asc" }],
   });
   const back = "/admin/people";
+  const inviteLink = safeInviteLink(one(sp.invite), config.appUrl);
+  const inviteName = (one(sp.inviteName) || "").replace(/[^\p{L}\p{N} .'-]/gu, "").slice(0, 80);
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <form action={addPersonAction} className="card grid gap-2 sm:grid-cols-5">
+      {inviteLink && <CopyInvite url={inviteLink} name={inviteName || undefined} failedSend={one(sp.inviteReason) === "send"} />}
+      {!me.impersonatorId && <form action={addPersonAction} className="card grid gap-2 sm:grid-cols-5">
         <input type="hidden" name="back" value={back} />
         <input name="name" placeholder="Name" className="input sm:col-span-1" />
         <input name="email" type="email" required placeholder="Email" className="input sm:col-span-2" />
@@ -55,7 +62,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
           <input type="checkbox" name="welcome" /> Email them a welcome note with the app link
         </label>
         <SubmitButton className="btn-primary sm:col-span-2">Add person</SubmitButton>
-      </form>
+      </form>}
       <p className="muted">
         Training stages per position: <b>Shadow</b> watches the leader set up (usually once) → <b>Trainee</b> sets up while the trainer watches → <b>Qualified</b> serves alone. Tick <b>Trainer</b> for LST / LT.
       </p>
@@ -66,8 +73,9 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
             <li key={p.id} className={`card ${p.active ? "" : "opacity-60"}`}>
               <details>
                 <summary className="flex cursor-pointer flex-wrap items-center gap-2">
-                  <b>{p.name || p.email}</b>
-                  <span className="muted">{p.email}</span>
+                  <b>{p.name || p.email || "No name"}</b>
+                  <span className="muted">{p.email || "No email"}</span>
+                  {p.mustChangePassword && <span className="chip bg-blue-100 text-blue-800">Temporary password</span>}
                   {p.appRole === "ADMIN" && <span className="chip bg-blue-100 text-blue-800">Admin</span>}
                   {p.appRole !== "ADMIN" && m?.role === "LEADER" && <span className="chip bg-slate-100 text-slate-700">Leader</span>}
                   {p.appRole !== "ADMIN" && m?.role === "TWO_IC" && <span className="chip bg-slate-100 text-slate-700">2IC</span>}
@@ -147,11 +155,92 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                   </table>
                   <SubmitButton>Save</SubmitButton>
                 </form>
+                <SignInControls
+                  personId={p.id}
+                  email={p.email || ""}
+                  name={p.name || p.email || "this person"}
+                  grant={canGrantLogin(
+                    { appRole: me.appRole, impersonatorId: me.impersonatorId },
+                    { appRole: p.appRole, departmentRole: m?.role ?? null },
+                  )}
+                  note={
+                    me.impersonatorId
+                      ? "Sign-in changes are unavailable while viewing as someone else."
+                      : me.appRole !== "ADMIN" && m?.role !== "VOLUNTEER"
+                        ? "Only an admin can give a Leader, 2IC, or Admin a login."
+                        : undefined
+                  }
+                  viewAs={me.appRole === "ADMIN" && !me.impersonatorId && p.id !== me.id && p.active}
+                  back={back}
+                />
               </details>
             </li>
           );
         })}
       </ul>
+    </div>
+  );
+}
+
+function SignInControls({
+  personId,
+  email,
+  name,
+  grant,
+  note,
+  viewAs,
+  back,
+}: {
+  personId: string;
+  email: string;
+  name: string;
+  grant: boolean;
+  note?: string;
+  viewAs: boolean;
+  back: string;
+}) {
+  if (!grant && !viewAs && !note) return null;
+  return (
+    <div className="mt-4 space-y-4 border-t border-slate-200 pt-4">
+      <h2 className="text-sm font-semibold text-slate-900">Sign-in</h2>
+      {grant && (
+        <>
+          <form action={setLoginAction} className="grid gap-2 sm:grid-cols-2">
+            <input type="hidden" name="userId" value={personId} />
+            <input type="hidden" name="back" value={back} />
+            <label className="block text-sm sm:col-span-2">Email
+              <input name="email" type="email" required defaultValue={email} autoComplete="off" className="input mt-1" />
+            </label>
+            <label className="block text-sm">Temporary password
+              <input name="password" type="password" required minLength={8} autoComplete="new-password" className="input mt-1" />
+            </label>
+            <label className="block text-sm">Confirm password
+              <input name="confirm" type="password" required minLength={8} autoComplete="new-password" className="input mt-1" />
+            </label>
+            <p className="muted sm:col-span-2">They must choose a new password the first time they sign in. This does not send an email.</p>
+            <SubmitButton className="btn-primary sm:col-span-2 sm:w-fit">Set login</SubmitButton>
+          </form>
+          <form action={sendInviteAction} className="grid gap-2 border-t border-slate-100 pt-4 sm:grid-cols-2">
+            <input type="hidden" name="userId" value={personId} />
+            <input type="hidden" name="back" value={back} />
+            <label className="block text-sm">Email
+              <input name="email" type="email" required defaultValue={email} autoComplete="off" className="input mt-1" />
+            </label>
+            <label className="block text-sm">Confirm email
+              <input name="emailConfirm" type="email" required defaultValue={email} autoComplete="off" className="input mt-1" />
+            </label>
+            <p className="muted sm:col-span-2">Sends a one-time link that expires in 7 days. They choose their own password.</p>
+            <SubmitButton className="btn-ghost sm:col-span-2 sm:w-fit">Send invite</SubmitButton>
+          </form>
+        </>
+      )}
+      {note && !grant && <p className="muted">{note}</p>}
+      {viewAs && (
+        <form action={startViewAsAction}>
+          <input type="hidden" name="userId" value={personId} />
+          <SubmitButton className="btn-ghost" confirm={`View the app as ${name}?`}>View as</SubmitButton>
+        </form>
+      )}
     </div>
   );
 }

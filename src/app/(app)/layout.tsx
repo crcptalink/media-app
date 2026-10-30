@@ -1,14 +1,16 @@
 import { AppShell, type ShellNavItem } from "@/components/AppShell";
+import { stopViewingAsAction } from "@/app/(app)/impersonation-actions";
 import { db } from "@/lib/db";
 import { DEPARTMENT_ORDER, departmentHref } from "@/lib/departments";
 import { getDepartment } from "@/lib/events";
-import { assertDepartmentAccess, canManagePeople, canManageSchedule, requireUser } from "@/lib/session";
+import { assertDepartmentAccess, canManagePeople, canManageSchedule, redirectIfPasswordChangeRequired, requireUser } from "@/lib/session";
 import { signOutAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  await redirectIfPasswordChangeRequired(user);
   const dept = await getDepartment(db);
   assertDepartmentAccess(user, dept.id);
   const schedule = canManageSchedule(user, dept.id);
@@ -38,6 +40,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       section={dept.name}
       nav={nav}
       signOut={signOutAction}
+      viewingAs={user.impersonatorId ? { name: user.name || user.email || "this person", stop: stopViewingAsAction } : undefined}
     >
       {children}
     </AppShell>

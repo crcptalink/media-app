@@ -80,14 +80,17 @@ export async function rsvpAction(form: FormData) {
 export async function setPasswordAction(form: FormData) {
   const user = await requireUser();
   await runAction(form, async () => {
+    if (user.impersonatorId) throw new WorkflowError("You can't change a password while viewing as someone else");
     const pw = String(form.get("password") || "");
     if (str(form, "remove") === "1") {
-      await db.user.update({ where: { id: user.id }, data: { passwordHash: null } });
+      if (user.mustChangePassword) throw new WorkflowError("Set a new password first");
+      await db.user.update({ where: { id: user.id }, data: { passwordHash: null, mustChangePassword: false } });
       return "Password removed. Use email links to sign in.";
     }
     if (pw.length < 8) throw new WorkflowError("Use at least 8 characters");
     if (pw !== String(form.get("confirm") || "")) throw new WorkflowError("Passwords don't match");
-    await db.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(pw, 10) } });
+    await db.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(pw, 10), mustChangePassword: false } });
+    if (user.mustChangePassword) return { back: "/me", msg: "Password saved." };
     return "Password saved.";
   });
 }
@@ -95,6 +98,7 @@ export async function setPasswordAction(form: FormData) {
 export async function updateProfileAction(form: FormData) {
   const user = await requireUser();
   await runAction(form, async () => {
+    if (user.impersonatorId) throw new WorkflowError("You can't change this profile while viewing as someone else");
     await db.user.update({ where: { id: user.id }, data: { name: str(form, "name") || null, phone: str(form, "phone") || null } });
     return "Profile saved.";
   });

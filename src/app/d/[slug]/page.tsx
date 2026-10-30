@@ -3,8 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { db } from "@/lib/db";
 import { DEPARTMENT_ORDER, departmentHref } from "@/lib/departments";
-import { currentUser } from "@/lib/session";
+import { currentUser, redirectIfPasswordChangeRequired } from "@/lib/session";
 import { signOutAction } from "@/app/(app)/actions";
+import { stopViewingAsAction } from "@/app/(app)/impersonation-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
   if (!dept || !dept.active) notFound();
   if (dept.ready && dept.slug === "link") redirect("/me");
   const user = await currentUser();
+  await redirectIfPasswordChangeRequired(user);
   const all = await db.department.findMany({ where: { active: true } });
   const departments = DEPARTMENT_ORDER.map((s) => all.find((d) => d.slug === s))
     .filter((d) => d != null)
@@ -26,6 +28,7 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
       currentSlug={dept.slug}
       nav={[]}
       signOut={user ? signOutAction : undefined}
+      viewingAs={user?.impersonatorId ? { name: user.name || user.email || "this person", stop: stopViewingAsAction } : undefined}
     >
       <div className="card max-w-lg">
         <h2 className="h2">{dept.name}</h2>

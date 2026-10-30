@@ -111,6 +111,8 @@ Department role is stored on each membership. **Member** is the `VOLUNTEER` valu
 
 An Admin can do every row even without a department tick. A 2IC matches a Leader on the schedule and cannot open People or Setup. On People, the role list is Admin, Leader, 2IC, and Member. Only an admin can assign Admin. Member is the stored volunteer value. Service Leader remains a Link position, not a role.
 
+On People, an admin can **Set login** (email and a temporary password; they must change it on first sign-in; no email is sent), **Send invite** (one-time link, 7 days, via the Gmail SMTP already used by the app), or **View as** that person. A Leader can set a login or send an invite only for a Member in their department. If `SMTP_APP_PASSWORD` is empty or still a `REPLACE_` / `change-me` placeholder, the invite is not emailed: the page says SMTP is not set up and offers **Copy invite link**. View as is admin-only, shows a blue banner “Viewing as … — Return to my account”, and writes `impersonate_start` / `impersonate_stop` to `AuditLog`. That session cannot change passwords, profiles, or roles.
+
 ### Training
 Positions: **SL** Service Leader, **LS** Livestream, **L** Link, **LSL** LS + Link (10:30, covers LS and L). Each person has a stage per position: **Shadow** (watches the leader set up, usually once) → **Trainee** (sets up while the trainer watches, until ready) → **Qualified**, plus a **Trainer** flag (LST = livestream trainer, LT = link trainer). Every slot has a serving person plus an optional **trainee / shadow** spot, so a trainee is paired with the trainer in that slot. The roster warns when a trainee has no trainer next to them, or when someone who isn't qualified is put in the serving spot.
 
@@ -136,6 +138,7 @@ One line per item. Adding or editing a line that looks like a known pattern ("Ka
 | Screen | Route | Who |
 |---|---|---|
 | Sign in | `/login` | all |
+| Accept an invite | `/invite/[token]` | the person, from a People invite |
 | My slots, Thursday RSVPs, notices | `/me` | everyone |
 | Profile & password | `/me/password` | everyone |
 | Roster (read-only + Claim) | `/roster` | everyone |

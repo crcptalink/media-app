@@ -2,11 +2,14 @@
 import type { SkillStage } from "@prisma/client";
 import { runAction, str } from "@/lib/actions";
 import { WorkflowError } from "@/lib/assignments";
-import { db } from "@/lib/db";
 import { APP_NAME } from "@/lib/brand";
-import { config } from "@/lib/env";
+import { db } from "@/lib/db";
+import { config, smtpReady } from "@/lib/env";
+import { canGrantLogin, hashInviteToken, INVITE_DAYS, newInviteToken, roleKey, validEmail } from "@/lib/login-access";
+import { sendMail } from "@/lib/mailer";
 import { enqueueEmail } from "@/lib/outbox";
-import { requirePeopleManager } from "@/lib/session";
+import { requirePeopleManager, type CurrentUser } from "@/lib/session";
+import bcrypt from "bcryptjs";
 
 function readDeptRole(form: FormData, actorIsAdmin: boolean) {
   const role = str(form, "role");
@@ -39,9 +42,14 @@ async function setDepartmentAccess(userId: string, form: FormData, linkRole: "LE
   }
 }
 
+function assertNotImpersonating(actor: CurrentUser) {
+  if (actor.impersonatorId) throw new WorkflowError("You can't do that while viewing as someone else");
+}
+
 export async function addPersonAction(form: FormData) {
   const { user } = await requirePeopleManager();
   await runAction(form, async () => {
+    if (user.impersonatorId) throw new WorkflowError("You can't add a person while viewing as someone else");
     const email = str(form, "email").toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new WorkflowError("Enter a valid email");
     const role = readDeptRole(form, user.appRole === "ADMIN");
@@ -54,7 +62,7 @@ export async function addPersonAction(form: FormData) {
       if (user.appRole !== "ADMIN") throw new WorkflowError("Only an admin can assign Admin");
       await db.user.update({ where: { id: u.id }, data: { appRole: "ADMIN" } });
     }
-    await db.auditLog.create({ data: { actorId: user.id, action: "add_person", entity: "user", entityId: u.id, after: { email, role } } });
+    await db.auditLog.create({ data: { actorId: user.impersonatorId || user.id, action: "add_person", entity: "user", entityId: u.id, after: { email, role } } });
     if (form.get("welcome")) {
       await enqueueEmail(db, {
         type: "notice",
@@ -71,9 +79,16 @@ export async function updatePersonAction(form: FormData) {
   const { user, dept } = await requirePeopleManager();
   await runAction(form, async () => {
     const id = str(form, "userId");
-    const target = await db.user.findUnique({ where: { id } });
+    const target = await db.user.findUnique({ where: { id }, include: { memberships: true } });
     if (!target) throw new WorkflowError("Person not found");
+    if (user.impersonatorId && target.appRole === "ADMIN") {
+      throw new WorkflowError("You can't change an admin while viewing as someone else");
+    }
     const requested = str(form, "role");
+    const currentRole = roleKey(target.appRole, target.memberships.find((m) => m.departmentId === dept.id)?.role ?? null);
+    if (user.impersonatorId && requested !== currentRole) {
+      throw new WorkflowError("You can't change roles while viewing as someone else");
+    }
     if (requested === "ADMIN" && user.appRole !== "ADMIN") throw new WorkflowError("Only an admin can assign Admin");
     if (target.appRole === "ADMIN" && user.appRole !== "ADMIN") throw new WorkflowError("Only an admin can change an admin");
     const role = readDeptRole(form, user.appRole === "ADMIN");
@@ -85,7 +100,7 @@ export async function updatePersonAction(form: FormData) {
         name: str(form, "name") || null,
         phone: str(form, "phone") || null,
         active,
-        ...(user.appRole === "ADMIN" && id !== user.id ? { appRole: requested === "ADMIN" ? "ADMIN" : "VOLUNTEER" } : {}),
+        ...(user.appRole === "ADMIN" && !user.impersonatorId && id !== user.id ? { appRole: requested === "ADMIN" ? "ADMIN" : "VOLUNTEER" } : {}),
       },
     });
     await setDepartmentAccess(id, form, role);
@@ -107,7 +122,101 @@ export async function updatePersonAction(form: FormData) {
         update: data,
       });
     }
-    await db.auditLog.create({ data: { actorId: user.id, action: "update_person", entity: "user", entityId: id } });
+    await db.auditLog.create({ data: { actorId: user.impersonatorId || user.id, action: "update_person", entity: "user", entityId: id } });
     return "Saved.";
   });
+}
+
+async function loadLoginTarget(actor: CurrentUser, userId: string, departmentId: string) {
+  assertNotImpersonating(actor);
+  const target = await db.user.findUnique({ where: { id: userId }, include: { memberships: true } });
+  if (!target) throw new WorkflowError("Person not found");
+  const departmentRole = target.memberships.find((m) => m.departmentId === departmentId)?.role ?? null;
+  if (!canGrantLogin(actor, { appRole: target.appRole, departmentRole })) {
+    throw new WorkflowError("You can only set a login for a Member");
+  }
+  return target;
+}
+
+function readEmailPair(form: FormData, confirmKey: string) {
+  const email = str(form, "email").toLowerCase();
+  if (!validEmail(email)) throw new WorkflowError("Enter a valid email");
+  if (confirmKey && str(form, confirmKey).toLowerCase() !== email) throw new WorkflowError("Email addresses don't match");
+  return email;
+}
+
+async function claimEmail(userId: string, email: string) {
+  const other = await db.user.findFirst({ where: { email, NOT: { id: userId } } });
+  if (other) throw new WorkflowError("That email is already used");
+}
+
+export async function setLoginAction(form: FormData) {
+  const { user, dept } = await requirePeopleManager();
+  await runAction(form, async () => {
+    const target = await loadLoginTarget(user, str(form, "userId"), dept.id);
+    const email = readEmailPair(form, "");
+    const password = String(form.get("password") || "");
+    const confirm = String(form.get("confirm") || "");
+    if (password.length < 8) throw new WorkflowError("Use at least 8 characters");
+    if (password !== confirm) throw new WorkflowError("Passwords don't match");
+    await claimEmail(target.id, email);
+    await db.loginInvite.deleteMany({ where: { userId: target.id, usedAt: null } });
+    await db.user.update({
+      where: { id: target.id },
+      data: { email, passwordHash: await bcrypt.hash(password, 10), mustChangePassword: true },
+    });
+    await db.auditLog.create({
+      data: { actorId: user.id, action: "set_login", entity: "user", entityId: target.id, after: { email, mustChangePassword: true } },
+    });
+    const who = target.name || email;
+    return target.active ? `Login saved for ${who}. They must choose a new password when they sign in.` : `Login saved for ${who}. They are inactive, so sign-in stays blocked until you mark them active.`;
+  });
+}
+
+export async function sendInviteAction(form: FormData) {
+  const { user, dept } = await requirePeopleManager();
+  await runAction(form, async () => {
+    const target = await loadLoginTarget(user, str(form, "userId"), dept.id);
+    const email = readEmailPair(form, "emailConfirm");
+    await claimEmail(target.id, email);
+    const token = newInviteToken();
+    const expiresAt = new Date(Date.now() + INVITE_DAYS * 24 * 60 * 60 * 1000);
+    await db.loginInvite.deleteMany({ where: { userId: target.id, usedAt: null } });
+    await db.user.update({ where: { id: target.id }, data: { email } });
+    await db.loginInvite.create({
+      data: { userId: target.id, tokenHash: hashInviteToken(token), email, expiresAt },
+    });
+    await db.auditLog.create({
+      data: { actorId: user.id, action: "send_invite", entity: "user", entityId: target.id, after: { email } },
+    });
+    const url = `${config.appUrl}/invite/${token}`;
+    const who = target.name || email;
+    const subject = `Set your ${APP_NAME} password`;
+    const text = `Hi ${target.name || ""},\n\nA leader created a sign-in for you on ${APP_NAME}.\nOpen this link to choose a password. It expires in ${INVITE_DAYS} days and only works once:\n${url}\n\nIf you didn't expect this, you can ignore it.\n\n— CRC PTA Link`;
+    const html = `<p>Hi ${escapeHtml(target.name || "")},</p><p>A leader created a sign-in for you on <b>${APP_NAME}</b>.</p><p><a href="${url}" style="display:inline-block;padding:12px 20px;background:#1d4ed8;color:#fff;border-radius:8px;text-decoration:none">Choose a password</a></p><p style="color:#666">This link expires in ${INVITE_DAYS} days and only works once. If you didn't expect this, you can ignore it.</p>`;
+    const manual = `/admin/people?invite=${encodeURIComponent(url)}&inviteName=${encodeURIComponent(who)}`;
+    if (!smtpReady()) return { back: manual };
+    try {
+      await sendMail({ to: email, subject, text, html });
+    } catch (e) {
+      console.error("invite email failed", e instanceof Error ? e.message : e);
+      return { back: `${manual}&inviteReason=send` };
+    }
+    await db.emailOutbox.create({
+      data: {
+        type: "login",
+        to: email,
+        subject,
+        text: "(invite link redacted)",
+        status: "SENT",
+        attempts: 1,
+        sentAt: new Date(),
+      },
+    });
+    return `Invite sent to ${email}.`;
+  });
+}
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] || c);
 }

@@ -16,6 +16,20 @@ export function smtpConfigured() {
   return Boolean(config.smtpUser && config.smtpPass);
 }
 
+/** True when Gmail SMTP can actually send. Placeholders match deploy/install.sh and notify-deploy.js. */
+export function smtpPasswordUsable(user: string, pass: string) {
+  const u = user.trim();
+  const p = pass.trim();
+  if (!u || !p) return false;
+  if (p.toUpperCase().startsWith("REPLACE") || p.includes("change-me")) return false;
+  return true;
+}
+
+/** Ready to send. Empty and REPLACE_ / change-me passwords count as not configured. */
+export function smtpReady() {
+  return smtpPasswordUsable(config.smtpUser, config.smtpPass);
+}
+
 /** Email address used as ORGANIZER in calendar invites. */
 export function organizerEmail() {
   const m = config.emailFrom.match(/<([^>]+)>/);
