@@ -32,8 +32,7 @@ export default async function AdminRosterPage({ searchParams }: { searchParams: 
   return (
     <div>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <h1 className="h1 flex-1">Admin schedule</h1>
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
         {[2, 4, 8].map((w) => (
           <Link key={w} href={`/admin/roster?weeks=${w}`} className={`chip ${w === weeks ? "bg-blue-700 text-white" : "bg-slate-200"}`}>
             {w} weeks

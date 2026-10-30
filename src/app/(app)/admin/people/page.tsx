@@ -27,7 +27,6 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <h1 className="h1">People</h1>
       <form action={addPersonAction} className="card grid gap-2 sm:grid-cols-5">
         <input type="hidden" name="back" value={back} />
         <input name="name" placeholder="Name" className="input sm:col-span-1" />
@@ -35,9 +34,10 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
         <input name="phone" type="tel" placeholder="Phone" className="input" />
         <label className="text-sm">Role
           <select name="role" defaultValue="VOLUNTEER" className="input">
-            <option value="VOLUNTEER">Member</option>
-            <option value="TWO_IC">2IC</option>
+            {me.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
             <option value="LEADER">Leader</option>
+            <option value="TWO_IC">2IC</option>
+            <option value="VOLUNTEER">Member</option>
           </select>
         </label>
         <fieldset className="sm:col-span-5">
@@ -69,8 +69,9 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                   <b>{p.name || p.email}</b>
                   <span className="muted">{p.email}</span>
                   {p.appRole === "ADMIN" && <span className="chip bg-blue-100 text-blue-800">Admin</span>}
-                  {m?.role === "LEADER" && <span className="chip bg-purple-100 text-purple-800">Leader</span>}
-                  {m?.role === "TWO_IC" && <span className="chip bg-indigo-100 text-indigo-800">2IC</span>}
+                  {p.appRole !== "ADMIN" && m?.role === "LEADER" && <span className="chip bg-slate-100 text-slate-700">Leader</span>}
+                  {p.appRole !== "ADMIN" && m?.role === "TWO_IC" && <span className="chip bg-slate-100 text-slate-700">2IC</span>}
+                  {p.appRole !== "ADMIN" && m?.role !== "LEADER" && m?.role !== "TWO_IC" && <span className="chip bg-slate-100 text-slate-600">Member</span>}
                   {!p.active && <span className="chip bg-slate-200">Inactive</span>}
                   <span className="ml-auto flex flex-wrap gap-1">
                     {p.skills.map((s) => {
@@ -93,17 +94,15 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                     <input name="name" defaultValue={p.name || ""} placeholder="Name" className="input" />
                     <input name="phone" defaultValue={p.phone || ""} placeholder="Phone" className="input" />
                     <label className="text-sm">Role
-                      <select name="role" defaultValue={m?.role || "VOLUNTEER"} className="input">
-                        <option value="VOLUNTEER">Member</option>
-                        <option value="TWO_IC">2IC</option>
+                      <select name="role" defaultValue={p.appRole === "ADMIN" ? "ADMIN" : m?.role || "VOLUNTEER"} className="input">
+                        {me.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
                         <option value="LEADER">Leader</option>
+                        <option value="TWO_IC">2IC</option>
+                        <option value="VOLUNTEER">Member</option>
                       </select>
                     </label>
                     <div className="flex items-center gap-3 text-sm">
                       <label className="flex items-center gap-1"><input type="checkbox" name="active" defaultChecked={p.active} /> Active</label>
-                      {me.appRole === "ADMIN" && p.id !== me.id && (
-                        <label className="flex items-center gap-1"><input type="checkbox" name="admin" defaultChecked={p.appRole === "ADMIN"} /> Admin</label>
-                      )}
                     </div>
                   </div>
                   <fieldset>

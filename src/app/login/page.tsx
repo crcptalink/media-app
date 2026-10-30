@@ -27,11 +27,13 @@ export default async function LoginPage({ searchParams }: { searchParams: SP }) 
   const mode = one(sp.mode) === "password" ? "password" : "link";
   const email = one(sp.email) || "";
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-5 py-10">
-      <div className="mb-8 rounded-2xl bg-black px-6 py-8 text-center text-white">
-        <BrandLogo className="mx-auto h-14" />
-        <h1 className="mt-4 text-2xl font-bold">{APP_NAME}</h1>
-        <p className="mt-1 text-sm text-white/70">CRC Pretoria</p>
+    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center bg-slate-50 px-5 py-10">
+      <div className="mb-8 text-center">
+        <span className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-700">
+          <BrandLogo className="h-9" alt="" />
+        </span>
+        <h1 className="mt-4 text-2xl font-semibold text-slate-900">{APP_NAME}</h1>
+        <p className="mt-1 text-sm text-slate-500">CRC Pretoria</p>
       </div>
       {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-red-200">{ERRORS[error] || "Sign-in failed. Try again."}</div>}
       <div className="card">

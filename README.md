@@ -109,7 +109,7 @@ Department role is stored on each membership. **Member** is the `VOLUNTEER` valu
 | People and department permissions | Yes | Their department | No | No |
 | Setup (templates, grace, screens, generate) and the email outbox | Yes | No | No | No |
 
-An Admin can do every row even without a department tick. A 2IC matches a Leader on the schedule and cannot open People or Setup.
+An Admin can do every row even without a department tick. A 2IC matches a Leader on the schedule and cannot open People or Setup. On People, the role list is Admin, Leader, 2IC, and Member. Only an admin can assign Admin. Member is the stored volunteer value. Service Leader remains a Link position, not a role.
 
 ### Training
 Positions: **SL** Service Leader, **LS** Livestream, **L** Link, **LSL** LS + Link (10:30, covers LS and L). Each person has a stage per position: **Shadow** (watches the leader set up, usually once) → **Trainee** (sets up while the trainer watches, until ready) → **Qualified**, plus a **Trainer** flag (LST = livestream trainer, LT = link trainer). Every slot has a serving person plus an optional **trainee / shadow** spot, so a trainee is paired with the trainer in that slot. The roster warns when a trainee has no trainer next to them, or when someone who isn't qualified is put in the serving spot.

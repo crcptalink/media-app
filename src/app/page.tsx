@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { signOutAction } from "@/app/(app)/actions";
-import { BrandLogo } from "@/components/BrandLogo";
+import { AppShell } from "@/components/AppShell";
 import { Flash, one, type SP } from "@/components/Flash";
-import { APP_NAME } from "@/lib/brand";
+import { signOutAction } from "@/app/(app)/actions";
 import { db } from "@/lib/db";
-import { DEPARTMENT_ORDER, departmentHref, departmentTheme } from "@/lib/departments";
+import { DEPARTMENT_ORDER, departmentHref } from "@/lib/departments";
 import { currentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -15,49 +14,28 @@ export default async function Home({ searchParams }: { searchParams: SP }) {
   const user = await currentUser();
   const all = await db.department.findMany({ where: { active: true } });
   const cards = DEPARTMENT_ORDER.map((slug) => all.find((d) => d.slug === slug)).filter((d) => d != null);
+  const departments = cards.map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="bg-black text-white">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-          <Link href="/" className="flex items-center gap-3">
-            <BrandLogo className="h-10" alt="" />
-            <span className="text-lg font-bold tracking-tight">{APP_NAME}</span>
-          </Link>
-          <div className="ml-auto flex items-center gap-3 text-sm">
-            {user ? (
-              <>
-                <span className="max-w-[40vw] truncate text-white/70">{user.name || user.email}</span>
-                <form action={signOutAction}>
-                  <button className="text-white/70 underline">Sign out</button>
-                </form>
-              </>
-            ) : (
-              <Link href="/login?callbackUrl=/" className="text-white/80 underline">Sign in</Link>
-            )}
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
-        <Flash ok={one(sp.ok)} error={one(sp.error)} />
-        <h1 className="h1">Department</h1>
-        <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map((d) => {
-            const theme = departmentTheme(d.slug);
-            return (
-              <li key={d.id}>
-                <Link
-                  href={departmentHref(d)}
-                  className="flex min-h-28 items-center justify-center rounded-2xl px-5 py-8 text-center text-xl font-semibold shadow-md transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                  style={{ backgroundColor: theme.bg, color: theme.fg }}
-                >
-                  {d.name}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </main>
-    </div>
+    <AppShell user={user ? { label: user.name || user.email } : null} departments={departments} nav={[]} signOut={user ? signOutAction : undefined}>
+      <Flash ok={one(sp.ok)} error={one(sp.error)} />
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {cards.map((d) => (
+          <li key={d.id}>
+            <Link
+              href={departmentHref(d)}
+              className={`flex min-h-[7.5rem] flex-col items-center justify-center rounded-xl border px-5 py-8 text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                d.ready
+                  ? "border-slate-200 bg-white text-slate-900 hover:border-blue-600 hover:bg-blue-50 hover:text-blue-800"
+                  : "border-slate-200 bg-slate-50 text-slate-500 hover:border-blue-300 hover:bg-blue-50/60"
+              }`}
+            >
+              <span className="text-lg font-semibold">{d.name}</span>
+              {!d.ready && <span className="mt-1 text-xs font-medium text-slate-400">Coming soon</span>}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </AppShell>
   );
 }

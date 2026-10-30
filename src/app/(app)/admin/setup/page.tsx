@@ -70,8 +70,6 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <h1 className="h1">Setup</h1>
-
       <section className="card space-y-2">
         <h2 className="h2">Screens</h2>
         <p className="text-sm">TV dashboard: <a className="break-all text-blue-700 underline" href={tv}>{tv}</a></p>

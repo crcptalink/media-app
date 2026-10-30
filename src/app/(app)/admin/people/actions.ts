@@ -8,8 +8,12 @@ import { config } from "@/lib/env";
 import { enqueueEmail } from "@/lib/outbox";
 import { requirePeopleManager } from "@/lib/session";
 
-function readDeptRole(form: FormData) {
+function readDeptRole(form: FormData, actorIsAdmin: boolean) {
   const role = str(form, "role");
+  if (role === "ADMIN") {
+    if (!actorIsAdmin) throw new WorkflowError("Only an admin can assign Admin");
+    return "LEADER" as const;
+  }
   if (role === "LEADER") return "LEADER" as const;
   if (role === "TWO_IC") return "TWO_IC" as const;
   return "VOLUNTEER" as const;
@@ -40,12 +44,16 @@ export async function addPersonAction(form: FormData) {
   await runAction(form, async () => {
     const email = str(form, "email").toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new WorkflowError("Enter a valid email");
-    const role = readDeptRole(form);
+    const role = readDeptRole(form, user.appRole === "ADMIN");
     const existing = await db.user.findUnique({ where: { email } });
     const u = existing
       ? await db.user.update({ where: { id: existing.id }, data: { active: true, name: existing.name || str(form, "name") || null } })
       : await db.user.create({ data: { email, name: str(form, "name") || null, phone: str(form, "phone") || null } });
     await setDepartmentAccess(u.id, form, role);
+    if (str(form, "role") === "ADMIN") {
+      if (user.appRole !== "ADMIN") throw new WorkflowError("Only an admin can assign Admin");
+      await db.user.update({ where: { id: u.id }, data: { appRole: "ADMIN" } });
+    }
     await db.auditLog.create({ data: { actorId: user.id, action: "add_person", entity: "user", entityId: u.id, after: { email, role } } });
     if (form.get("welcome")) {
       await enqueueEmail(db, {
@@ -65,7 +73,10 @@ export async function updatePersonAction(form: FormData) {
     const id = str(form, "userId");
     const target = await db.user.findUnique({ where: { id } });
     if (!target) throw new WorkflowError("Person not found");
-    const role = readDeptRole(form);
+    const requested = str(form, "role");
+    if (requested === "ADMIN" && user.appRole !== "ADMIN") throw new WorkflowError("Only an admin can assign Admin");
+    if (target.appRole === "ADMIN" && user.appRole !== "ADMIN") throw new WorkflowError("Only an admin can change an admin");
+    const role = readDeptRole(form, user.appRole === "ADMIN");
     const active = form.get("active") === "on";
     if (id === user.id && !active) throw new WorkflowError("You can't deactivate yourself");
     await db.user.update({
@@ -74,7 +85,7 @@ export async function updatePersonAction(form: FormData) {
         name: str(form, "name") || null,
         phone: str(form, "phone") || null,
         active,
-        ...(user.appRole === "ADMIN" && id !== user.id ? { appRole: form.get("admin") === "on" ? "ADMIN" : "VOLUNTEER" } : {}),
+        ...(user.appRole === "ADMIN" && id !== user.id ? { appRole: requested === "ADMIN" ? "ADMIN" : "VOLUNTEER" } : {}),
       },
     });
     await setDepartmentAccess(id, form, role);

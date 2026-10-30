@@ -72,7 +72,7 @@ function EventCard({
   back: string;
 }) {
   return (
-    <div className={`card ${e.kind === "TRAINING" ? "border-indigo-200 bg-indigo-50/40" : ""}`}>
+    <div className={`card ${e.kind === "TRAINING" ? "border-blue-200 bg-blue-50/40" : ""}`}>
       <div className="mb-2 flex items-baseline gap-2">
         <h3 className="font-semibold">{e.title}</h3>
         <span className="muted">{fmtDate(e.date)}</span>
@@ -116,7 +116,7 @@ function EventCard({
               </div>
               {learner ? (
                 <div className="ml-16 mt-1 flex flex-wrap items-center gap-2">
-                  <span className="chip bg-indigo-100 text-indigo-800">{KIND_LABEL[learner.kind]}</span>
+                  <span className="chip bg-blue-50 text-blue-800">{KIND_LABEL[learner.kind]}</span>
                   <AssignmentLine a={learner} mode={mode} me={me.id} back={back} />
                 </div>
               ) : mode === "admin" ? (

@@ -17,8 +17,7 @@ export default async function OutboxPage({ searchParams }: { searchParams: SP })
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <div className="flex items-center gap-2">
-        <h1 className="h1 flex-1">Emails</h1>
+      <div className="flex items-center justify-end gap-2">
         <form action={retryEmailAction}>
           <input type="hidden" name="back" value={back} />
           <SubmitButton className="btn-ghost btn-sm">{failed ? `Retry ${failed} failed` : "Send pending now"}</SubmitButton>
