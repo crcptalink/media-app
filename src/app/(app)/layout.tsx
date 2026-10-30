@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/BrandLogo";
 import { APP_NAME } from "@/lib/brand";
+import { departmentTheme } from "@/lib/departments";
 import { db } from "@/lib/db";
 import { getDepartment } from "@/lib/events";
 import { assertDepartmentAccess, isLead, requireUser } from "@/lib/session";
@@ -22,16 +23,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ];
   if (lead) links.push(["/admin/roster", "Admin", pendingClaims], ["/admin/people", "People"], ["/admin/rules", "Rules"]);
   if (user.appRole === "ADMIN") links.push(["/admin/setup", "Setup"], ["/admin/outbox", "Emails"]);
+  const theme = departmentTheme(dept.slug);
   return (
     <div className="min-h-screen pb-16">
       <header className="sticky top-0 z-20 bg-black text-white">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2">
           <Link href="/" className="flex items-center gap-3">
             <BrandLogo className="h-9" alt="" />
-            <span className="leading-tight">
-              <span className="block text-sm font-bold">{APP_NAME}</span>
-              <span className="block text-xs font-medium text-white/70">{dept.name}</span>
-            </span>
+            <span className="text-sm font-bold">{APP_NAME}</span>
           </Link>
           <span className="ml-auto truncate text-xs text-white/70">{user.name || user.email}</span>
           <form action={signOutAction}>
@@ -46,6 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
           ))}
         </nav>
+        <div className="h-1.5" style={{ backgroundColor: theme.bg }} />
       </header>
       <main className="mx-auto max-w-6xl px-4 py-5">{children}</main>
     </div>

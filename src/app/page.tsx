@@ -4,28 +4,30 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { Flash, one, type SP } from "@/components/Flash";
 import { APP_NAME } from "@/lib/brand";
 import { db } from "@/lib/db";
-import { departmentHref } from "@/lib/departments";
+import { DEPARTMENT_ORDER, departmentHref, departmentTheme } from "@/lib/departments";
 import { currentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Departments" };
+export const metadata = { title: "Department" };
 
 export default async function Home({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const user = await currentUser();
-  const all = await db.department.findMany({ where: { active: true }, orderBy: [{ sort: "asc" }, { name: "asc" }] });
-  const visible = !user ? [] : user.appRole === "ADMIN" ? all : all.filter((d) => user.memberships.some((m) => m.departmentId === d.id));
+  const all = await db.department.findMany({ where: { active: true } });
+  const cards = DEPARTMENT_ORDER.map((slug) => all.find((d) => d.slug === slug)).filter((d) => d != null);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-100">
       <header className="bg-black text-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-          <BrandLogo className="h-10" alt="" />
-          <span className="text-lg font-bold">{APP_NAME}</span>
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+          <Link href="/" className="flex items-center gap-3">
+            <BrandLogo className="h-10" alt="" />
+            <span className="text-lg font-bold tracking-tight">{APP_NAME}</span>
+          </Link>
           <div className="ml-auto flex items-center gap-3 text-sm">
             {user ? (
               <>
-                <span className="truncate text-white/70">{user.name || user.email}</span>
+                <span className="max-w-[40vw] truncate text-white/70">{user.name || user.email}</span>
                 <form action={signOutAction}>
                   <button className="text-white/70 underline">Sign out</button>
                 </form>
@@ -36,23 +38,24 @@ export default async function Home({ searchParams }: { searchParams: SP }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
         <Flash ok={one(sp.ok)} error={one(sp.error)} />
-        <h1 className="h1">Departments</h1>
-        {!user && <p className="muted mt-2">Sign in to see the departments you can open.</p>}
-        {user && visible.length === 0 && <p className="muted mt-2">You don’t have a department yet. Ask a lead to give you access.</p>}
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((d) => (
-            <li key={d.id}>
-              <Link href={departmentHref(d)} className="card block h-full hover:ring-2 hover:ring-black">
-                <div className="flex items-start justify-between gap-2">
-                  <h2 className="h2">{d.name}</h2>
-                  {!d.ready && <span className="chip shrink-0 bg-slate-100 text-slate-600">Coming soon</span>}
-                </div>
-                {d.blurb ? <p className="muted mt-2">{d.blurb}</p> : null}
-              </Link>
-            </li>
-          ))}
+        <h1 className="h1">Department</h1>
+        <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {cards.map((d) => {
+            const theme = departmentTheme(d.slug);
+            return (
+              <li key={d.id}>
+                <Link
+                  href={departmentHref(d)}
+                  className="flex min-h-28 items-center justify-center rounded-2xl px-5 py-8 text-center text-xl font-semibold shadow-md transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                  style={{ backgroundColor: theme.bg, color: theme.fg }}
+                >
+                  {d.name}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </main>
     </div>

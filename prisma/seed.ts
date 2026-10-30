@@ -56,10 +56,11 @@ async function main() {
   const adminName = process.env.SEED_ADMIN_NAME || "Tech Boost";
 
   for (const row of DEPARTMENT_CATALOG) {
+    const data = { name: row.name, sort: row.sort, blurb: row.blurb, ready: row.ready };
     await db.department.upsert({
       where: { slug: row.slug },
-      create: { ...row },
-      update: { name: row.name, sort: row.sort, blurb: row.blurb, ready: row.ready, active: true },
+      create: { slug: row.slug, ...data },
+      update: { ...data, active: true },
     });
   }
   const dept = await db.department.findUniqueOrThrow({ where: { slug: "link" } });
