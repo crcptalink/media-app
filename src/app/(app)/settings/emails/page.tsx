@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { smtpConfigured } from "@/lib/env";
 import { requireAdmin } from "@/lib/session";
 import { fmtDateTime } from "@/lib/time";
-import { retryEmailAction } from "../actions";
+import { retryEmailAction } from "@/app/(app)/admin/actions";
 
 const CLS: Record<string, string> = { SENT: "bg-green-100 text-green-800", PENDING: "bg-amber-100 text-amber-800", FAILED: "bg-red-100 text-red-800" };
 
