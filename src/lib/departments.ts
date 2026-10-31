@@ -14,7 +14,7 @@ export const DEPARTMENT_CATALOG = [
 export const DEPARTMENT_ORDER = DEPARTMENT_CATALOG.map((d) => d.slug);
 
 export function departmentHref(dept: { slug: string; ready: boolean }) {
-  if (dept.ready && dept.slug === "link") return "/my-schedule";
+  if (dept.ready) return `/${dept.slug}/my-schedule`;
   return `/d/${dept.slug}`;
 }
 

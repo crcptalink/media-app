@@ -9,7 +9,7 @@ import { kickOutbox } from "./outbox";
 export type ActionResult = string | void | { msg?: string; back?: string };
 
 export async function runAction(form: FormData, fn: () => Promise<ActionResult>) {
-  let back = safeBack(String(form.get("back") || "/my-schedule"));
+  let back = safeBack(String(form.get("back") || "/link/my-schedule"));
   let msg: string | undefined = undefined;
   let error: string | null = null;
   try {
@@ -25,7 +25,7 @@ export async function runAction(form: FormData, fn: () => Promise<ActionResult>)
     if (!(e instanceof WorkflowError)) console.error(e);
   }
   kickOutbox(db);
-  revalidatePath(back.split("?")[0] || "/my-schedule");
+  revalidatePath(back.split("?")[0] || "/link/my-schedule");
   const clean = back.replace(/([?&])(ok|error)=[^&]*&?/g, "$1").replace(/[?&]+$/, "");
   const sep2 = clean.includes("?") ? "&" : "?";
   if (error) redirect(`${clean}${sep2}error=${encodeURIComponent(error)}`);
