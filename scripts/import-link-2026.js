@@ -10,8 +10,8 @@ const path = require("path");
 const crypto = require("crypto");
 const { PrismaClient } = require("@prisma/client");
 
-const MARKER = "link-2026-sunday-v1";
-const DATA = path.join(__dirname, "..", "prisma", "data", "link-2026-sunday.json");
+const MARKER = "link-2026-sunday-clean-v1";
+const DATA = path.join(__dirname, "..", "prisma", "data", "link-2026-sunday-clean.json");
 
 const TIMES = {
   "08:30": { arrival: "07:00", preprayer: "07:20", duration: 120, sort: 1, templateName: "Sunday 08:30" },
