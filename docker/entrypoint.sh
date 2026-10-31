@@ -9,5 +9,10 @@ if node scripts/import-link-2026.js; then
 else
   echo "[entrypoint] link-2026-sunday-v1 import failed; continuing" >&2
 fi
-echo "[entrypoint] starting CRC Media on :${PORT:-3000}"
+echo "[entrypoint] tidying announcements and Thursday roles…"
+if node scripts/tidy-live.js; then
+  true
+else
+  echo "[entrypoint] tidy failed; continuing" >&2
+fi
 exec node server.js

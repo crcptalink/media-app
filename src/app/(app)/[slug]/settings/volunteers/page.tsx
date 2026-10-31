@@ -1,5 +1,5 @@
 import { CopyInvite } from "@/components/CopyInvite";
-import { VolunteerTable } from "@/components/VolunteerTable";
+import { ChoiceChips } from "@/components/ChoiceChips";
 import { Flash, one, type SP } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
 import { startViewAsAction } from "@/app/(app)/impersonation-actions";
@@ -9,13 +9,6 @@ import { canGrantLogin, safeInviteLink } from "@/lib/login-access";
 import { positionTitle } from "@/lib/positions";
 import { requirePeopleManager } from "@/lib/session";
 import { addPersonAction, sendInviteAction, setLoginAction, updatePersonAction } from "./actions";
-
-const STAGES = [
-  ["NONE", "—"],
-  ["SHADOW", "Shadow"],
-  ["TRAINEE", "Trainee"],
-  ["QUALIFIED", "Qualified"],
-] as const;
 
 export default async function PeoplePage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
@@ -36,63 +29,50 @@ export default async function PeoplePage({ searchParams, params }: { searchParam
   return (
     <div>
       <h1 className="h1 mb-4">Volunteers</h1>
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       {inviteLink && <CopyInvite url={inviteLink} name={inviteName || undefined} failedSend={one(sp.inviteReason) === "send"} />}
-      {!me.impersonatorId && <form action={addPersonAction} className="card grid gap-2 sm:grid-cols-5">
-        <input type="hidden" name="back" value={back} />
-        <input name="name" placeholder="Name" className="input sm:col-span-1" />
-        <input name="email" type="email" required placeholder="Email" className="input sm:col-span-2" />
-        <input name="phone" type="tel" placeholder="WhatsApp" className="input" />
-        <label className="text-sm">
-          <select name="role" defaultValue="VOLUNTEER" className="input">
-            {me.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
-            <option value="LEADER">Leader</option>
-            <option value="TWO_IC">2IC</option>
-            <option value="VOLUNTEER">Member</option>
-          </select>
-        </label>
-        <details className="sm:col-span-5">
-          <summary className="cursor-pointer text-sm font-medium">Departments</summary>
-          <div className="mt-2 flex flex-wrap gap-3 text-sm">
-            {departments.map((d) => (
-              <label key={d.id} className="flex items-center gap-1">
-                <input type="checkbox" name="dept" value={d.id} defaultChecked={d.slug === "link"} /> {d.name}
+      {!me.impersonatorId && (
+        <section>
+          <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Add Volunteer</h2>
+          <form action={addPersonAction} className="card space-y-4 border-l-4 border-l-blue-700">
+            <input type="hidden" name="back" value={back} />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block text-sm font-medium">Name<input name="name" className="input mt-1" /></label>
+              <label className="block text-sm font-medium">Email<input name="email" type="email" required className="input mt-1" /></label>
+              <label className="block text-sm font-medium">WhatsApp<input name="phone" type="tel" className="input mt-1" /></label>
+              <label className="block text-sm font-medium">Role
+                <select name="role" defaultValue="VOLUNTEER" className="input mt-1">
+                  {me.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
+                  <option value="LEADER">Leader</option>
+                  <option value="TWO_IC">2IC</option>
+                  <option value="VOLUNTEER">Member</option>
+                </select>
               </label>
-            ))}
-          </div>
-        </details>
-        <details className="sm:col-span-5">
-          <summary className="cursor-pointer text-sm font-medium">Positions</summary>
-          <div className="mt-2 flex flex-wrap gap-3 text-sm">
-            {positions.map((pos) => (
-              <label key={pos.id} className="flex items-center gap-1">
-                <input type="checkbox" name="position" value={pos.id} /> {pos.name}
+              <label className="block text-sm font-medium">Department
+                <select name="dept" defaultValue={departments.find((d) => d.slug === "link")?.id || departments[0]?.id || ""} className="input mt-1">
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
               </label>
-            ))}
-          </div>
-        </details>
-        <label className="flex items-center gap-2 text-sm sm:col-span-3">
-          <input type="checkbox" name="welcome" /> Send Invite Email
-        </label>
-        <SubmitButton className="btn-primary sm:col-span-2">Add</SubmitButton>
-      </form>}
-      <p className="muted">
-        Training stages per position: <b>Shadow</b> watches the leader set up (usually once) → <b>Trainee</b> sets up while the trainer watches → <b>Qualified</b> serves alone. Tick <b>Trainer</b> for LST / LT.
-      </p>
-      <h2 className="h2">Directory</h2>
-      <VolunteerTable people={people.map((p) => {
-          const m = p.memberships.find((x) => x.departmentId === dept.id);
-          const role = p.appRole === "ADMIN" ? "Admin" : m?.role === "LEADER" ? "Leader" : m?.role === "TWO_IC" ? "2IC" : "Member";
-          const positionsLabel = p.skills.map((s) => positions.find((x) => x.id === s.positionId)?.name).filter(Boolean).join(", ");
-          return { id: p.id, name: p.name || "", email: p.email || "", phone: p.phone || "", role, positions: positionsLabel, active: p.active };
-        })} />
-      <h2 className="h2">Edit A Volunteer</h2>
-      <ul className="space-y-3">
+            </div>
+            <div>
+              <p className="text-sm font-medium">Position</p>
+              <ChoiceChips name="position" multi options={positions.map((p) => ({ value: p.id, label: p.name }))} />
+            </div>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="welcome" /> Send Invite Email</label>
+            <SubmitButton className="btn-primary">Add</SubmitButton>
+          </form>
+        </section>
+      )}
+      <section>
+        <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Volunteers</h2>
+        <ul className="space-y-3">
         {people.map((p) => {
           const m = p.memberships.find((x) => x.departmentId === dept.id);
           return (
-            <li key={p.id} className={`card ${p.active ? "" : "opacity-60"}`}>
+            <li key={p.id} className={`card border-l-4 border-l-blue-700 ${p.active ? "" : "opacity-60"}`}>
               <details>
                 <summary className="flex cursor-pointer flex-wrap items-center gap-2">
                   <b>{p.name || p.email || "No name"}</b>
@@ -120,61 +100,31 @@ export default async function PeoplePage({ searchParams, params }: { searchParam
                 <form action={updatePersonAction} className="mt-3 space-y-3">
                   <input type="hidden" name="userId" value={p.id} />
                   <input type="hidden" name="back" value={back} />
-                  <div className="grid gap-2 sm:grid-cols-4">
-                    <input name="name" defaultValue={p.name || ""} placeholder="Name" className="input" />
-                    <input name="phone" defaultValue={p.phone || ""} placeholder="WhatsApp" className="input" />
-                    <label className="text-sm">
-                      <select name="role" defaultValue={p.appRole === "ADMIN" ? "ADMIN" : m?.role || "VOLUNTEER"} className="input">
+                  <input type="hidden" name="chipPositions" value="1" />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="block text-sm font-medium">Name<input name="name" defaultValue={p.name || ""} className="input mt-1" /></label>
+                    <label className="block text-sm font-medium">WhatsApp<input name="phone" defaultValue={p.phone || ""} className="input mt-1" /></label>
+                    <label className="block text-sm font-medium">Role
+                      <select name="role" defaultValue={p.appRole === "ADMIN" ? "ADMIN" : m?.role || "VOLUNTEER"} className="input mt-1">
                         {me.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
                         <option value="LEADER">Leader</option>
                         <option value="TWO_IC">2IC</option>
                         <option value="VOLUNTEER">Member</option>
                       </select>
                     </label>
-                    <div className="flex items-center gap-3 text-sm">
-                      <label className="flex items-center gap-1"><input type="checkbox" name="active" defaultChecked={p.active} /> Active</label>
-                    </div>
+                    <label className="block text-sm font-medium">Department
+                      <select name="dept" defaultValue={m?.departmentId || departments.find((d) => d.slug === "link")?.id || ""} className="input mt-1">
+                        {departments.map((d) => (
+                          <option key={d.id} value={d.id}>{d.name}</option>
+                        ))}
+                      </select>
+                    </label>
                   </div>
-                  <fieldset>
-                    <legend className="text-sm font-medium">Departments</legend>
-                    <p className="muted">Tick the departments this person can open. Admins can open every department even when it is not ticked.</p>
-                    <div className="mt-2 flex flex-wrap gap-3 text-sm">
-                      {departments.map((d) => (
-                        <label key={d.id} className="flex items-center gap-1">
-                          <input type="checkbox" name="dept" value={d.id} defaultChecked={p.memberships.some((x) => x.departmentId === d.id)} /> {d.name}
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-slate-500">
-                        <th className="py-1">Position</th>
-                        <th>Stage</th>
-                        <th>Trainer</th>
-                        <th>Needs supervision</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {positions.map((pos) => {
-                        const s = p.skills.find((x) => x.positionId === pos.id);
-                        return (
-                          <tr key={pos.id} className="border-t">
-                            <td className="py-1.5">{pos.name}</td>
-                            <td>
-                              <select name={`stage_${pos.id}`} defaultValue={s?.stage || "NONE"} className="rounded border px-1 py-1">
-                                {STAGES.map(([v, l]) => (
-                                  <option key={v} value={v}>{l}</option>
-                                ))}
-                              </select>
-                            </td>
-                            <td><input type="checkbox" name={`trainer_${pos.id}`} defaultChecked={s?.isTrainer} /></td>
-                            <td><input type="checkbox" name={`sup_${pos.id}`} defaultChecked={s?.needsSupervision} /></td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="active" defaultChecked={p.active} /> Active</label>
+                  <div>
+                    <p className="text-sm font-medium">Position</p>
+                    <ChoiceChips name="position" multi options={positions.map((pos) => ({ value: pos.id, label: pos.name }))} defaultValue={p.skills.map((s) => s.positionId)} />
+                  </div>
                   <SubmitButton>Save</SubmitButton>
                 </form>
                 <SignInControls
@@ -200,6 +150,7 @@ export default async function PeoplePage({ searchParams, params }: { searchParam
           );
         })}
       </ul>
+      </section>
     </div>
     </div>
   );

@@ -40,6 +40,7 @@ COPY --from=build /app/src ./src
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/scripts/notify-deploy.js ./scripts/notify-deploy.js
 COPY --from=build /app/scripts/import-link-2026.js ./scripts/import-link-2026.js
+COPY --from=build /app/scripts/tidy-live.js ./scripts/tidy-live.js
 COPY --from=build /opt/extra/node_modules ./node_modules
 COPY docker/entrypoint.sh ./docker/entrypoint.sh
 EXPOSE 3000

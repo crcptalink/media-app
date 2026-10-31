@@ -6,8 +6,11 @@ const TITLES: Record<string, string> = {
   LS: "Live Stream",
   L: "Link",
   LSL: "Live Stream & Link",
-  LST: "Live Stream Training",
-  LT: "Link Training",
+  LST: "Live Stream Trainer",
+  LSTE: "Live Stream Trainee",
+  LT: "Link Trainer",
+  LTE: "Link Trainee",
+  TEC: "Technical",
   T: "Training",
 };
 

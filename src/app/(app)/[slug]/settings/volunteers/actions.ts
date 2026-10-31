@@ -31,7 +31,7 @@ function readDeptRole(form: FormData, actorIsAdmin: boolean) {
 async function setDepartmentAccess(userId: string, form: FormData, linkRole: "LEADER" | "TWO_IC" | "VOLUNTEER") {
   const all = await db.department.findMany({ where: { active: true } });
   const selected = new Set(form.getAll("dept").map(String));
-  if (selected.size === 0) throw new WorkflowError("Tick at least one department");
+  if (selected.size === 0) throw new WorkflowError("Choose a department");
   const link = all.find((d) => d.slug === "link");
   for (const d of all) {
     if (!selected.has(d.id)) {
@@ -119,6 +119,19 @@ export async function updatePersonAction(form: FormData) {
     });
     await setDepartmentAccess(id, form, role);
     const positions = await db.position.findMany({ where: { departmentId: dept.id } });
+    if (form.get("chipPositions") === "1") {
+      const ids = new Set(form.getAll("position").map(String));
+      const allowed = positions.filter((p) => ids.has(p.id)).map((p) => p.id);
+      const drop = positions.map((p) => p.id).filter((pid) => !allowed.includes(pid));
+      if (drop.length) await db.userSkill.deleteMany({ where: { userId: id, positionId: { in: drop } } });
+      for (const positionId of allowed) {
+        await db.userSkill.upsert({
+          where: { userId_positionId: { userId: id, positionId } },
+          create: { userId: id, positionId, stage: "QUALIFIED" },
+          update: {},
+        });
+      }
+    } else {
     for (const p of positions) {
       const stage = str(form, `stage_${p.id}`);
       if (!stage || stage === "NONE") {
@@ -135,6 +148,7 @@ export async function updatePersonAction(form: FormData) {
         create: { userId: id, positionId: p.id, ...data },
         update: data,
       });
+    }
     }
     await db.auditLog.create({ data: { actorId: user.impersonatorId || user.id, action: "update_person", entity: "user", entityId: id } });
     return "Saved.";

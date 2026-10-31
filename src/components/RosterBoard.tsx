@@ -8,7 +8,7 @@ import { slotTitle } from "@/lib/positions";
 import type { Warning } from "@/lib/rules";
 import { fmtDateOnly, localTime, WEEKDAYS, weekdayOf } from "@/lib/time";
 import { TimePill } from "./TimePill";
-import { KIND_LABEL, StatusChip } from "./StatusChip";
+import { KIND_LABEL } from "./StatusChip";
 import { SubmitButton } from "./SubmitButton";
 
 export interface Person {
@@ -77,26 +77,28 @@ function EventCard({
   warnings: Warning[];
   back: string;
 }) {
-  const edge = weekdayOf(e.date) === 0 ? "border-l-4 border-l-blue-700" : weekdayOf(e.date) === 4 || e.kind === "TRAINING" ? "border-l-4 border-l-slate-400 bg-slate-50" : "";
+  const thursday = weekdayOf(e.date) === 4 || e.kind === "TRAINING";
+  const edge = weekdayOf(e.date) === 0 ? "border-l-4 border-l-blue-700" : thursday ? "border-l-4 border-l-sky-500 bg-sky-50" : "";
+  const label = "text-sm text-slate-700";
   return (
     <div className={`card ${edge}`}>
       <div className="flex flex-wrap items-center gap-2">
-        {weekdayOf(e.date) === 4 || e.kind === "TRAINING" ? (
+        {thursday ? (
           <>
             <TimePill time="18:30" />
-            <span className="text-xs font-medium text-sky-600">Pre-Prayer</span>
+            <span className={label}>Pre-Prayer</span>
             <TimePill time="19:00" />
-            <span className="text-xs font-medium text-sky-600">Training</span>
+            <span className={label}>Training</span>
           </>
         ) : (
           <>
             <TimePill time={localTime(e.startsAt)} />
-            <span className="text-xs text-slate-500">Arrival {localTime(e.arriveBy)}</span>
-            {e.preprayerAt && <span className="text-xs text-slate-500">Pre-Prayer {localTime(e.preprayerAt)}</span>}
+            <span className={label}>Arrival {localTime(e.arriveBy)}</span>
+            {e.preprayerAt && <span className={label}>Pre-Prayer {localTime(e.preprayerAt)}</span>}
           </>
         )}
         {mode === "admin" && (
-          <Link href={`/admin/events/${e.id}`} className="ml-auto text-xs text-blue-700 underline">Details</Link>
+          <Link href={`/admin/events/${e.id}`} className="ml-auto text-sm text-slate-700 underline">Details</Link>
         )}
       </div>
       
@@ -109,7 +111,7 @@ function EventCard({
           return (
             <li key={s.id} className="py-1.5">
               <div className="grid grid-cols-[9.5rem_minmax(0,1fr)_auto] items-center gap-x-3">
-                <span className="truncate text-sm font-semibold text-slate-800">{slotTitle(s.position, s.label)}</span>
+                <span className="truncate text-sm text-slate-800">{slotTitle(s.position, s.label)}</span>
                 {serving ? (
                   <AssignmentLine a={serving} mode={mode} me={me.id} back={back} serviceDate={e.date} />
                 ) : mode === "admin" ? (
@@ -118,13 +120,13 @@ function EventCard({
                   </div>
                 ) : (
                   <>
-                    <span className="text-sm text-slate-400">Open</span>
+                    <span className="text-sm text-slate-700">Open</span>
                     {!mineHere ? (
                       <form action={claimAction} className="justify-self-end">
                         <input type="hidden" name="slotId" value={s.id} />
                         <input type="hidden" name="kind" value="SERVING" />
                         <input type="hidden" name="back" value={back} />
-                        <SubmitButton className="btn-primary btn-sm">Serve</SubmitButton>
+                        <SubmitButton className="btn-primary btn-sm">Select</SubmitButton>
                       </form>
                     ) : (
                       <span />
@@ -150,7 +152,7 @@ function EventCard({
                     <input type="hidden" name="slotId" value={s.id} />
                     <input type="hidden" name="kind" value={myStage === "SHADOW" ? "SHADOW" : "TRAINEE"} />
                     <input type="hidden" name="back" value={back} />
-                    <SubmitButton className="btn-ghost btn-sm">Serve as {myStage === "SHADOW" ? "shadow" : "trainee"}</SubmitButton>
+                    <SubmitButton className="btn-ghost btn-sm">Select</SubmitButton>
                   </form>
                 )
               )}
@@ -184,30 +186,29 @@ function AssignmentLine({
   back: string;
   serviceDate: string;
 }) {
+  const awaiting = a.status === "CLAIM_PENDING" || (a.status === "PROPOSED" && !answersClosed(serviceDate));
   return (
     <>
-      <span className={`truncate text-sm ${(a.status === "PROPOSED" && !answersClosed(serviceDate)) || a.status === "CLAIM_PENDING" ? "text-slate-500" : a.userId === me ? "font-medium text-blue-800" : "font-medium text-slate-900"}`}>
+      <span className={`truncate text-sm text-slate-800 ${awaiting ? "rounded bg-sky-100 px-1.5 py-0.5" : ""}`}>
         {displayName(a.user)}
-        {a.status === "ACCEPTED" && <span className="ml-2 text-xs font-medium text-emerald-700">Accepted</span>}
+        {a.status === "ACCEPTED" && <span className="ml-2 text-sm text-slate-700">Accepted</span>}
+        {awaiting && <span className="ml-2 text-sm text-slate-800">Awaiting</span>}
       </span>
       <span className="flex items-center justify-end gap-2">
-        {a.status === "PROPOSED" && !answersClosed(serviceDate) ? null : <StatusChip status={a.status} serviceDate={serviceDate} />}
-        {mode === "admin" && (
-          <span className="flex gap-1">
-            {a.status === "CLAIM_PENDING" && (
-              <form action={decideAction} className="flex gap-1">
-                <input type="hidden" name="assignmentId" value={a.id} />
-                <input type="hidden" name="back" value={back} />
-                <SubmitButton className="btn-green btn-sm" name="decision" value="approve">Approve</SubmitButton>
-                <SubmitButton className="btn-red btn-sm" name="decision" value="reject">Reject</SubmitButton>
-              </form>
-            )}
-            <form action={removeAction}>
-              <input type="hidden" name="assignmentId" value={a.id} />
-              <input type="hidden" name="back" value={back} />
-              <SubmitButton className="btn-ghost btn-sm" confirm={`Remove ${displayName(a.user)}?`}>Remove</SubmitButton>
-            </form>
-          </span>
+        {mode === "admin" && a.status === "CLAIM_PENDING" && (
+          <form action={decideAction} className="flex gap-1">
+            <input type="hidden" name="assignmentId" value={a.id} />
+            <input type="hidden" name="back" value={back} />
+            <SubmitButton className="btn-green btn-sm" name="decision" value="approve">Approve</SubmitButton>
+            <SubmitButton className="btn-red btn-sm" name="decision" value="reject">Reject</SubmitButton>
+          </form>
+        )}
+        {mode === "admin" && a.status !== "CLAIM_PENDING" && (
+          <form action={removeAction}>
+            <input type="hidden" name="assignmentId" value={a.id} />
+            <input type="hidden" name="back" value={back} />
+            <SubmitButton className="btn-ghost btn-sm" confirm={`Remove ${displayName(a.user)}?`}>Remove</SubmitButton>
+          </form>
         )}
       </span>
     </>

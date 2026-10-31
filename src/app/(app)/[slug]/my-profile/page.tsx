@@ -53,8 +53,9 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
             <input type="hidden" name="back" value={back} />
             <input name="photo" type="file" accept="image/*" className="hidden" />
 
-            <section className="card space-y-4">
-              <h2 className="h2">My Details</h2>
+            <section>
+              <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">My Details</h2>
+              <div className="card space-y-4 border-l-4 border-l-blue-700">
               <label className="block text-sm font-medium">First Name<input name="name" defaultValue={user.name || ""} required className="input mt-1" /></label>
               <label className="block text-sm font-medium">Surname<input name="surname" defaultValue={user.surname || ""} required className="input mt-1" /></label>
               <label className="block text-sm font-medium">Email<input name="email" type="email" defaultValue={user.email || ""} required className="input mt-1" /></label>
@@ -74,55 +75,52 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
                 <p className="text-sm font-medium">Shirt Size</p>
                 <ChoiceChips name="shirtSize" options={SIZES.map((s) => ({ value: s, label: s }))} defaultValue={user.shirtSize || undefined} />
               </div>
+              </div>
             </section>
 
-            <section className="card space-y-4">
-              <h2 className="h2">Serving</h2>
+            <section>
+              <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Serving</h2>
+              <div className="card space-y-4 border-l-4 border-l-blue-700">
               {canEditRole ? (
                 <>
                   <input type="hidden" name="manageAccess" value="1" />
-                  <label className="block text-sm font-medium">Role
-                    <select name="deptRole" defaultValue={user.appRole === "ADMIN" ? "ADMIN" : user.memberships[0]?.role || "VOLUNTEER"} className="input mt-1">
-                      {user.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
-                      <option value="LEADER">Leader</option>
-                      <option value="TWO_IC">2IC</option>
-                      <option value="VOLUNTEER">Member</option>
-                    </select>
-                  </label>
-                  <div>
-                    <p className="text-sm font-medium">Department</p>
-                    <div className="mt-1 flex flex-wrap gap-3 text-sm">
-                      {departments.map((d) => (
-                        <label key={d.id} className="flex items-center gap-1">
-                          <input type="checkbox" name="dept" value={d.id} defaultChecked={user.memberships.some((m) => m.departmentId === d.id)} /> {d.name}
-                        </label>
-                      ))}
-                    </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="block text-sm font-medium">Role
+                      <select name="deptRole" defaultValue={user.appRole === "ADMIN" ? "ADMIN" : user.memberships[0]?.role || "VOLUNTEER"} className="input mt-1">
+                        {user.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
+                        <option value="LEADER">Leader</option>
+                        <option value="TWO_IC">2IC</option>
+                        <option value="VOLUNTEER">Member</option>
+                      </select>
+                    </label>
+                    <label className="block text-sm font-medium">Department
+                      <select name="dept" defaultValue={user.memberships[0]?.departmentId || departments[0]?.id || ""} className="input mt-1">
+                        {departments.map((d) => (
+                          <option key={d.id} value={d.id}>{d.name}</option>
+                        ))}
+                      </select>
+                    </label>
                   </div>
                   <div>
                     <p className="text-sm font-medium">Position</p>
-                    <div className="mt-1 flex flex-wrap gap-3 text-sm">
-                      {positions.map((p) => (
-                        <label key={p.id} className="flex items-center gap-1">
-                          <input type="checkbox" name="position" value={p.id} defaultChecked={skills.some((s) => s.positionId === p.id)} /> {p.name}
-                        </label>
-                      ))}
-                    </div>
+                    <ChoiceChips name="position" multi options={positions.map((p) => ({ value: p.id, label: p.name }))} defaultValue={skills.map((s) => s.positionId)} />
                   </div>
                 </>
               ) : (
-                <div className="space-y-1 text-sm">
+                <div className="grid gap-3 text-sm text-slate-800 sm:grid-cols-2">
                   <p>Role: {roleLabel}</p>
                   <p>Department: {deptNames}</p>
-                  <p>Position: {posNames}</p>
-                  <p className="muted">Only leaders and admins can change these.</p>
+                  <p className="sm:col-span-2">Position: {posNames}</p>
+                  <p className="muted sm:col-span-2">Only leaders and admins can change these.</p>
                 </div>
               )}
-              <p className="text-sm"><span className="font-medium">Joined Date</span><span className="mt-1 block">{user.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Johannesburg" })}</span></p>
+              <p className="text-sm text-slate-800"><span className="font-medium">Joined Date</span><span className="mt-1 block">{user.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Johannesburg" })}</span></p>
+              </div>
             </section>
 
-            <section className="card space-y-4">
-              <h2 className="h2">Structure</h2>
+            <section>
+              <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Structure</h2>
+              <div className="card space-y-4 border-l-4 border-l-blue-700">
               <label className="block text-sm font-medium">Zone Pastor<input name="zonePastor" defaultValue={user.zonePastor || ""} className="input mt-1" /></label>
               <label className="block text-sm font-medium">Homecell Leader<input name="homecellLeader" defaultValue={user.homecellLeader || ""} className="input mt-1" /></label>
               <div>
@@ -134,6 +132,7 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
                 <ChoiceChips name="services" multi options={[{ value: "08:30", label: "08:30" }, { value: "10:30", label: "10:30" }, { value: "18:00", label: "18:00" }]} defaultValue={sundayDefault} />
               </div>
               <SubmitButton>Save Profile</SubmitButton>
+              </div>
             </section>
           </form>
           <form action={setPasswordAction} className="card space-y-3">
