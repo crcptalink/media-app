@@ -20,7 +20,7 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
     db.serviceTemplate.findMany({ where: { departmentId: dept.id, groupId: null }, orderBy: { startTime: "asc" }, include: { slots: true } }),
     getGraceMinutes(db),
   ]);
-  const back = "/admin/setup";
+  const back = "/settings/setup";
   const tv = `${config.appUrl}/tv?token=${config.tvToken}`;
   const checkinDisplay = `${config.appUrl}/checkin-display?token=${config.kioskToken}`;
 

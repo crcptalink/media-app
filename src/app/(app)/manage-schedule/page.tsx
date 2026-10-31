@@ -31,11 +31,11 @@ export default async function AdminRosterPage({ searchParams }: { searchParams: 
     orderBy: { createdAt: "asc" },
   });
   const skills = await db.userSkill.findMany({ where: { userId: user.id } });
-  const back = `/admin/roster?from=${from}`;
+  const back = `/manage-schedule?from=${from}`;
   return (
     <div>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <WeekNav from={from} base="/admin/roster" />
+      <WeekNav from={from} base="/manage-schedule" />
       {claims.length > 0 && (
         <div className="card mb-6 border-purple-200">
           <h2 className="h2 mb-2">Slot requests ({claims.length})</h2>

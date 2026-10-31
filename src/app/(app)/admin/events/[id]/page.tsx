@@ -55,7 +55,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
     <div className="mx-auto max-w-4xl space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <div>
-        <Link href="/admin/roster" className="text-sm text-blue-700 underline">← Admin schedule</Link>
+        <Link href="/admin/manage" className="text-sm text-blue-700 underline">← Admin schedule</Link>
         <h1 className="h1 mt-1">{fmtDay(e.date)} <span className="ml-2 tabular-nums">{localTime(e.startsAt)}</span></h1>
         <div className="mt-2 text-sm text-slate-600">
           <p className="text-xs font-medium text-slate-500">Arrival</p>
@@ -78,7 +78,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
                 <span className="text-sm font-semibold">{slotTitle(s.position, s.label)}</span>
                 <form action={deleteSlotAction} className="ml-auto">
                   <input type="hidden" name="slotId" value={s.id} />
-                  <input type="hidden" name="back" value="/admin/roster" />
+                  <input type="hidden" name="back" value="/admin/manage" />
                   <SubmitButton className="btn-ghost btn-sm" confirm="Delete this empty slot?">Delete slot</SubmitButton>
                 </form>
               </div>
@@ -193,7 +193,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
           {e.status !== "CANCELLED" && (
             <form action={cancelEventAction} className="mt-4">
               <input type="hidden" name="eventId" value={e.id} />
-              <input type="hidden" name="back" value="/admin/roster" />
+              <input type="hidden" name="back" value="/admin/manage" />
               <SubmitButton className="btn-red" confirm="Cancel this whole event? Everyone confirmed gets a cancellation.">Cancel event</SubmitButton>
             </form>
           )}

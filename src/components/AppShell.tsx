@@ -12,29 +12,30 @@ export type ShellDepartment = { slug: string; name: string; href: string; ready:
 function titleFor(pathname: string) {
   const rules: [string, string][] = [
     ["/admin/events/", "Event"],
-    ["/admin/approvals", "My Approvals"],
-    ["/admin/roster", "Admin Schedule"],
-    ["/admin/people", "People"],
-    ["/admin/rules", "Rules And Notes"],
-    ["/admin/setup", "Setup"],
-    ["/admin/outbox", "Emails"],
-    ["/me/availability", "My Availability"],
-    ["/me/password", "My Profile"],
-    ["/me/training", "My Training"],
-    ["/me/announcements", "Announcements"],
-    ["/roster", "Team Schedule"],
+    
+    ["/manage-schedule", "Manage Schedule"],
+    ["/settings", "Settings"],
+    ["/admin/volunteers", "Volunteers"],
+    ["/settings/rules", "Rules"],
+    ["/settings/setup", "Setup"],
+    ["/settings/emails", "Emails"],
+    ["/my-availability", "My Availability"],
+    ["/my-profile", "My Profile"],
+    ["/my-training", "My Training"],
+    ["/my-announcements", "Announcements"],
+    ["/team-schedule", "Team Schedule"],
     ["/d/", "Coming Soon"],
   ];
   for (const [prefix, title] of rules) {
     if (pathname === prefix || pathname.startsWith(prefix)) return title;
   }
-  if (pathname === "/me") return "My Schedule";
+  if (pathname === "/my-schedule") return "My Schedule";
   return "Departments";
 }
 
 function navActive(pathname: string, href: string) {
-  if (href === "/me") return pathname === "/me";
-  if (href === "/admin/roster") return pathname === "/admin/roster" || pathname.startsWith("/admin/events/");
+  if (href === "/my-schedule") return pathname === "/my-schedule";
+  if (href === "/admin/manage") return pathname === "/admin/manage" || pathname.startsWith("/admin/events/");
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -145,6 +146,12 @@ export function AppShell({
           <div className="ml-auto flex items-center gap-3">
             {user ? (
               <>
+                <Link href="/my-announcements" className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100" aria-label="Notifications">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                </Link>
                 <span className="hidden max-w-[12rem] truncate text-sm text-slate-600 sm:inline">{user.label}</span>
                 {signOut && (
                   <form action={signOut}>

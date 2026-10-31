@@ -13,16 +13,21 @@ function fromParam(raw: string | undefined) {
 
 export default async function RosterPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const user = await requireUser("/roster");
+  const user = await requireUser("/team-schedule");
   const dept = await getDepartment(db);
   const from = fromParam(one(sp.from));
   const events = await loadRoster(db, dept.id, from, addDays(from, SCHEDULE_DAYS - 1));
   const skills = await db.userSkill.findMany({ where: { userId: user.id } });
-  const back = `/roster?from=${from}`;
+  const back = `/team-schedule?from=${from}`;
   return (
     <div>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <WeekNav from={from} base="/roster" />
+      <WeekNav from={from} base="/team-schedule" />
+      {events.some((e) => e.slots.some((s) => !s.assignments.some((a) => a.kind === "SERVING"))) && (
+        <div className="mb-4 rounded-lg border-l-4 border-l-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
+          We need someone for this Sunday. Open slots are available — please step up if you can serve.
+        </div>
+      )}
       <RosterBoard events={events} mode="volunteer" me={{ id: user.id, skills }} back={back} />
     </div>
   );

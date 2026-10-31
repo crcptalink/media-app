@@ -29,11 +29,11 @@ export async function stopViewingAsAction() {
       data: { actorId: realId, action: "impersonate_stop", entity: "user", entityId: view.targetId },
     });
   }
-  redirect("/admin/people");
+  redirect("/admin/volunteers");
 }
 
 export async function startViewAsAction(form: FormData) {
-  const back = "/admin/people";
+  const back = "/admin/volunteers";
   try {
     const session = await auth();
     const realId = session?.user?.id;
@@ -72,5 +72,5 @@ export async function startViewAsAction(form: FormData) {
     if (!(e instanceof WorkflowError)) console.error(e);
     redirect(`${back}?error=${encodeURIComponent(message)}`);
   }
-  redirect("/me");
+  redirect("/my-schedule");
 }

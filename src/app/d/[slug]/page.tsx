@@ -13,7 +13,7 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
   const { slug } = await params;
   const dept = await db.department.findUnique({ where: { slug } });
   if (!dept || !dept.active) notFound();
-  if (dept.ready && dept.slug === "link") redirect("/me");
+  if (dept.ready && dept.slug === "link") redirect("/my-schedule");
   const user = await currentUser();
   await redirectIfPasswordChangeRequired(user);
   const all = await db.department.findMany({ where: { active: true } });

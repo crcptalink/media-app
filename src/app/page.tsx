@@ -15,7 +15,7 @@ export default async function Home({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const user = await currentUser();
   await redirectIfPasswordChangeRequired(user);
-  if (user && !showDepartmentMenu(user)) redirect("/me");
+  if (user && !showDepartmentMenu(user)) redirect("/my-schedule");
   const all = await db.department.findMany({ where: { active: true } });
   const departments = menuDepartments(user, all);
   const cards = departments;

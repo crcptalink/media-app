@@ -28,7 +28,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
     include: { memberships: true, skills: true },
     orderBy: [{ active: "desc" }, { name: "asc" }],
   });
-  const back = "/admin/people";
+  const back = "/settings/volunteers";
   const inviteLink = safeInviteLink(one(sp.invite), config.appUrl);
   const inviteName = (one(sp.inviteName) || "").replace(/[^\p{L}\p{N} .'-]/gu, "").slice(0, 80);
   return (

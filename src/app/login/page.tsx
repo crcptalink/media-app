@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export default async function LoginPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const session = await auth();
-  const callbackUrl = one(sp.callbackUrl) || "/me";
+  const callbackUrl = one(sp.callbackUrl) || "/my-schedule";
   if (session?.user) redirect(callbackUrl);
   const error = one(sp.error);
   const mode = one(sp.mode) === "password" ? "password" : "link";

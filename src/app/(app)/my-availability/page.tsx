@@ -7,7 +7,7 @@ import { addDays, localTime, todayLocal } from "@/lib/time";
 
 export default async function AvailabilityPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const user = await requireUser("/me/availability");
+  const user = await requireUser("/my-availability");
   const dept = await getDepartment(db);
   const today = todayLocal();
   const events = await db.event.findMany({

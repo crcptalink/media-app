@@ -11,7 +11,7 @@ import { claimAction, markReadAction } from "../../actions";
 
 export default async function AnnouncementsPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const user = await requireUser("/me/announcements");
+  const user = await requireUser("/my-announcements");
   const dept = await getDepartment(db);
   const today = todayLocal();
   const events = await loadRoster(db, dept.id, today, addDays(today, 34));
@@ -22,7 +22,7 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
       .map((s) => ({ e, s })),
   );
   const notes = await db.notification.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 15 });
-  const back = "/me/announcements";
+  const back = "/my-announcements";
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

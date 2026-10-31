@@ -5,12 +5,12 @@ import { signIn } from "@/auth";
 import { db } from "@/lib/db";
 
 function safe(url: string) {
-  return url.startsWith("/") && !url.startsWith("//") ? url : "/me";
+  return url.startsWith("/") && !url.startsWith("//") ? url : "/my-schedule";
 }
 
 export async function magicLinkAction(form: FormData) {
   const email = String(form.get("email") || "").trim().toLowerCase();
-  const callbackUrl = safe(String(form.get("callbackUrl") || "/me"));
+  const callbackUrl = safe(String(form.get("callbackUrl") || "/my-schedule"));
   if (!email) redirect("/login?error=MissingEmail");
   const user = await db.user.findUnique({ where: { email } });
   if (!user || !user.active) redirect(`/login?error=AccessDenied&email=${encodeURIComponent(email)}`);
@@ -27,7 +27,7 @@ export async function magicLinkAction(form: FormData) {
 export async function passwordAction(form: FormData) {
   const email = String(form.get("email") || "").trim().toLowerCase();
   const password = String(form.get("password") || "");
-  const callbackUrl = safe(String(form.get("callbackUrl") || "/me"));
+  const callbackUrl = safe(String(form.get("callbackUrl") || "/my-schedule"));
   try {
     await signIn("credentials", { email, password, redirectTo: callbackUrl });
   } catch (e) {

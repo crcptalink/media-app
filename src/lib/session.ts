@@ -38,7 +38,7 @@ export async function currentUser(): Promise<CurrentUser | null> {
  */
 export async function redirectIfPasswordChangeRequired(user: CurrentUser | null) {
   if (!user?.mustChangePassword || user.impersonatorId) return;
-  redirect("/me/password");
+  redirect("/my-profile");
 }
 
 export function departmentRole(u: CurrentUser, departmentId: string) {
@@ -76,7 +76,7 @@ export async function requireUser(callbackUrl = "/me") {
 }
 
 export async function requireScheduleManager() {
-  const u = await requireUser("/admin/roster");
+  const u = await requireUser("/admin/manage");
   const dept = await getDepartment(db);
   assertDepartmentAccess(u, dept.id);
   if (!canManageSchedule(u, dept.id)) redirect("/me?error=" + encodeURIComponent("Leaders and 2ICs only"));
@@ -84,7 +84,7 @@ export async function requireScheduleManager() {
 }
 
 export async function requirePeopleManager() {
-  const u = await requireUser("/admin/people");
+  const u = await requireUser("/admin/volunteers");
   const dept = await getDepartment(db);
   assertDepartmentAccess(u, dept.id);
   if (!canManagePeople(u, dept.id)) redirect("/me?error=" + encodeURIComponent("Leaders only"));

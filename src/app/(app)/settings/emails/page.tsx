@@ -13,7 +13,7 @@ export default async function OutboxPage({ searchParams }: { searchParams: SP })
   await requireAdmin();
   const rows = await db.emailOutbox.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
   const failed = rows.filter((r) => r.status === "FAILED").length;
-  const back = "/admin/outbox";
+  const back = "/settings/emails";
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />

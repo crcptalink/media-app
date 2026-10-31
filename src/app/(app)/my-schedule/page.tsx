@@ -41,7 +41,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
       })
     : [];
   const servingSunday = new Set(sundaySlots.map((a) => a.slot.event.date));
-  const back = "/me";
+  const back = "/my-schedule";
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">

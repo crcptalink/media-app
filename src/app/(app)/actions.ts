@@ -79,7 +79,7 @@ export async function toggleUnavailableAction(form: FormData) {
 export async function toggleUnavailableNow(date: string, templateId: string | null) {
   const user = await requireUser();
   await flipUnavailable(user.id, date, templateId);
-  revalidatePath("/me/availability");
+  revalidatePath("/my-availability");
 }
 
 export async function setTrainingRsvp(eventId: string, part: "PREPRAYER" | "SESSION", response: "YES" | "NO") {
@@ -91,7 +91,7 @@ export async function setTrainingRsvp(eventId: string, part: "PREPRAYER" | "SESS
     create: { eventId, userId: user.id, part, response },
     update: { response },
   });
-  revalidatePath("/me");
+  revalidatePath("/my-schedule");
 }
 
 export async function rsvpAction(form: FormData) {

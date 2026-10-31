@@ -22,7 +22,7 @@ export default async function RulesPage({ searchParams }: { searchParams: SP }) 
     return u ? displayName(u) : "?";
   };
   const tplOf = (id: string) => templates.find((t) => t.id === id)?.name ?? "?";
-  const back = "/admin/rules";
+  const back = "/settings/rules";
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
@@ -45,7 +45,7 @@ export default async function RulesPage({ searchParams }: { searchParams: SP }) 
                     {l.severity === "INFO" ? " · soft" : ""}
                   </span>
                 )}
-                <Link href={`/admin/rules?edit=${l.id}`} className="btn-ghost btn-sm">Edit</Link>
+                <Link href={`/settings/rules?edit=${l.id}`} className="btn-ghost btn-sm">Edit</Link>
               </li>
             );
           }
@@ -109,7 +109,7 @@ export default async function RulesPage({ searchParams }: { searchParams: SP }) 
                 </fieldset>
                 <div className="flex gap-2">
                   <SubmitButton>Save</SubmitButton>
-                  <Link href="/admin/rules" className="btn-ghost">Cancel</Link>
+                  <Link href="/settings/rules" className="btn-ghost">Cancel</Link>
                 </div>
               </form>
               <form action={deleteLineAction}>
