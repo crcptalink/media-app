@@ -110,7 +110,7 @@ function EventCard({
           const mineHere = s.assignments.some((a) => a.userId === me.id);
           return (
             <li key={s.id} className="py-1.5">
-              <div className="grid grid-cols-[9.5rem_minmax(0,1fr)_auto] items-center gap-x-3">
+              <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[9.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-3">
                 <span className="truncate text-sm text-slate-800">{slotTitle(s.position, s.label)}</span>
                 {serving ? (
                   <AssignmentLine a={serving} mode={mode} me={me.id} back={back} serviceDate={e.date} />
@@ -190,7 +190,7 @@ function AssignmentLine({
   return (
     <>
       <span className="truncate text-sm text-slate-800">
-        <span className={a.userId === me ? "rounded bg-green-600 px-1.5 py-0.5 font-medium text-white" : ""}>{displayName(a.user)}</span>
+        <span className={a.userId === me ? "rounded-full bg-green-600 px-2 py-0.5 font-medium text-white" : ""}>{displayName(a.user)}</span>
         {a.status === "ACCEPTED" && <span className="ml-2 text-sm text-slate-700">Accepted</span>}
         {awaiting && <span className="ml-2 rounded bg-sky-100 px-1.5 py-0.5 text-sm text-slate-800">Awaiting</span>}
       </span>

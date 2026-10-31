@@ -56,7 +56,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <div>
         <Link href={`/${dept.slug}/manage-schedule`} className="text-sm text-blue-700 underline">Back To Manage Schedule</Link>
-        <h1 className="h1 mt-1">{fmtDay(e.date)} <span className="ml-2 tabular-nums">{localTime(e.startsAt)}</span></h1>
+        <h1 className="section-head mt-3">{fmtDay(e.date)} <span className="ml-2 tabular-nums">{localTime(e.startsAt)}</span></h1>
         <div className="mt-2 text-sm text-slate-600">
           <p className="text-xs font-medium text-slate-500">Arrival</p>
           <p>{localTime(e.arriveBy)}</p>
@@ -69,8 +69,8 @@ export default async function EventPage({ params, searchParams }: { params: Prom
         </div>
       </div>
 
-      <section className="card">
-        <h2 className="h2 mb-3">Slots</h2>
+      <section className="card border-l-4 border-l-blue-700">
+        <h2 className="section-head">Slots</h2>
         <ul className="divide-y">
           {e.slots.map((s) => (
             <li key={s.id} className="py-3">

@@ -27,15 +27,13 @@ export default async function RulesPage({ searchParams, params }: { searchParams
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <p className="muted">
-        One line per item. A note is just text. A rule is a note linked to people and services, and shows warnings on the admin schedule. Tap Edit on a line to change it. When a line looks like a known rule, a suggestion is filled in for you to check.
-      </p>
+      <h1 className="section-head">Rules</h1>
       <ol className="space-y-2">
         {lines.map((l) => {
           const p = asParams(l.params);
           if (l.id !== editId) {
             return (
-              <li key={l.id} className={`card flex flex-wrap items-center gap-2 py-3 ${l.active ? "" : "opacity-50"}`}>
+              <li key={l.id} className={`card flex flex-wrap items-center gap-2 border-l-4 border-l-blue-700 py-3 ${l.active ? "" : "opacity-50"}`}>
                 <span className={`chip ${l.kind === "RULE" ? "bg-blue-100 text-blue-800" : "bg-slate-100 text-slate-600"}`}>{l.kind === "RULE" ? "Rule" : "Note"}</span>
                 <span className="flex-1">{l.text}</span>
                 {l.kind === "RULE" && l.ruleType && (

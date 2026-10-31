@@ -1,0 +1,13 @@
+{
+	auto_https off
+	admin off
+}
+
+:443 {
+	tls internal
+	reverse_proxy app:3000
+}
+
+:80 {
+	reverse_proxy app:3000
+}

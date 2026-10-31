@@ -87,7 +87,19 @@ export function VolunteerDirectory({
           {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <div className="space-y-2 md:hidden">
+        {rows.map((p) => (
+          <article key={p.id} className={`card border-l-4 border-l-blue-700 ${p.active ? "" : "opacity-50"}`}>
+            <p className="font-medium text-slate-900">{[p.name, p.surname].filter(Boolean).join(" ") || "No name"}</p>
+            <p className="text-sm text-slate-700">{p.role} · {p.department || "No department"}</p>
+            <p className="text-sm text-slate-700">{p.positions || "No position"}</p>
+            <p className="text-sm text-slate-700">{p.email || "No email"}</p>
+            <button type="button" className="btn-primary btn-sm mt-2" onClick={() => setEditing(p)}>Edit</button>
+          </article>
+        ))}
+        {rows.length === 0 && <p className="muted">No volunteers match.</p>}
+      </div>
+      <div className="hidden overflow-x-auto rounded-xl border border-slate-200 bg-white md:block">
         <table className="w-full min-w-[72rem] text-left text-sm text-slate-800">
           <thead className="bg-blue-800 text-white">
             <tr>

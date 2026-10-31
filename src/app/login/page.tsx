@@ -34,7 +34,9 @@ export default async function LoginPage({ searchParams }: { searchParams: SP }) 
         <p className="mt-1 text-sm text-slate-500">CRC Pretoria</p>
       </div>
       {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-red-200">{ERRORS[error] || "Sign-in failed. Try again."}</div>}
-      <div className="card">
+      <div className="card overflow-hidden p-0">
+        <h2 className="section-head rounded-none">Sign In</h2>
+        <div className="p-4">
         {mode === "link" ? (
           <form action={magicLinkAction} className="space-y-3">
             <input type="hidden" name="callbackUrl" value={callbackUrl} />
@@ -58,6 +60,7 @@ export default async function LoginPage({ searchParams }: { searchParams: SP }) 
             </p>
           </form>
         )}
+        </div>
       </div>
     </main>
   );

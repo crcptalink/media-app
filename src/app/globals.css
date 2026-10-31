@@ -24,5 +24,6 @@
   .h1 { @apply text-xl font-semibold tracking-tight text-slate-900; }
   .h2 { @apply text-base font-semibold text-slate-900; }
   .muted { @apply text-sm text-slate-500; }
-  .chip { @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium; }
+  .chip { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+  .section-head { @apply mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white; }
 }
