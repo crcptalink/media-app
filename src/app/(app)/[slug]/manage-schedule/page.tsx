@@ -7,7 +7,8 @@ import { loadRoster } from "@/lib/roster";
 import { requireScheduleManager } from "@/lib/session";
 import { addDays, todayLocal } from "@/lib/time";
 import { loadWarnings } from "@/lib/warnings";
-import { decideAction } from "@/app/(app)/admin/actions";
+import { decideAction, proposeAction } from "@/app/(app)/admin/actions";
+import { suggestForEmptySlots } from "@/lib/suggest";
 import { SubmitButton } from "@/components/SubmitButton";
 
 function fromParam(raw: string | undefined) {
@@ -25,6 +26,7 @@ export default async function AdminRosterPage({ searchParams }: { searchParams: 
     select: { id: true, name: true, email: true, skills: { select: { positionId: true, stage: true, isTrainer: true } } },
   });
   const warnings = await loadWarnings(db, dept.id, events);
+  const suggestions = await suggestForEmptySlots(db, dept.id, events);
   const claims = await db.assignment.findMany({
     where: { status: "CLAIM_PENDING", slot: { event: { departmentId: dept.id } } },
     include: { user: true, slot: { include: { position: true, event: true } } },
@@ -36,6 +38,26 @@ export default async function AdminRosterPage({ searchParams }: { searchParams: 
     <div>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <WeekNav from={from} base="/manage-schedule" />
+      {suggestions.length > 0 && (
+        <div className="card mb-4 border-blue-200 bg-blue-50">
+          <p className="mb-2 text-sm font-semibold text-blue-900">Suggestions for open slots</p>
+          <ul className="space-y-1 text-sm">
+            {suggestions.map((s) => (
+              <li key={s.slotId} className="flex items-center gap-2">
+                <span className="flex-1">{s.userName} — {s.reason}</span>
+                <form action={proposeAction}>
+                  <input type="hidden" name="slotId" value={s.slotId} />
+                  <input type="hidden" name="userId" value={s.userId} />
+                  <input type="hidden" name="kind" value="SERVING" />
+                  <input type="hidden" name="mode" value="assign" />
+                  <input type="hidden" name="back" value={back} />
+                  <SubmitButton className="btn-primary btn-sm">Assign</SubmitButton>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {claims.length > 0 && (
         <div className="card mb-6 border-purple-200">
           <h2 className="h2 mb-2">Slot requests ({claims.length})</h2>
