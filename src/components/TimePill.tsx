@@ -1,8 +1,7 @@
 /** Same colour for a clock time everywhere. */
 export function timePillClass(hhmm: string) {
   const hm = hhmm.slice(0, 5);
-  if (hm === "08:30" || hm === "18:00") return "bg-blue-700 text-white";
-  if (hm === "10:30") return "bg-cyan-600 text-white";
+  if (hm === "08:30" || hm === "10:30" || hm === "18:00") return "bg-blue-700 text-white";
   if (hm === "18:30" || hm === "19:00") return "bg-sky-500 text-white";
   return "bg-slate-700 text-white";
 }

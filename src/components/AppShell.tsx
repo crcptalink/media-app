@@ -22,7 +22,7 @@ function titleFor(pathname: string) {
     ["/my-availability", "My Availability"],
     ["/my-profile", "My Profile"],
     ["/my-training", "My Training"],
-    ["/my-announcements", "Announcements"],
+    ["/my-announcements", "Notifications"],
     ["/team-schedule", "Team Schedule"],
     ["/d/", "Department"],
   ];

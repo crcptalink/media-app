@@ -8,7 +8,7 @@ export function appNav(opts: { slug: string; unread?: number; schedule: boolean;
     { href: `${p}/my-availability`, label: "My Availability" },
     { href: `${p}/my-training`, label: "My Training" },
     { href: `${p}/my-profile`, label: "My Profile" },
-    { href: `${p}/my-announcements`, label: "Announcements", badge: opts.unread || undefined },
+    { href: `${p}/my-announcements`, label: "Notifications", badge: opts.unread || undefined },
   ];
   if (opts.schedule) nav.push({ href: `${p}/manage-schedule`, label: "Manage Schedule", badge: opts.pendingClaims || undefined });
   if (opts.people || opts.admin) nav.push({ href: `${p}/settings`, label: "Settings" });

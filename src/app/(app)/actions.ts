@@ -125,23 +125,41 @@ export async function updateProfileAction(form: FormData) {
   const user = await requireUser();
   await runAction(form, async () => {
     if (user.impersonatorId) throw new WorkflowError("You can't change this profile while viewing as someone else");
-    await db.user.update({
-      where: { id: user.id },
-      data: {
-        name: str(form, "name") || null,
-        surname: str(form, "surname") || null,
-        email: str(form, "email") || null,
-        phone: [str(form, "countryCode") || "+27", str(form, "phone")].filter(Boolean).join(" ") || null,
-        birthday: str(form, "birthday") || null,
-        homecellLeader: str(form, "homecellLeader") || null,
-        zonePastor: str(form, "zonePastor") || null,
-        attendingHomecell: form.get("attendingHomecell") === "yes" ? true : form.get("attendingHomecell") === "no" ? false : null,
-        attendingSundays: form.getAll("services").map(String).filter((t) => t === "08:30" || t === "10:30" || t === "18:00").join(",") || null,
-        shirtSize: str(form, "shirtSize") || null,
-      },
-    });
+    const section = str(form, "section") || "all";
+    const data: {
+      name?: string | null;
+      surname?: string | null;
+      email?: string | null;
+      phone?: string | null;
+      birthday?: string | null;
+      shirtSize?: string | null;
+      homecellLeader?: string | null;
+      zonePastor?: string | null;
+      attendingHomecell?: boolean | null;
+      attendingSundays?: string | null;
+    } = {};
+    if (section === "details" || section === "all") {
+      const email = str(form, "email").toLowerCase();
+      if (email) {
+        const other = await db.user.findFirst({ where: { email, NOT: { id: user.id } } });
+        if (other) throw new WorkflowError("That email is already used");
+      }
+      data.name = str(form, "name") || null;
+      data.surname = str(form, "surname") || null;
+      data.email = email || null;
+      data.phone = [str(form, "countryCode") || "+27", str(form, "phone")].filter(Boolean).join(" ") || null;
+      data.birthday = str(form, "birthday") || null;
+      data.shirtSize = str(form, "shirtSize") || null;
+    }
+    if (section === "structure" || section === "all") {
+      data.homecellLeader = str(form, "homecellLeader") || null;
+      data.zonePastor = str(form, "zonePastor") || null;
+      data.attendingHomecell = form.get("attendingHomecell") === "yes" ? true : form.get("attendingHomecell") === "no" ? false : null;
+      data.attendingSundays = form.getAll("services").map(String).filter((t) => t === "08:30" || t === "10:30" || t === "18:00").join(",") || null;
+    }
+    if (Object.keys(data).length) await db.user.update({ where: { id: user.id }, data });
     const mayManage = user.appRole === "ADMIN" || user.memberships.some((m) => m.role === "LEADER");
-    if (form.get("manageAccess") === "1" && mayManage) {
+    if ((section === "serving" || section === "all") && form.get("manageAccess") === "1" && mayManage) {
       const roleRaw = str(form, "deptRole");
       const deptRole = roleRaw === "LEADER" || roleRaw === "TWO_IC" || roleRaw === "VOLUNTEER" ? roleRaw : null;
       const deptIds = form.getAll("dept").map(String).filter(Boolean);
@@ -169,6 +187,6 @@ export async function updateProfileAction(form: FormData) {
         });
       }
     }
-    return "Profile saved.";
+    return section === "details" ? "Details saved." : section === "serving" ? "Serving saved." : section === "structure" ? "Structure saved." : "Profile saved.";
   });
 }

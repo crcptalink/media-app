@@ -60,9 +60,20 @@ export async function addPersonAction(form: FormData) {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new WorkflowError("Enter a valid email");
     const role = readDeptRole(form, user.appRole === "ADMIN");
     const existing = await db.user.findUnique({ where: { email } });
+    const profile = {
+      name: str(form, "name") || null,
+      surname: str(form, "surname") || null,
+      phone: [str(form, "countryCode") || "+27", str(form, "phone")].filter(Boolean).join(" ") || null,
+      birthday: str(form, "birthday") || null,
+      shirtSize: str(form, "shirtSize") || null,
+      zonePastor: str(form, "zonePastor") || null,
+      homecellLeader: str(form, "homecellLeader") || null,
+      attendingHomecell: form.get("attendingHomecell") === "yes" ? true : form.get("attendingHomecell") === "no" ? false : null,
+      attendingSundays: form.getAll("services").map(String).filter((t) => t === "08:30" || t === "10:30" || t === "18:00").join(",") || null,
+    };
     const u = existing
-      ? await db.user.update({ where: { id: existing.id }, data: { active: true, name: existing.name || str(form, "name") || null } })
-      : await db.user.create({ data: { email, name: str(form, "name") || null, phone: str(form, "phone") || null } });
+      ? await db.user.update({ where: { id: existing.id }, data: { active: true, ...profile, name: profile.name || existing.name } })
+      : await db.user.create({ data: { email, ...profile } });
     await setDepartmentAccess(u.id, form, role);
     const positionIds = form.getAll("position").map(String).filter(Boolean);
     for (const pid of positionIds) {
@@ -108,11 +119,25 @@ export async function updatePersonAction(form: FormData) {
     const role = readDeptRole(form, user.appRole === "ADMIN");
     const active = form.get("active") === "on";
     if (id === user.id && !active) throw new WorkflowError("You can't deactivate yourself");
+    const email = str(form, "email").toLowerCase();
+    if (email) {
+      if (!validEmail(email)) throw new WorkflowError("Enter a valid email");
+      const other = await db.user.findFirst({ where: { email, NOT: { id } } });
+      if (other) throw new WorkflowError("That email is already used");
+    }
     await db.user.update({
       where: { id },
       data: {
         name: str(form, "name") || null,
-        phone: str(form, "phone") || null,
+        surname: str(form, "surname") || null,
+        ...(email ? { email } : {}),
+        phone: [str(form, "countryCode") || "+27", str(form, "phone")].filter(Boolean).join(" ") || null,
+        birthday: str(form, "birthday") || null,
+        shirtSize: str(form, "shirtSize") || null,
+        zonePastor: str(form, "zonePastor") || null,
+        homecellLeader: str(form, "homecellLeader") || null,
+        attendingHomecell: form.get("attendingHomecell") === "yes" ? true : form.get("attendingHomecell") === "no" ? false : null,
+        attendingSundays: form.getAll("services").map(String).filter((t) => t === "08:30" || t === "10:30" || t === "18:00").join(",") || null,
         active,
         ...(user.appRole === "ADMIN" && !user.impersonatorId && id !== user.id ? { appRole: requested === "ADMIN" ? "ADMIN" : "VOLUNTEER" } : {}),
       },

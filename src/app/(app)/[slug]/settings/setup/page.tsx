@@ -101,8 +101,7 @@ export default async function SetupPage({ searchParams, params }: { searchParams
 
       <section className="space-y-4">
         <div>
-          <h2 className="h2">Service templates</h2>
-          <p className="muted mt-1">A group is an event type, such as Sunday or Thursday. Add a group, then add each service inside it.</p>
+          <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Services</h2>
         </div>
         {groups.map((g) => (
           <div key={g.id} className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
@@ -137,8 +136,8 @@ export default async function SetupPage({ searchParams, params }: { searchParams
       </section>
 
       <section className="space-y-2">
-        <h2 className="h2">Positions</h2>
-        <p className="muted">“Covers” lets a combined role (LS + Link) count trainers of LS or Link.</p>
+        <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Positions</h2>
+        <p className="muted">Add, rename, or remove a position. The name updates on the schedule, profile, and volunteer lists. Remove hides it from new lists. Past services keep it.</p>
         {[...positions, null].map((p) => (
           <form key={p?.id ?? "new"} action={savePositionAction} className="card flex flex-wrap items-center gap-2 py-3 text-sm">
             <input type="hidden" name="back" value={back} />
@@ -149,6 +148,7 @@ export default async function SetupPage({ searchParams, params }: { searchParams
             <input name="sort" type="number" defaultValue={p?.sort ?? positions.length + 1} className="w-16 rounded border px-2 py-1.5" />
             {p && <label className="flex items-center gap-1"><input type="checkbox" name="active" defaultChecked={p.active} /> Active</label>}
             <SubmitButton className={p ? "btn-ghost btn-sm" : "btn-primary btn-sm"}>{p ? "Save" : "Add"}</SubmitButton>
+            {p && <SubmitButton className="btn-ghost btn-sm" name="remove" value="1">Remove</SubmitButton>}
           </form>
         ))}
       </section>

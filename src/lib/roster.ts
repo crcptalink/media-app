@@ -26,8 +26,9 @@ export async function loadRoster(db: Db, departmentId: string, fromDate: string,
   });
 }
 
-export function displayName(u: { name: string | null; email: string | null }) {
-  if (u.name) return u.name;
+export function displayName(u: { name: string | null; surname?: string | null; email: string | null }) {
+  const full = [u.name, u.surname].filter(Boolean).join(" ");
+  if (full) return full;
   if (u.email) return u.email.split("@")[0];
   return "Member";
 }

@@ -31,6 +31,10 @@ export async function savePositionAction(form: FormData) {
       active: id ? form.get("active") === "on" : true,
       coversCodes: str(form, "covers").split(/[\s,]+/).filter(Boolean).map((c) => c.toUpperCase()),
     };
+    if (str(form, "remove") === "1" && id) {
+      await db.position.update({ where: { id }, data: { active: false } });
+      return "Position removed. Past services keep it. New lists no longer show it.";
+    }
     if (id) await db.position.update({ where: { id }, data });
     else await db.position.create({ data: { ...data, departmentId: dept.id } });
     return "Position saved.";

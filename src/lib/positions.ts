@@ -15,7 +15,9 @@ const TITLES: Record<string, string> = {
 };
 
 export function positionTitle(code: string, fallback?: string | null) {
-  return TITLES[code.trim().toUpperCase()] || (fallback || "").trim() || code;
+  const stored = (fallback || "").trim();
+  if (stored) return stored;
+  return TITLES[code.trim().toUpperCase()] || code;
 }
 
 /** Full position name. A numbered sheet label such as "LS 2" keeps the number only. */

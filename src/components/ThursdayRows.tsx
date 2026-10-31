@@ -1,28 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { setTrainingRsvp } from "@/app/(app)/actions";
+import { claimAction, setTrainingRsvp } from "@/app/(app)/actions";
 import { fmtDateOnly } from "@/lib/time";
+import { SubmitButton } from "./SubmitButton";
 import { TimePill } from "./TimePill";
 
 type Answer = "YES" | "NO" | null;
+export type ThursdaySlot = { id: string; label: string; open: boolean };
 export type ThursdayRow = {
   eventId: string;
   date: string;
   required: boolean;
   preprayer: Answer;
-  session: Answer;
+  slots: ThursdaySlot[];
+  back: string;
 };
 
 export function ThursdayRows({ rows }: { rows: ThursdayRow[] }) {
   const [answers, setAnswers] = useState(rows);
-  async function choose(eventId: string, part: "PREPRAYER" | "SESSION", response: "YES" | "NO") {
+  async function choose(eventId: string, response: "YES" | "NO") {
     const prev = answers;
-    setAnswers((list) =>
-      list.map((row) => (row.eventId === eventId ? { ...row, [part === "PREPRAYER" ? "preprayer" : "session"]: response } : row)),
-    );
+    setAnswers((list) => list.map((row) => (row.eventId === eventId ? { ...row, preprayer: response } : row)));
     try {
-      await setTrainingRsvp(eventId, part, response);
+      await setTrainingRsvp(eventId, "PREPRAYER", response);
     } catch {
       setAnswers(prev);
     }
@@ -30,31 +31,43 @@ export function ThursdayRows({ rows }: { rows: ThursdayRow[] }) {
   return (
     <section className="space-y-3">
       {answers.map((row) => (
-        <article key={row.eventId} className="card border-l-4 border-l-sky-500 space-y-3">
+        <article key={row.eventId} className="card space-y-3 border-l-4 border-l-sky-500 bg-sky-50">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <h3 className="font-semibold">Thursday</h3>
+            <h3 className="text-sm font-semibold text-slate-800">Thursday</h3>
             <span className="text-base font-bold text-slate-900">{fmtDateOnly(row.date)}</span>
-            <span className={`text-sm font-medium ${row.required ? "text-sky-700" : "text-slate-500"}`}>
-              {row.required ? "Required" : "Optional"}
+            <span className="text-sm text-slate-700">{row.required ? "Required" : "Optional"}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <TimePill time="18:30" />
+            <span className="min-w-[7rem] text-sm text-slate-700">Pre-Prayer</span>
+            <span className="flex gap-2">
+              <button type="button" className={row.preprayer === "YES" ? "btn-green btn-sm" : "btn-ghost btn-sm"} onClick={() => choose(row.eventId, "YES")}>Yes</button>
+              <button type="button" className={row.preprayer === "NO" ? "btn-red btn-sm" : "btn-ghost btn-sm"} onClick={() => choose(row.eventId, "NO")}>No</button>
             </span>
           </div>
-          <AnswerLine label="Pre-Prayer" time="18:30" value={row.preprayer} onPick={(response) => choose(row.eventId, "PREPRAYER", response)} />
-          <AnswerLine label="Training" time="19:00" value={row.session} onPick={(response) => choose(row.eventId, "SESSION", response)} />
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <TimePill time="19:00" />
+            <span className="text-sm text-slate-700">Training</span>
+          </div>
+          <ul className="divide-y divide-sky-100">
+            {row.slots.map((slot) => (
+              <li key={slot.id} className="flex items-center gap-3 py-1.5">
+                <span className="flex-1 text-sm text-slate-800">{slot.label}</span>
+                {slot.open ? (
+                  <form action={claimAction}>
+                    <input type="hidden" name="slotId" value={slot.id} />
+                    <input type="hidden" name="kind" value="SERVING" />
+                    <input type="hidden" name="back" value={row.back} />
+                    <SubmitButton className="btn-sky btn-sm">Select</SubmitButton>
+                  </form>
+                ) : (
+                  <span className="text-sm text-slate-700">Filled</span>
+                )}
+              </li>
+            ))}
+          </ul>
         </article>
       ))}
     </section>
-  );
-}
-
-function AnswerLine({ label, time, value, onPick }: { label: string; time: string; value: Answer; onPick: (response: "YES" | "NO") => void }) {
-  return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <TimePill time={time} />
-      <span className="text-sm font-medium min-w-[7rem]">{label}</span>
-      <span className="flex gap-2">
-        <button type="button" className={value === "YES" ? "btn-green btn-sm" : "btn-ghost btn-sm"} onClick={() => onPick("YES")}>Yes</button>
-        <button type="button" className={value === "NO" ? "btn-red btn-sm" : "btn-ghost btn-sm"} onClick={() => onPick("NO")}>No</button>
-      </span>
-    </div>
   );
 }

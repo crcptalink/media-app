@@ -126,7 +126,7 @@ function EventCard({
                         <input type="hidden" name="slotId" value={s.id} />
                         <input type="hidden" name="kind" value="SERVING" />
                         <input type="hidden" name="back" value={back} />
-                        <SubmitButton className="btn-primary btn-sm">Select</SubmitButton>
+                        <SubmitButton className={thursday ? "btn-sky btn-sm" : "btn-primary btn-sm"}>Select</SubmitButton>
                       </form>
                     ) : (
                       <span />
@@ -189,10 +189,10 @@ function AssignmentLine({
   const awaiting = a.status === "CLAIM_PENDING" || (a.status === "PROPOSED" && !answersClosed(serviceDate));
   return (
     <>
-      <span className={`truncate text-sm text-slate-800 ${awaiting ? "rounded bg-sky-100 px-1.5 py-0.5" : ""}`}>
-        {displayName(a.user)}
+      <span className="truncate text-sm text-slate-800">
+        <span className={a.userId === me ? "rounded bg-green-600 px-1.5 py-0.5 font-medium text-white" : ""}>{displayName(a.user)}</span>
         {a.status === "ACCEPTED" && <span className="ml-2 text-sm text-slate-700">Accepted</span>}
-        {awaiting && <span className="ml-2 text-sm text-slate-800">Awaiting</span>}
+        {awaiting && <span className="ml-2 rounded bg-sky-100 px-1.5 py-0.5 text-sm text-slate-800">Awaiting</span>}
       </span>
       <span className="flex items-center justify-end gap-2">
         {mode === "admin" && a.status === "CLAIM_PENDING" && (

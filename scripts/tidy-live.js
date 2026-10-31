@@ -11,6 +11,7 @@ const ROLES = [
   { code: "LT", name: "Link Trainer", sort: 12, isTraining: true, coversCodes: ["L"] },
   { code: "LTE", name: "Link Trainee", sort: 13, isTraining: true, coversCodes: ["L"] },
   { code: "TEC", name: "Technical", sort: 14, isTraining: true, coversCodes: [] },
+  { code: "OTH", name: "Other", sort: 15, isTraining: true, coversCodes: [] },
 ];
 
 function todayLocal() {
@@ -26,7 +27,7 @@ async function clearAnnouncements() {
 }
 
 async function thursdayRoles() {
-  const key = "thursday-roles-v1";
+  const key = "thursday-roles-v2";
   if (await db.dataImport.findUnique({ where: { key } })) return;
   const dept = await db.department.findUnique({ where: { slug: "link" } });
   if (!dept) return;

@@ -11,7 +11,7 @@ export default async function AnnouncementsPage({ searchParams, params }: { sear
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      <h2 className="mb-3 rounded-md bg-red-700 px-3 py-2 text-sm font-semibold text-white">Announcements</h2>
+      <h2 className="mb-3 rounded-md bg-red-700 px-3 py-2 text-sm font-semibold text-white">Notifications</h2>
       {notes.length === 0 ? (
         <p className="muted">None.</p>
       ) : (

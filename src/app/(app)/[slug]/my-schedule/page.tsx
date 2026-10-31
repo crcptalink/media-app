@@ -27,12 +27,14 @@ export default async function MePage({ searchParams, params }: { searchParams: S
     include,
     orderBy: { slot: { event: { startsAt: "asc" } } },
   });
-  const pending = mine.filter((a) => a.status === "PROPOSED" && !answersClosed(a.slot.event.date)).length;
   const trainings = await db.event.findMany({
     where: { departmentId: dept.id, kind: "TRAINING", date: { gte: today }, status: { not: "CANCELLED" } },
     orderBy: { startsAt: "asc" },
     take: 4,
-    include: { rsvps: { where: { userId: user.id } } },
+    include: {
+      rsvps: { where: { userId: user.id } },
+      slots: { orderBy: { sort: "asc" }, include: { position: true, assignments: { where: { status: { in: ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"] } } } } },
+    },
   });
   const sundayDates = trainings.map((t) => addDays(t.date, 3));
   const sundaySlots = sundayDates.length
@@ -42,69 +44,76 @@ export default async function MePage({ searchParams, params }: { searchParams: S
       })
     : [];
   const servingSunday = new Set(sundaySlots.map((a) => a.slot.event.date));
+  const pendingItems = mine.filter((a) => a.status === "PROPOSED" || a.status === "CLAIM_PENDING");
+  const acceptedItems = mine.filter((a) => a.status === "ACCEPTED");
   const back = `/${slug}/my-schedule`;
 
-  return (
-    <div className="mx-auto max-w-2xl space-y-4">
-      <Flash ok={one(sp.ok)} error={one(sp.error)} />
-      {pending > 0 && <h1 className="h1">Pending Approvals <span className="text-slate-500">{pending}</span></h1>}
-      {mine.length === 0 && <p className="muted">Nothing scheduled.</p>}
-      {mine.map((a) => {
-        const e = a.slot.event;
-        const closed = answersClosed(e.date);
-        const canAccept = a.status === "PROPOSED" && !closed;
-        const canDecline = (a.status === "PROPOSED" || a.status === "ACCEPTED") && !closed;
-        const st = e.date === today ? arrivalStatus(a, e, grace) : null;
-        const sunday = e.kind !== "TRAINING";
-        return (
-          <article key={a.id} className={`card border-l-4 ${sunday ? "border-l-blue-700" : "border-l-sky-500"}`}>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <TimePill time={localTime(e.startsAt)} />
-              <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>
-              <span className="text-base font-bold text-slate-900">{fmtDateOnly(e.date)}</span>
-            </div>
-            <p className="mt-1 font-medium">{slotTitle(a.slot.position, a.slot.label)}</p>
-            <div className="mt-3 text-sm">
-              <p className="text-xs font-medium text-slate-500">Arrival</p>
-              <p>{localTime(e.arriveBy)}</p>
-              {e.preprayerAt && (
-                <>
-                  <p className="mt-2 text-xs font-medium text-slate-500">Pre-Prayer</p>
-                  <p>{localTime(e.preprayerAt)}</p>
-                </>
-              )}
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2 overflow-x-auto pb-1">
-              {a.status === "PROPOSED" && !closed ? null : <StatusChip status={a.status} serviceDate={e.date} />}
-              {a.status === "CLAIM_PENDING" ? (
-                <form action={withdrawAction}>
-                  <input type="hidden" name="assignmentId" value={a.id} />
-                  <input type="hidden" name="back" value={back} />
-                  <SubmitButton className="btn-ghost btn-sm">Withdraw</SubmitButton>
-                </form>
-              ) : (
-                <SlotAnswer assignmentId={a.id} back={back} canAccept={canAccept} canDecline={canDecline} closed={closed} />
-              )}
-              {(a.status === "ACCEPTED" || (a.status === "PROPOSED" && closed)) && (
-                <a className="btn-primary btn-sm" href={`/api/ics/${a.id}`}>Add To My Calendar</a>
-              )}
-            </div>
-            {st && <p className="muted mt-2">{STATUS_LABEL[st]}{a.checkedInAt ? ` ${localTime(a.checkedInAt)}` : ""}</p>}
-          </article>
-        );
-      })}
+  const assignmentCard = (a: (typeof mine)[number]) => {
+    const e = a.slot.event;
+    const closed = answersClosed(e.date);
+    const canAccept = a.status === "PROPOSED" && !closed;
+    const canDecline = (a.status === "PROPOSED" || a.status === "ACCEPTED") && !closed;
+    const st = e.date === today ? arrivalStatus(a, e, grace) : null;
+    const sunday = e.kind !== "TRAINING";
+    return (
+      <article key={a.id} className={`card border-l-4 ${sunday ? "border-l-blue-700" : "border-l-sky-500"}`}>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <TimePill time={localTime(e.startsAt)} />
+          <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>
+          <span className="text-base font-bold text-slate-900">{fmtDateOnly(e.date)}</span>
+        </div>
+        <p className="mt-1 text-sm text-slate-800">{slotTitle(a.slot.position, a.slot.label)}</p>
+        <div className="mt-3 text-sm text-slate-700">
+          <p>Arrival {localTime(e.arriveBy)}</p>
+          {e.preprayerAt && <p>Pre-Prayer {localTime(e.preprayerAt)}</p>}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {a.status === "PROPOSED" && !closed ? null : <StatusChip status={a.status} serviceDate={e.date} />}
+          {a.status === "CLAIM_PENDING" && !closed && (
+            <form action={withdrawAction}>
+              <input type="hidden" name="assignmentId" value={a.id} />
+              <input type="hidden" name="back" value={back} />
+              <SubmitButton className="btn-ghost btn-sm">Withdraw</SubmitButton>
+            </form>
+          )}
+          {a.status === "CLAIM_PENDING" && closed && <p className="text-sm text-slate-700">Ask a leader to change this.</p>}
+          {a.status !== "CLAIM_PENDING" && <SlotAnswer assignmentId={a.id} back={back} canAccept={canAccept} canDecline={canDecline} closed={closed} />}
+          {a.status === "ACCEPTED" && <a className="btn-primary btn-sm" href={`/api/ics/${a.id}`}>Add To My Calendar</a>}
+        </div>
+        {st && <p className="muted mt-2">{STATUS_LABEL[st]}{a.checkedInAt ? ` ${localTime(a.checkedInAt)}` : ""}</p>}
+      </article>
+    );
+  };
 
-      {trainings.length > 0 && (
-        <ThursdayRows
-          rows={trainings.map((t) => ({
-            eventId: t.id,
-            date: t.date,
-            required: servingSunday.has(addDays(t.date, 3)),
-            preprayer: t.rsvps.find((r) => r.part === "PREPRAYER")?.response ?? null,
-            session: t.rsvps.find((r) => r.part === "SESSION")?.response ?? null,
-          }))}
-        />
-      )}
+  return (
+    <div className="mx-auto max-w-2xl space-y-6">
+      <Flash ok={one(sp.ok)} error={one(sp.error)} />
+      <section className="space-y-3">
+        <h2 className="rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Pending Approvals {pendingItems.length > 0 ? pendingItems.length : ""}</h2>
+        {pendingItems.length === 0 && <p className="muted">None.</p>}
+        {pendingItems.map(assignmentCard)}
+      </section>
+      <section className="space-y-3">
+        <h2 className="rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">My Schedule</h2>
+        {acceptedItems.length === 0 && trainings.length === 0 && <p className="muted">None.</p>}
+        {acceptedItems.map(assignmentCard)}
+        {trainings.length > 0 && (
+          <ThursdayRows
+            rows={trainings.map((t) => ({
+              eventId: t.id,
+              date: t.date,
+              required: servingSunday.has(addDays(t.date, 3)),
+              preprayer: t.rsvps.find((r) => r.part === "PREPRAYER")?.response ?? null,
+              back,
+              slots: t.slots.map((s) => ({
+                id: s.id,
+                label: slotTitle(s.position, s.label),
+                open: !s.assignments.some((a) => a.status === "ACCEPTED" || a.status === "PROPOSED" || a.status === "CLAIM_PENDING"),
+              })),
+            }))}
+          />
+        )}
+      </section>
     </div>
   );
 }

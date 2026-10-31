@@ -2,6 +2,7 @@ import { Flash, one, type SP } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ChoiceChips } from "@/components/ChoiceChips";
 import { setPasswordAction, updateProfileAction } from "@/app/(app)/actions";
+import { UnsavedGuard } from "@/components/UnsavedGuard";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
@@ -49,8 +50,10 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
         <p className="muted">Profile and password changes are unavailable while viewing as {user.name || "this person"}.</p>
       ) : (
         <>
+        <UnsavedGuard>
           <form action={updateProfileAction} className="space-y-6">
             <input type="hidden" name="back" value={back} />
+            <input type="hidden" name="section" value="details" />
             <input name="photo" type="file" accept="image/*" className="hidden" />
 
             <section>
@@ -75,9 +78,14 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
                 <p className="text-sm font-medium">Shirt Size</p>
                 <ChoiceChips name="shirtSize" options={SIZES.map((s) => ({ value: s, label: s }))} defaultValue={user.shirtSize || undefined} />
               </div>
+              <SubmitButton>Save Details</SubmitButton>
               </div>
             </section>
+          </form>
 
+          <form action={updateProfileAction} className="space-y-6">
+            <input type="hidden" name="back" value={back} />
+            <input type="hidden" name="section" value="serving" />
             <section>
               <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Serving</h2>
               <div className="card space-y-4 border-l-4 border-l-blue-700">
@@ -115,9 +123,14 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
                 </div>
               )}
               <p className="text-sm text-slate-800"><span className="font-medium">Joined Date</span><span className="mt-1 block">{user.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Johannesburg" })}</span></p>
+              {canEditRole && <SubmitButton>Save Serving</SubmitButton>}
               </div>
             </section>
+          </form>
 
+          <form action={updateProfileAction} className="space-y-6">
+            <input type="hidden" name="back" value={back} />
+            <input type="hidden" name="section" value="structure" />
             <section>
               <h2 className="mb-3 rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white">Structure</h2>
               <div className="card space-y-4 border-l-4 border-l-blue-700">
@@ -131,10 +144,11 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
                 <p className="text-sm font-medium">Attending Sundays</p>
                 <ChoiceChips name="services" multi options={[{ value: "08:30", label: "08:30" }, { value: "10:30", label: "10:30" }, { value: "18:00", label: "18:00" }]} defaultValue={sundayDefault} />
               </div>
-              <SubmitButton>Save Profile</SubmitButton>
+              <SubmitButton>Save Structure</SubmitButton>
               </div>
             </section>
           </form>
+        </UnsavedGuard>
           <form action={setPasswordAction} className="card space-y-3">
             <input type="hidden" name="back" value={back} />
             <p className="muted">
