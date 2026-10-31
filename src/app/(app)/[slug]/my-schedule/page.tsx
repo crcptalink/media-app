@@ -12,7 +12,7 @@ import { slotTitle } from "@/lib/positions";
 import { requireUser } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
 import { addDays, fmtDateOnly, localTime, todayLocal, WEEKDAYS, weekdayOf } from "@/lib/time";
-import { withdrawAction } from "../actions";
+import { withdrawAction } from "@/app/(app)/actions";
 
 export default async function MePage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;

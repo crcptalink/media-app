@@ -7,7 +7,7 @@ import { todayLocal } from "@/lib/time";
 import { getDepartment } from "@/lib/events";
 import { appNav } from "@/lib/shell-nav";
 import { assertDepartmentAccess, canManagePeople, canManageSchedule, redirectIfPasswordChangeRequired, requireUser } from "@/lib/session";
-import { signOutAction } from "../actions";
+import { signOutAction } from "@/app/(app)/actions";
 
 export const dynamic = "force-dynamic";
 

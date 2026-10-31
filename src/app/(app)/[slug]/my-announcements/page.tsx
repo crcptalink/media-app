@@ -7,7 +7,7 @@ import { loadRoster } from "@/lib/roster";
 import { requireUser } from "@/lib/session";
 import { addDays, fmtDateOnly, fmtDateTime, localTime, todayLocal, WEEKDAYS, weekdayOf } from "@/lib/time";
 import { TimePill } from "@/components/TimePill";
-import { claimAction, markReadAction } from "../../actions";
+import { claimAction, markReadAction } from "@/app/(app)/actions";
 
 export default async function AnnouncementsPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
