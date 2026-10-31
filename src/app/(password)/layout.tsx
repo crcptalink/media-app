@@ -15,7 +15,7 @@ export default async function PasswordLayout({ children }: { children: React.Rea
   const dept = await getDepartment(db);
   const schedule = canManageSchedule(user, dept.id);
   const people = canManagePeople(user, dept.id);
-  const nav = appNav({ schedule, people, admin: user.appRole === "ADMIN" });
+  const nav = appNav({ slug: dept.slug, schedule,  people, admin: user.appRole === "ADMIN" });
 
   const all = await db.department.findMany({ where: { active: true } });
   const departments = menuDepartments(user, all);
