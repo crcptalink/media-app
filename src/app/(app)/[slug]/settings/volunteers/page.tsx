@@ -89,8 +89,6 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                       const pos = positions.find((x) => x.id === s.positionId);
                       if (!pos) return null;
                       return (
-    <div>
-      <h1 className="h1 mb-4">Volunteers</h1>
                         <span key={s.positionId} className={`chip ${pos.code === "LS" || pos.code === "LST" ? "bg-blue-100 text-blue-800" : pos.code === "L" || pos.code === "LT" ? "bg-cyan-100 text-cyan-800" : s.stage === "QUALIFIED" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-700"}`}>
                           {positionTitle(pos.code, pos.name)}
                           {s.stage === "QUALIFIED" ? "" : s.stage === "TRAINEE" ? " · Trainee" : " · Shadow"}
@@ -142,8 +140,6 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                       {positions.map((pos) => {
                         const s = p.skills.find((x) => x.positionId === pos.id);
                         return (
-    <div>
-      <h1 className="h1 mb-4">Volunteers</h1>
                           <tr key={pos.id} className="border-t">
                             <td className="py-1.5">{pos.name}</td>
                             <td>
