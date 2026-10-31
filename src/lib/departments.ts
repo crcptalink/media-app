@@ -1,7 +1,7 @@
 /**
  * Canonical department list. The database is the source of truth at runtime
  * (seeded, and inserted by migration). Permissions are DepartmentMember rows.
- * Link keeps /me, /roster, /admin, and the rest of its existing URLs.
+ * Link uses /my-schedule and the rest of the new URLs.
  */
 export const DEPARTMENT_CATALOG = [
   { slug: "link", name: "Link", blurb: "Livestream, Link, and service leading. Answer slots, check in, and see who is serving.", sort: 1, ready: true },

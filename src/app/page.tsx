@@ -9,7 +9,7 @@ import { currentUser, redirectIfPasswordChangeRequired } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Department" };
+export const metadata = { title: "CRC Media" };
 
 export default async function Home({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;

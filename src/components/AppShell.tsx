@@ -30,7 +30,7 @@ function titleFor(pathname: string) {
     if (pathname === prefix || pathname.startsWith(prefix)) return title;
   }
   if (pathname === "/my-schedule") return "My Schedule";
-  return "Departments";
+  return "CRC Media";
 }
 
 function navActive(pathname: string, href: string) {
@@ -70,7 +70,7 @@ export function AppShell({
         <span className="text-sm font-semibold tracking-tight text-slate-900">{APP_NAME}</span>
       </Link>
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        {departments.length > 0 && <p className="px-2 pb-1 pt-2 text-xs font-medium text-slate-500">Departments</p>}
+        {departments.length > 0 && <p className="px-2 pb-1 pt-2 text-xs font-medium text-slate-500">CRC Media</p>}
         <ul className="space-y-0.5">
           {departments.map((d) => {
             const current = d.slug === currentSlug;

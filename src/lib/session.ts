@@ -69,30 +69,30 @@ export function assertDepartmentAccess(u: CurrentUser, departmentId: string) {
   }
 }
 
-export async function requireUser(callbackUrl = "/me") {
+export async function requireUser(callbackUrl = "/my-schedule") {
   const u = await currentUser();
   if (!u) redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
   return u;
 }
 
 export async function requireScheduleManager() {
-  const u = await requireUser("/admin/manage");
+  const u = await requireUser("/manage-schedule");
   const dept = await getDepartment(db);
   assertDepartmentAccess(u, dept.id);
-  if (!canManageSchedule(u, dept.id)) redirect("/me?error=" + encodeURIComponent("Leaders and 2ICs only"));
+  if (!canManageSchedule(u, dept.id)) redirect("/my-schedule?error=" + encodeURIComponent("Leaders and 2ICs only"));
   return { user: u, dept };
 }
 
 export async function requirePeopleManager() {
-  const u = await requireUser("/admin/volunteers");
+  const u = await requireUser("/settings/volunteers");
   const dept = await getDepartment(db);
   assertDepartmentAccess(u, dept.id);
-  if (!canManagePeople(u, dept.id)) redirect("/me?error=" + encodeURIComponent("Leaders only"));
+  if (!canManagePeople(u, dept.id)) redirect("/my-schedule?error=" + encodeURIComponent("Leaders only"));
   return { user: u, dept };
 }
 
 export async function requireAdmin() {
-  const u = await requireUser("/admin/setup");
-  if (u.appRole !== "ADMIN") redirect("/me?error=" + encodeURIComponent("Admins only"));
+  const u = await requireUser("/settings/setup");
+  if (u.appRole !== "ADMIN") redirect("/my-schedule?error=" + encodeURIComponent("Admins only"));
   return { user: u, dept: await getDepartment(db) };
 }
