@@ -27,14 +27,16 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
   const user = await requireUser(`/${slug}/my-profile`);
   const back = `/${slug}/my-profile`;
   const phone = splitPhone(user.phone);
-  const canEditRole = user.appRole === "ADMIN" || user.memberships.some((m) => m.role === "LEADER" || m.role === "TWO_IC");
-  const [departments, skills] = await Promise.all([
-    db.department.findMany({ where: { active: true } }),
+  const canEditRole = user.appRole === "ADMIN" || user.memberships.some((m) => m.role === "LEADER");
+  const [departments, skills, positions] = await Promise.all([
+    db.department.findMany({ where: { active: true }, orderBy: { sort: "asc" } }),
     db.userSkill.findMany({ where: { userId: user.id }, include: { position: true } }),
+    db.position.findMany({ where: { active: true }, orderBy: { sort: "asc" } }),
   ]);
   const roleLabel = user.appRole === "ADMIN" ? "Admin" : user.memberships[0]?.role === "LEADER" ? "Leader" : user.memberships[0]?.role === "TWO_IC" ? "2IC" : "Member";
   const deptNames = user.memberships.map((m) => departments.find((d) => d.id === m.departmentId)?.name).filter(Boolean).join(", ") || "—";
   const posNames = skills.map((s) => s.position.name).join(", ") || "—";
+  const sundayDefault = (user.attendingSundays || "").split(",").filter(Boolean);
 
   return (
     <div className="mx-auto max-w-md space-y-6">
@@ -74,7 +76,7 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
             </div>
             <div>
               <p className="text-sm font-medium">Attending Sundays</p>
-              <ChoiceChips name="services" multi options={[{ value: "08:30", label: "08:30" }, { value: "10:30", label: "10:30" }, { value: "18:00", label: "18:00" }]} />
+              <ChoiceChips name="services" multi options={[{ value: "08:30", label: "08:30" }, { value: "10:30", label: "10:30" }, { value: "18:00", label: "18:00" }]} defaultValue={sundayDefault} />
             </div>
             <div>
               <p className="text-sm font-medium">Shirt Size</p>
@@ -82,10 +84,42 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
             </div>
             <div className="space-y-2 rounded-md border border-slate-200 p-3 text-sm">
               <p className="font-medium">Role, Department, Position</p>
-              <p>Role: {roleLabel}</p>
-              <p>Department: {deptNames}</p>
-              <p>Position: {posNames}</p>
-              {!canEditRole && <p className="muted">Only leaders and admins can change these.</p>}
+              {canEditRole ? (
+                <>
+                  <input type="hidden" name="manageAccess" value="1" />
+                  <label className="block">Role
+                    <select name="deptRole" defaultValue={user.appRole === "ADMIN" ? "ADMIN" : user.memberships[0]?.role || "VOLUNTEER"} className="input mt-1">
+                      {user.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
+                      <option value="LEADER">Leader</option>
+                      <option value="TWO_IC">2IC</option>
+                      <option value="VOLUNTEER">Member</option>
+                    </select>
+                  </label>
+                  <p className="font-medium">Departments</p>
+                  <div className="flex flex-wrap gap-3">
+                    {departments.map((d) => (
+                      <label key={d.id} className="flex items-center gap-1">
+                        <input type="checkbox" name="dept" value={d.id} defaultChecked={user.memberships.some((m) => m.departmentId === d.id)} /> {d.name}
+                      </label>
+                    ))}
+                  </div>
+                  <p className="font-medium">Positions</p>
+                  <div className="flex flex-wrap gap-3">
+                    {positions.map((p) => (
+                      <label key={p.id} className="flex items-center gap-1">
+                        <input type="checkbox" name="position" value={p.id} defaultChecked={skills.some((s) => s.positionId === p.id)} /> {p.name}
+                      </label>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>Role: {roleLabel}</p>
+                  <p>Department: {deptNames}</p>
+                  <p>Position: {posNames}</p>
+                  <p className="muted">Only leaders and admins can change these.</p>
+                </>
+              )}
             </div>
             <SubmitButton>Save Profile</SubmitButton>
           </form>

@@ -11,6 +11,12 @@ import { enqueueEmail } from "@/lib/outbox";
 import { requirePeopleManager, type CurrentUser } from "@/lib/session";
 import bcrypt from "bcryptjs";
 
+function slugFrom(form: FormData) {
+  const back = String(form.get("back") || "");
+  const match = back.match(/^\/([a-z0-9-]+)\//);
+  return match && match[1] !== "admin" && match[1] !== "login" ? match[1] : "link";
+}
+
 function readDeptRole(form: FormData, actorIsAdmin: boolean) {
   const role = str(form, "role");
   if (role === "ADMIN") {
@@ -47,7 +53,7 @@ function assertNotImpersonating(actor: CurrentUser) {
 }
 
 export async function addPersonAction(form: FormData) {
-  const { user } = await requirePeopleManager();
+  const { user } = await requirePeopleManager(slugFrom(form));
   await runAction(form, async () => {
     if (user.impersonatorId) throw new WorkflowError("You can't add a person while viewing as someone else");
     const email = str(form, "email").toLowerCase();
@@ -84,7 +90,7 @@ export async function addPersonAction(form: FormData) {
 }
 
 export async function updatePersonAction(form: FormData) {
-  const { user, dept } = await requirePeopleManager();
+  const { user, dept } = await requirePeopleManager(slugFrom(form));
   await runAction(form, async () => {
     const id = str(form, "userId");
     const target = await db.user.findUnique({ where: { id }, include: { memberships: true } });
@@ -159,7 +165,7 @@ async function claimEmail(userId: string, email: string) {
 }
 
 export async function setLoginAction(form: FormData) {
-  const { user, dept } = await requirePeopleManager();
+  const { user, dept } = await requirePeopleManager(slugFrom(form));
   await runAction(form, async () => {
     const target = await loadLoginTarget(user, str(form, "userId"), dept.id);
     const email = readEmailPair(form, "");
@@ -182,7 +188,7 @@ export async function setLoginAction(form: FormData) {
 }
 
 export async function sendInviteAction(form: FormData) {
-  const { user, dept } = await requirePeopleManager();
+  const { user, dept } = await requirePeopleManager(slugFrom(form));
   await runAction(form, async () => {
     const target = await loadLoginTarget(user, str(form, "userId"), dept.id);
     const email = readEmailPair(form, "emailConfirm");

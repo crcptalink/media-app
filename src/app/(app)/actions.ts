@@ -116,7 +116,7 @@ export async function setPasswordAction(form: FormData) {
     if (pw.length < 8) throw new WorkflowError("Use at least 8 characters");
     if (pw !== String(form.get("confirm") || "")) throw new WorkflowError("Passwords don't match");
     await db.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(pw, 10), mustChangePassword: false } });
-    if (user.mustChangePassword) return { back: "/me", msg: "Password saved." };
+    if (user.mustChangePassword) return { back: "/link/my-schedule", msg: "Password saved." };
     return "Password saved.";
   });
 }
@@ -135,11 +135,40 @@ export async function updateProfileAction(form: FormData) {
         birthday: str(form, "birthday") || null,
         homecellLeader: str(form, "homecellLeader") || null,
         zonePastor: str(form, "zonePastor") || null,
-        attendingHomecell: form.get("attendingHomecell") === "on",
-        attendingChurch: form.get("attendingChurch") === "on",
+        attendingHomecell: form.get("attendingHomecell") === "yes" ? true : form.get("attendingHomecell") === "no" ? false : null,
+        attendingSundays: form.getAll("services").map(String).filter((t) => t === "08:30" || t === "10:30" || t === "18:00").join(",") || null,
         shirtSize: str(form, "shirtSize") || null,
       },
     });
+    const mayManage = user.appRole === "ADMIN" || user.memberships.some((m) => m.role === "LEADER");
+    if (form.get("manageAccess") === "1" && mayManage) {
+      const roleRaw = str(form, "deptRole");
+      const deptRole = roleRaw === "LEADER" || roleRaw === "TWO_IC" || roleRaw === "VOLUNTEER" ? roleRaw : null;
+      const deptIds = form.getAll("dept").map(String).filter(Boolean);
+      if (deptIds.length) {
+        await db.departmentMember.deleteMany({ where: { userId: user.id, departmentId: { notIn: deptIds } } });
+        for (const departmentId of deptIds) {
+          await db.departmentMember.upsert({
+            where: { userId_departmentId: { userId: user.id, departmentId } },
+            create: { userId: user.id, departmentId, role: deptRole || "VOLUNTEER" },
+            update: deptRole ? { role: deptRole } : {},
+          });
+        }
+      }
+      const positionIds = form.getAll("position").map(String).filter(Boolean);
+      const valid = positionIds.length
+        ? await db.position.findMany({ where: { id: { in: positionIds }, active: true }, select: { id: true } })
+        : [];
+      const ids = valid.map((p) => p.id);
+      await db.userSkill.deleteMany({ where: { userId: user.id, ...(ids.length ? { positionId: { notIn: ids } } : {}) } });
+      for (const positionId of ids) {
+        await db.userSkill.upsert({
+          where: { userId_positionId: { userId: user.id, positionId } },
+          create: { userId: user.id, positionId, stage: "QUALIFIED" },
+          update: {},
+        });
+      }
+    }
     return "Profile saved.";
   });
 }

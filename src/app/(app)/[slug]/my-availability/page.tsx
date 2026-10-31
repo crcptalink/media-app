@@ -5,10 +5,11 @@ import { getDepartment } from "@/lib/events";
 import { requireUser } from "@/lib/session";
 import { addDays, localTime, todayLocal } from "@/lib/time";
 
-export default async function AvailabilityPage({ searchParams }: { searchParams: SP }) {
+export default async function AvailabilityPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
-  const user = await requireUser("/my-availability");
-  const dept = await getDepartment(db);
+  const { slug } = await params;
+  const user = await requireUser(`/${slug}/my-availability`);
+  const dept = await getDepartment(db, slug);
   const today = todayLocal();
   const events = await db.event.findMany({
     where: { departmentId: dept.id, date: { gte: today, lte: addDays(today, 7 * 10) }, status: { not: "CANCELLED" } },

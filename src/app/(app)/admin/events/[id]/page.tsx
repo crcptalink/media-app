@@ -55,7 +55,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
     <div className="mx-auto max-w-4xl space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <div>
-        <Link href="/admin/manage" className="text-sm text-blue-700 underline">← Admin schedule</Link>
+        <Link href={`/${dept.slug}/manage-schedule`} className="text-sm text-blue-700 underline">Back To Manage Schedule</Link>
         <h1 className="h1 mt-1">{fmtDay(e.date)} <span className="ml-2 tabular-nums">{localTime(e.startsAt)}</span></h1>
         <div className="mt-2 text-sm text-slate-600">
           <p className="text-xs font-medium text-slate-500">Arrival</p>

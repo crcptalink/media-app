@@ -14,10 +14,11 @@ import { getGraceMinutes } from "@/lib/settings";
 import { addDays, fmtDateOnly, localTime, todayLocal, WEEKDAYS, weekdayOf } from "@/lib/time";
 import { withdrawAction } from "@/app/(app)/actions";
 
-export default async function MePage({ searchParams }: { searchParams: SP }) {
+export default async function MePage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
-  const user = await requireUser();
-  const dept = await getDepartment(db);
+  const { slug } = await params;
+  const user = await requireUser(`/${slug}/my-schedule`);
+  const dept = await getDepartment(db, slug);
   const today = todayLocal();
   const grace = await getGraceMinutes(db);
   const include = { user: true, slot: { include: { position: true, event: true } } } as const;
@@ -41,7 +42,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
       })
     : [];
   const servingSunday = new Set(sundaySlots.map((a) => a.slot.event.date));
-  const back = "/my-schedule";
+  const back = `/${slug}/my-schedule`;
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">

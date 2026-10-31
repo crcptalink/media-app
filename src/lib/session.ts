@@ -38,13 +38,13 @@ export async function currentUser(): Promise<CurrentUser | null> {
  */
 export async function redirectIfPasswordChangeRequired(user: CurrentUser | null) {
   if (!user?.mustChangePassword || user.impersonatorId) return;
-  redirect("/link/my-profile");
+  redirect("/me/password");
 }
 
-/** First sign-in must complete the profile before using the rest of the app. */
+/** Only accounts with no name at all. Imported volunteers already have a name. */
 export function profileIncomplete(user: CurrentUser | null) {
   if (!user || user.impersonatorId) return false;
-  return !user.name || !user.surname || !user.phone || !user.birthday;
+  return !user.name;
 }
 
 export async function redirectIfProfileIncomplete(user: CurrentUser | null, slug = "link") {
@@ -86,24 +86,24 @@ export async function requireUser(callbackUrl = "/link/my-schedule") {
   return u;
 }
 
-export async function requireScheduleManager() {
-  const u = await requireUser("/manage-schedule");
-  const dept = await getDepartment(db);
+export async function requireScheduleManager(slug = "link") {
+  const u = await requireUser(`/${slug}/manage-schedule`);
+  const dept = await getDepartment(db, slug);
   assertDepartmentAccess(u, dept.id);
-  if (!canManageSchedule(u, dept.id)) redirect("/link/my-schedule?error=" + encodeURIComponent("Leaders and 2ICs only"));
+  if (!canManageSchedule(u, dept.id)) redirect(`/${slug}/my-schedule?error=` + encodeURIComponent("Leaders and 2ICs only"));
   return { user: u, dept };
 }
 
-export async function requirePeopleManager() {
-  const u = await requireUser("/settings/volunteers");
-  const dept = await getDepartment(db);
+export async function requirePeopleManager(slug = "link") {
+  const u = await requireUser(`/${slug}/settings/volunteers`);
+  const dept = await getDepartment(db, slug);
   assertDepartmentAccess(u, dept.id);
-  if (!canManagePeople(u, dept.id)) redirect("/link/my-schedule?error=" + encodeURIComponent("Leaders only"));
+  if (!canManagePeople(u, dept.id)) redirect(`/${slug}/my-schedule?error=` + encodeURIComponent("Leaders only"));
   return { user: u, dept };
 }
 
-export async function requireAdmin() {
-  const u = await requireUser("/settings/setup");
-  if (u.appRole !== "ADMIN") redirect("/link/my-schedule?error=" + encodeURIComponent("Admins only"));
-  return { user: u, dept: await getDepartment(db) };
+export async function requireAdmin(slug = "link") {
+  const u = await requireUser(`/${slug}/settings/setup`);
+  if (u.appRole !== "ADMIN") redirect(`/${slug}/my-schedule?error=` + encodeURIComponent("Admins only"));
+  return { user: u, dept: await getDepartment(db, slug) };
 }

@@ -17,9 +17,10 @@ const STAGES = [
   ["QUALIFIED", "Qualified"],
 ] as const;
 
-export default async function PeoplePage({ searchParams }: { searchParams: SP }) {
+export default async function PeoplePage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
-  const { user: me, dept } = await requirePeopleManager();
+  const { slug } = await params;
+  const { user: me, dept } = await requirePeopleManager(slug);
   const [positions, departments] = await Promise.all([
     db.position.findMany({ where: { departmentId: dept.id, active: true }, orderBy: { sort: "asc" } }),
     db.department.findMany({ where: { active: true }, orderBy: [{ sort: "asc" }, { name: "asc" }] }),
@@ -29,7 +30,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
     include: { memberships: true, skills: true },
     orderBy: [{ active: "desc" }, { name: "asc" }],
   });
-  const back = "/settings/volunteers";
+  const back = `/${slug}/settings/volunteers`;
   const inviteLink = safeInviteLink(one(sp.invite), config.appUrl);
   const inviteName = (one(sp.inviteName) || "").replace(/[^\p{L}\p{N} .'-]/gu, "").slice(0, 80);
   return (
@@ -79,12 +80,14 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
       <p className="muted">
         Training stages per position: <b>Shadow</b> watches the leader set up (usually once) → <b>Trainee</b> sets up while the trainer watches → <b>Qualified</b> serves alone. Tick <b>Trainer</b> for LST / LT.
       </p>
+      <h2 className="h2">Directory</h2>
       <VolunteerTable people={people.map((p) => {
           const m = p.memberships.find((x) => x.departmentId === dept.id);
           const role = p.appRole === "ADMIN" ? "Admin" : m?.role === "LEADER" ? "Leader" : m?.role === "TWO_IC" ? "2IC" : "Member";
           const positionsLabel = p.skills.map((s) => positions.find((x) => x.id === s.positionId)?.name).filter(Boolean).join(", ");
           return { id: p.id, name: p.name || "", email: p.email || "", phone: p.phone || "", role, positions: positionsLabel, active: p.active };
         })} />
+      <h2 className="h2">Edit A Volunteer</h2>
       <ul className="space-y-3">
         {people.map((p) => {
           const m = p.memberships.find((x) => x.departmentId === dept.id);

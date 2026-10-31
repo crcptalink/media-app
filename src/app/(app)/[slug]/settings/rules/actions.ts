@@ -6,19 +6,27 @@ import { db } from "@/lib/db";
 import { RULE_TYPE_LABEL } from "@/lib/rules";
 import { requireScheduleManager } from "@/lib/session";
 
+function slugFrom(form: FormData) {
+  const back = String(form.get("back") || "");
+  const match = back.match(/^\/([a-z0-9-]+)\//);
+  return match && match[1] !== "admin" && match[1] !== "login" ? match[1] : "link";
+}
+
 export async function addLineAction(form: FormData) {
-  const { user, dept } = await requireScheduleManager();
+  const { user, dept } = await requireScheduleManager(slugFrom(form));
   const text = str(form, "text");
   await runAction(form, async () => {
     if (!text) throw new WorkflowError("Type a line first");
     const max = await db.ruleNote.aggregate({ where: { departmentId: dept.id }, _max: { sort: true } });
     const row = await db.ruleNote.create({ data: { departmentId: dept.id, text, kind: "NOTE", sort: (max._max.sort ?? 0) + 1, createdById: user.id } });
-    return { msg: "Line added. If it looks like a rule, a suggestion is filled in — check it and Save.", back: `/link/settings/rules?edit=${row.id}` };
+    const submitted = str(form, "back") || "/link/settings/rules";
+    const base = submitted.split("?")[0];
+    return { msg: "Line added. If it looks like a rule, a suggestion is filled in — check it and Save.", back: `${base}?edit=${row.id}` };
   });
 }
 
 export async function saveLineAction(form: FormData) {
-  const { user } = await requireScheduleManager();
+  const { user } = await requireScheduleManager(slugFrom(form));
   await runAction(form, async () => {
     const id = str(form, "id");
     const text = str(form, "text");
@@ -51,7 +59,7 @@ export async function saveLineAction(form: FormData) {
 }
 
 export async function deleteLineAction(form: FormData) {
-  const { user } = await requireScheduleManager();
+  const { user } = await requireScheduleManager(slugFrom(form));
   await runAction(form, async () => {
     const id = str(form, "id");
     const before = await db.ruleNote.delete({ where: { id } });

@@ -11,7 +11,7 @@ import { addLineAction, deleteLineAction, saveLineAction } from "./actions";
 export default async function RulesPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
   const { slug } = await params;
-  const { dept } = await requireScheduleManager();
+  const { dept } = await requireScheduleManager(slug);
   const editId = one(sp.edit);
   const [lines, people, templates] = await Promise.all([
     db.ruleNote.findMany({ where: { departmentId: dept.id }, orderBy: [{ sort: "asc" }, { createdAt: "asc" }] }),

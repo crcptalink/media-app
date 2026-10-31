@@ -8,12 +8,13 @@ import { retryEmailAction } from "@/app/(app)/admin/actions";
 
 const CLS: Record<string, string> = { SENT: "bg-green-100 text-green-800", PENDING: "bg-amber-100 text-amber-800", FAILED: "bg-red-100 text-red-800" };
 
-export default async function OutboxPage({ searchParams }: { searchParams: SP }) {
+export default async function OutboxPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
-  await requireAdmin();
+  const { slug } = await params;
+  await requireAdmin(slug);
   const rows = await db.emailOutbox.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
   const failed = rows.filter((r) => r.status === "FAILED").length;
-  const back = "/settings/emails";
+  const back = `/${slug}/settings/emails`;
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />

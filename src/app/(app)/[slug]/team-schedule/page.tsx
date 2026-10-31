@@ -11,15 +11,16 @@ function fromParam(raw: string | undefined) {
   return raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : todayLocal();
 }
 
-export default async function RosterPage({ searchParams }: { searchParams: SP }) {
+export default async function RosterPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
-  const user = await requireUser("/team-schedule");
-  await redirectIfProfileIncomplete(user, "link");
-  const dept = await getDepartment(db);
+  const { slug } = await params;
+  const user = await requireUser(`/${slug}/team-schedule`);
+  await redirectIfProfileIncomplete(user, slug);
+  const dept = await getDepartment(db, slug);
   const from = fromParam(one(sp.from));
   const events = await loadRoster(db, dept.id, from, addDays(from, SCHEDULE_DAYS - 1));
   const skills = await db.userSkill.findMany({ where: { userId: user.id } });
-  const back = `/team-schedule?from=${from}`;
+  const back = `/${slug}/team-schedule?from=${from}`;
   return (
     <div>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />

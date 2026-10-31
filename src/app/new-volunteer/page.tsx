@@ -18,7 +18,7 @@ export default async function NewVolunteerPage({ searchParams }: { searchParams:
     <div className="mx-auto max-w-md space-y-6 px-4 py-8">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <h1 className="h1">New Volunteer</h1>
-      <p className="muted">Fill in your details. A leader will confirm your role, department, and position.</p>
+      <p className="muted">Fill in your details. A leader confirms your role, department, and position before you can sign in.</p>
       <form action={createVolunteerAction} className="card space-y-4">
         <label className="block text-sm font-medium">First Name<input name="name" required className="input mt-1" /></label>
         <label className="block text-sm font-medium">Surname<input name="surname" required className="input mt-1" /></label>

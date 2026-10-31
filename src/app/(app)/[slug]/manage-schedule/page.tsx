@@ -18,7 +18,7 @@ function fromParam(raw: string | undefined) {
 export default async function AdminRosterPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
   const { slug } = await params;
-  const { user, dept } = await requireScheduleManager();
+  const { user, dept } = await requireScheduleManager(slug);
   const from = fromParam(one(sp.from));
   const events = await loadRoster(db, dept.id, from, addDays(from, SCHEDULE_DAYS - 1));
   const people = await db.user.findMany({

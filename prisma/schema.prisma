@@ -110,6 +110,8 @@ model User {
   zonePastor    String?
   attendingHomecell Boolean?
   attendingChurch Boolean?
+  /// Comma-separated Sunday services: 08:30,10:30,18:00
+  attendingSundays String?
   shirtSize     String?
   emailVerified DateTime?
   image         String?

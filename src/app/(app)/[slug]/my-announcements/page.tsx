@@ -9,10 +9,11 @@ import { addDays, fmtDateOnly, fmtDateTime, localTime, todayLocal, WEEKDAYS, wee
 import { TimePill } from "@/components/TimePill";
 import { claimAction, markReadAction } from "@/app/(app)/actions";
 
-export default async function AnnouncementsPage({ searchParams }: { searchParams: SP }) {
+export default async function AnnouncementsPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
-  const user = await requireUser("/my-announcements");
-  const dept = await getDepartment(db);
+  const { slug } = await params;
+  const user = await requireUser(`/${slug}/my-announcements`);
+  const dept = await getDepartment(db, slug);
   const today = todayLocal();
   const events = await loadRoster(db, dept.id, today, addDays(today, 34));
   const open = events.flatMap((e) =>
@@ -22,7 +23,7 @@ export default async function AnnouncementsPage({ searchParams }: { searchParams
       .map((s) => ({ e, s })),
   );
   const notes = await db.notification.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 15 });
-  const back = "/my-announcements";
+  const back = `/${slug}/my-announcements`;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

@@ -7,9 +7,10 @@ import { getGraceMinutes } from "@/lib/settings";
 import { WEEKDAYS } from "@/lib/time";
 import { generateAction, saveGraceAction, saveGroupAction, savePositionAction, saveTemplateAction } from "./actions";
 
-export default async function SetupPage({ searchParams }: { searchParams: SP }) {
+export default async function SetupPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
-  const { dept } = await requireAdmin();
+  const { slug } = await params;
+  const { dept } = await requireAdmin(slug);
   const [positions, groups, ungrouped, grace] = await Promise.all([
     db.position.findMany({ where: { departmentId: dept.id }, orderBy: { sort: "asc" } }),
     db.templateGroup.findMany({
@@ -20,7 +21,7 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
     db.serviceTemplate.findMany({ where: { departmentId: dept.id, groupId: null }, orderBy: { startTime: "asc" }, include: { slots: true } }),
     getGraceMinutes(db),
   ]);
-  const back = "/settings/setup";
+  const back = `/${slug}/settings/setup`;
   const tv = `${config.appUrl}/tv?token=${config.tvToken}`;
   const checkinDisplay = `${config.appUrl}/checkin-display?token=${config.kioskToken}`;
 
