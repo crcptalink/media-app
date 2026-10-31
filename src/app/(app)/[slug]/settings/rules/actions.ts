@@ -13,7 +13,7 @@ export async function addLineAction(form: FormData) {
     if (!text) throw new WorkflowError("Type a line first");
     const max = await db.ruleNote.aggregate({ where: { departmentId: dept.id }, _max: { sort: true } });
     const row = await db.ruleNote.create({ data: { departmentId: dept.id, text, kind: "NOTE", sort: (max._max.sort ?? 0) + 1, createdById: user.id } });
-    return { msg: "Line added. If it looks like a rule, a suggestion is filled in — check it and Save.", back: `/admin/rules?edit=${row.id}` };
+    return { msg: "Line added. If it looks like a rule, a suggestion is filled in — check it and Save.", back: `/link/settings/rules?edit=${row.id}` };
   });
 }
 

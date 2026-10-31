@@ -84,29 +84,22 @@ function EventCard({
         {weekdayOf(e.date) === 4 || e.kind === "TRAINING" ? (
           <>
             <TimePill time="18:30" />
-            <span className="text-xs font-medium text-amber-700">Pre-Prayer</span>
+            <span className="text-xs font-medium text-sky-600">Pre-Prayer</span>
             <TimePill time="19:00" />
-            <span className="text-xs font-medium text-amber-700">Training</span>
+            <span className="text-xs font-medium text-sky-600">Training</span>
           </>
         ) : (
-          <TimePill time={localTime(e.startsAt)} />
+          <>
+            <TimePill time={localTime(e.startsAt)} />
+            <span className="text-xs text-slate-500">Arrival {localTime(e.arriveBy)}</span>
+            {e.preprayerAt && <span className="text-xs text-slate-500">Pre-Prayer {localTime(e.preprayerAt)}</span>}
+          </>
         )}
         {mode === "admin" && (
           <Link href={`/admin/events/${e.id}`} className="ml-auto text-xs text-blue-700 underline">Details</Link>
         )}
       </div>
-      {weekdayOf(e.date) !== 4 && e.kind !== "TRAINING" && (
-        <div className="mt-3 text-sm">
-          <p className="text-xs font-medium text-slate-500">Arrival</p>
-          <p>{localTime(e.arriveBy)}</p>
-          {e.preprayerAt && (
-            <>
-              <p className="mt-2 text-xs font-medium text-slate-500">Pre-Prayer</p>
-              <p>{localTime(e.preprayerAt)}</p>
-            </>
-          )}
-        </div>
-      )}
+      
       <ul className="mt-3 divide-y divide-slate-100">
         {e.slots.map((s) => {
           const serving = s.assignments.find((a) => a.kind === "SERVING");
@@ -168,7 +161,7 @@ function EventCard({
       {mode === "admin" && warnings.length > 0 && (
         <ul className="mt-3 space-y-1">
           {warnings.map((w, i) => (
-            <li key={i} className={`rounded px-2 py-1 text-xs ${w.severity === "WARN" ? "bg-sky-50 text-amber-900" : "bg-slate-100 text-slate-700"}`}>
+            <li key={i} className={`rounded px-2 py-1 text-xs ${w.severity === "WARN" ? "bg-sky-50 text-sky-900" : "bg-slate-100 text-slate-700"}`}>
               {w.message}
             </li>
           ))}

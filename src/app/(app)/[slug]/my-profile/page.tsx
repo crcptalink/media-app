@@ -3,6 +3,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { setPasswordAction, updateProfileAction } from "@/app/(app)/actions";
 import { requireUser } from "@/lib/session";
 
+const SIZES = ["S", "M", "L", "XL", "XXL"];
+
 export default async function ProfilePage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
   const { slug } = await params;
@@ -19,24 +21,49 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
         <p className="muted">Profile and password changes are unavailable while viewing as {user.name || "this person"}.</p>
       ) : (
         <>
-          <form action={updateProfileAction} className="card space-y-3">
+          <form action={updateProfileAction} className="card space-y-4">
             <input type="hidden" name="back" value={back} />
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-xl font-semibold text-blue-800">
+                {user.image ? <img src={user.image} alt="" className="h-full w-full rounded-full object-cover" /> : (user.name || "?")[0]}
+              </div>
+              <label className="text-sm font-medium">
+                Media Tag Photo
+                <input name="photo" type="file" accept="image/*" className="mt-1 block text-xs" />
+              </label>
+            </div>
             <label className="block text-sm font-medium">First Name<input name="name" defaultValue={user.name || ""} className="input mt-1" /></label>
             <label className="block text-sm font-medium">Surname<input name="surname" defaultValue={user.surname || ""} className="input mt-1" /></label>
             <label className="block text-sm font-medium">Email<input name="email" type="email" defaultValue={user.email || ""} className="input mt-1" /></label>
-            <label className="block text-sm font-medium">Phone<input name="phone" type="tel" defaultValue={user.phone || ""} className="input mt-1" /></label>
-            <label className="block text-sm font-medium">Birthday<input name="birthday" defaultValue={user.birthday || ""} placeholder="e.g. 7 June" className="input mt-1" /></label>
-            <label className="block text-sm font-medium">Homecell Leader<input name="homecellLeader" defaultValue={user.homecellLeader || ""} className="input mt-1" /></label>
+            <label className="block text-sm font-medium">WhatsApp<input name="phone" type="tel" defaultValue={user.phone || ""} className="input mt-1" /></label>
+            <label className="block text-sm font-medium">Birthday<input name="birthday" type="date" defaultValue={user.birthday || ""} className="input mt-1" /></label>
             <label className="block text-sm font-medium">Zone Pastor<input name="zonePastor" defaultValue={user.zonePastor || ""} className="input mt-1" /></label>
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <input name="attendingHomecell" type="checkbox" defaultChecked={!!user.attendingHomecell} />
-              Attending Homecell
-            </label>
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <input name="attendingChurch" type="checkbox" defaultChecked={!!user.attendingChurch} />
-              Attending Church
-            </label>
-            <label className="block text-sm font-medium">Shirt Size<input name="shirtSize" defaultValue={user.shirtSize || ""} className="input mt-1" /></label>
+            <label className="block text-sm font-medium">Homecell Leader<input name="homecellLeader" defaultValue={user.homecellLeader || ""} className="input mt-1" /></label>
+            <div>
+              <p className="text-sm font-medium">Attending Homecell</p>
+              <div className="mt-1 flex gap-2">
+                <label className="chip cursor-pointer"><input type="radio" name="attendingHomecell" value="yes" defaultChecked={user.attendingHomecell === true} className="sr-only" /> Yes</label>
+                <label className="chip cursor-pointer"><input type="radio" name="attendingHomecell" value="no" defaultChecked={user.attendingHomecell === false} className="sr-only" /> No</label>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Services I Attend</p>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {["08:30", "10:30", "18:00", "Any"].map((t) => (
+                  <label key={t} className="chip cursor-pointer"><input type="checkbox" name="services" value={t} className="sr-only" /> {t === "18:00" ? "18:00" : t}</label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Shirt Size</p>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {SIZES.map((s) => (
+                  <label key={s} className={`chip cursor-pointer ${user.shirtSize === s ? "bg-blue-700 text-white" : ""}`}>
+                    <input type="radio" name="shirtSize" value={s} defaultChecked={user.shirtSize === s} className="sr-only" /> {s}
+                  </label>
+                ))}
+              </div>
+            </div>
             <SubmitButton>Save Profile</SubmitButton>
           </form>
           <form action={setPasswordAction} className="card space-y-3">

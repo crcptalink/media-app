@@ -25,7 +25,7 @@ export default async function RosterPage({ searchParams }: { searchParams: SP })
       <WeekNav from={from} base="/team-schedule" />
       {events.some((e) => e.slots.some((s) => !s.assignments.some((a) => a.kind === "SERVING"))) && (
         <div className="mb-4 rounded-lg border-l-4 border-l-red-600 bg-red-50 px-4 py-3 text-sm font-medium text-red-900">
-          We need someone for this Sunday. Open slots are available — please step up if you can serve.
+          We need someone for this Sunday please.
         </div>
       )}
       <RosterBoard events={events} mode="volunteer" me={{ id: user.id, skills }} back={back} />

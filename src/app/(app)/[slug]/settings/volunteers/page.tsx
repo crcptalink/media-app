@@ -32,6 +32,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
   const inviteLink = safeInviteLink(one(sp.invite), config.appUrl);
   const inviteName = (one(sp.inviteName) || "").replace(/[^\p{L}\p{N} .'-]/gu, "").slice(0, 80);
   return (
+    <div>
+      <h1 className="h1 mb-4">Volunteers</h1>
     <div className="mx-auto max-w-4xl space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       {inviteLink && <CopyInvite url={inviteLink} name={inviteName || undefined} failedSend={one(sp.inviteReason) === "send"} />}
@@ -71,6 +73,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
         {people.map((p) => {
           const m = p.memberships.find((x) => x.departmentId === dept.id);
           return (
+    <div>
+      <h1 className="h1 mb-4">Volunteers</h1>
             <li key={p.id} className={`card ${p.active ? "" : "opacity-60"}`}>
               <details>
                 <summary className="flex cursor-pointer flex-wrap items-center gap-2">
@@ -87,6 +91,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                       const pos = positions.find((x) => x.id === s.positionId);
                       if (!pos) return null;
                       return (
+    <div>
+      <h1 className="h1 mb-4">Volunteers</h1>
                         <span key={s.positionId} className={`chip ${s.stage === "QUALIFIED" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
                           {positionTitle(pos.code, pos.name)}
                           {s.stage === "QUALIFIED" ? "" : s.stage === "TRAINEE" ? " · Trainee" : " · Shadow"}
@@ -138,6 +144,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                       {positions.map((pos) => {
                         const s = p.skills.find((x) => x.positionId === pos.id);
                         return (
+    <div>
+      <h1 className="h1 mb-4">Volunteers</h1>
                           <tr key={pos.id} className="border-t">
                             <td className="py-1.5">{pos.name}</td>
                             <td>
@@ -202,6 +210,8 @@ function SignInControls({
 }) {
   if (!grant && !viewAs && !note) return null;
   return (
+    <div>
+      <h1 className="h1 mb-4">Volunteers</h1>
     <div className="mt-4 space-y-4 border-t border-slate-200 pt-4">
       <h2 className="text-sm font-semibold text-slate-900">Sign-in</h2>
       {grant && (

@@ -47,7 +47,7 @@ export default async function MePage({ searchParams }: { searchParams: SP }) {
     <div className="mx-auto max-w-2xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       {pending > 0 && <h1 className="h1">Pending Approvals <span className="text-slate-500">{pending}</span></h1>}
-      {mine.length === 0 && <p className="muted">Nothing scheduled.</p>}
+      {mine.length === 0 {mine.length === 0 && <p className="muted">Nothing scheduled.</p>}{mine.length === 0 && <p className="muted">Nothing scheduled.</p>} null}
       {mine.map((a) => {
         const e = a.slot.event;
         const closed = answersClosed(e.date);
