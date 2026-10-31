@@ -7,7 +7,7 @@ import { loadRoster } from "@/lib/roster";
 import { requireScheduleManager } from "@/lib/session";
 import { addDays, todayLocal } from "@/lib/time";
 import { loadWarnings } from "@/lib/warnings";
-import { decideAction } from "@/app/(app)/actions";
+import { decideAction } from "@/app/(app)/admin/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 
 function fromParam(raw: string | undefined) {
