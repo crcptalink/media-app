@@ -53,6 +53,12 @@ async function main() {
       return;
     }
 
+    console.log("[import] clearing existing schedule data for clean reimport...");
+    await prisma.assignment.deleteMany();
+    await prisma.slot.deleteMany();
+    await prisma.event.deleteMany();
+    await prisma.dataImport.deleteMany({ where: { key: { startsWith: "link-2026" } } });
+
     const data = JSON.parse(fs.readFileSync(DATA, "utf8"));
     const dept = await prisma.department.findUnique({ where: { slug: "link" } });
     if (!dept) throw new Error("Link department is missing. Migrations should create it before this import.");
