@@ -74,6 +74,8 @@ services:
       TZ: Africa/Johannesburg
       # Heap stays under the 512m cgroup; the rest is for the Prisma query engine.
       NODE_OPTIONS: --max-old-space-size=384
+      APP_URL: https://media-app.crcchurch.com
+      AUTH_URL: https://media-app.crcchurch.com
     ports:
       - "3000:3000"
     depends_on:
