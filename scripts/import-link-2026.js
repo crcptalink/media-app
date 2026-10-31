@@ -10,7 +10,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { PrismaClient } = require("@prisma/client");
 
-const MARKER = "link-2026-sunday-clean-v1";
+const MARKER = "link-2026-sunday-clean-v2";
 const DATA = path.join(__dirname, "..", "prisma", "data", "link-2026-sunday-clean.json");
 
 const TIMES = {
@@ -58,6 +58,18 @@ async function main() {
     await prisma.slot.deleteMany();
     await prisma.event.deleteMany();
     await prisma.dataImport.deleteMany({ where: { key: { startsWith: "link-2026" } } });
+
+    const removeNames = ["Aiden", "Aidan", "Stefan", "Stéphan", "Veronica", "Veronice-Lee", "Kiamo", "Keamo", "Brett", "Luu", "Namile", "Amelia"];
+    for (const n of removeNames) {
+      const users = await prisma.user.findMany({ where: { name: { contains: n, mode: "insensitive" } } });
+      for (const u of users) {
+        await prisma.assignment.deleteMany({ where: { userId: u.id } });
+        await prisma.userSkill.deleteMany({ where: { userId: u.id } });
+        await prisma.departmentMember.deleteMany({ where: { userId: u.id } });
+        await prisma.user.delete({ where: { id: u.id } });
+        console.log("[import] removed user", u.name);
+      }
+    }
 
     const data = JSON.parse(fs.readFileSync(DATA, "utf8"));
     const dept = await prisma.department.findUnique({ where: { slug: "link" } });

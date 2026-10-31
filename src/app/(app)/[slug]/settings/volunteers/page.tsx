@@ -73,8 +73,6 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
         {people.map((p) => {
           const m = p.memberships.find((x) => x.departmentId === dept.id);
           return (
-    <div>
-      <h1 className="h1 mb-4">Volunteers</h1>
             <li key={p.id} className={`card ${p.active ? "" : "opacity-60"}`}>
               <details>
                 <summary className="flex cursor-pointer flex-wrap items-center gap-2">
@@ -93,7 +91,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                       return (
     <div>
       <h1 className="h1 mb-4">Volunteers</h1>
-                        <span key={s.positionId} className={`chip ${s.stage === "QUALIFIED" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                        <span key={s.positionId} className={`chip ${pos.code === "LS" || pos.code === "LST" ? "bg-blue-100 text-blue-800" : pos.code === "L" || pos.code === "LT" ? "bg-cyan-100 text-cyan-800" : s.stage === "QUALIFIED" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-700"}`}>
                           {positionTitle(pos.code, pos.name)}
                           {s.stage === "QUALIFIED" ? "" : s.stage === "TRAINEE" ? " · Trainee" : " · Shadow"}
                           {s.isTrainer ? " · Trainer" : ""}
