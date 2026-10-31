@@ -1,12 +1,13 @@
 {
-	email crcptalink@gmail.com
+	auto_https off
 	admin off
 }
 
-media-app.crcchurch.com {
-	encode gzip
-	reverse_proxy app:3000 {
-		header_up X-Forwarded-Proto {scheme}
-		header_up X-Forwarded-Host {host}
-	}
+:443 {
+	tls internal
+	reverse_proxy app:3000
+}
+
+:80 {
+	reverse_proxy app:3000
 }
