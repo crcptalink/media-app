@@ -84,9 +84,9 @@ function EventCard({
         {weekdayOf(e.date) === 4 || e.kind === "TRAINING" ? (
           <>
             <TimePill time="18:30" />
-            <span className="text-xs font-medium text-slate-600">Pre-Prayer</span>
+            <span className="text-xs font-medium text-amber-700">Pre-Prayer</span>
             <TimePill time="19:00" />
-            <span className="text-xs font-medium text-slate-600">Training</span>
+            <span className="text-xs font-medium text-amber-700">Training</span>
           </>
         ) : (
           <TimePill time={localTime(e.startsAt)} />
@@ -95,16 +95,18 @@ function EventCard({
           <Link href={`/admin/events/${e.id}`} className="ml-auto text-xs text-blue-700 underline">Details</Link>
         )}
       </div>
-      <div className="mt-3 text-sm">
-        <p className="text-xs font-medium text-slate-500">Arrival</p>
-        <p>{localTime(e.arriveBy)}</p>
-        {e.preprayerAt && weekdayOf(e.date) !== 4 && e.kind !== "TRAINING" && (
-          <>
-            <p className="mt-2 text-xs font-medium text-slate-500">Pre-Prayer</p>
-            <p>{localTime(e.preprayerAt)}</p>
-          </>
-        )}
-      </div>
+      {weekdayOf(e.date) !== 4 && e.kind !== "TRAINING" && (
+        <div className="mt-3 text-sm">
+          <p className="text-xs font-medium text-slate-500">Arrival</p>
+          <p>{localTime(e.arriveBy)}</p>
+          {e.preprayerAt && (
+            <>
+              <p className="mt-2 text-xs font-medium text-slate-500">Pre-Prayer</p>
+              <p>{localTime(e.preprayerAt)}</p>
+            </>
+          )}
+        </div>
+      )}
       <ul className="mt-3 divide-y divide-slate-100">
         {e.slots.map((s) => {
           const serving = s.assignments.find((a) => a.kind === "SERVING");
@@ -193,6 +195,7 @@ function AssignmentLine({
     <>
       <span className={`truncate text-sm ${(a.status === "PROPOSED" && !answersClosed(serviceDate)) || a.status === "CLAIM_PENDING" ? "text-slate-500" : a.userId === me ? "font-medium text-blue-800" : "font-medium text-slate-900"}`}>
         {displayName(a.user)}
+        {a.status === "ACCEPTED" && <span className="ml-2 text-xs font-medium text-emerald-700">Accepted</span>}
       </span>
       <span className="flex items-center justify-end gap-2">
         {a.status === "PROPOSED" && !answersClosed(serviceDate) ? null : <StatusChip status={a.status} serviceDate={serviceDate} />}

@@ -26,7 +26,7 @@ export async function decideAction(form: FormData) {
   await runAction(form, async () => {
     const approve = str(form, "decision") === "approve";
     await decideClaim(db, { assignmentId: str(form, "assignmentId"), actorId: user.id, approve });
-    return approve ? "Approved — invite queued." : "Rejected — volunteer notified.";
+    return approve ? "Approved." : "Rejected — volunteer notified.";
   });
 }
 
