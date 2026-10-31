@@ -179,7 +179,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
             <input type="hidden" name="eventId" value={e.id} />
             <input type="hidden" name="back" value={back} />
             <label>Arrive<input name="arrive" defaultValue={localTime(e.arriveBy)} className="input" /></label>
-            <label>Pre-prayer<input name="preprayer" defaultValue={e.preprayerAt ? localTime(e.preprayerAt) : ""} className="input" /></label>
+            <label>Pre-Prayer<input name="preprayer" defaultValue={e.preprayerAt ? localTime(e.preprayerAt) : ""} className="input" /></label>
             <label>Start<input name="start" defaultValue={localTime(e.startsAt)} className="input" /></label>
             <label>Duration (min)<input name="duration" type="number" defaultValue={durationMin} className="input" /></label>
             <SubmitButton className="btn-primary col-span-2">Save times</SubmitButton>

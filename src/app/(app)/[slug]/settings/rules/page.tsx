@@ -8,8 +8,9 @@ import { asParams, parseRuleLine, RULE_TYPE_LABEL } from "@/lib/rules";
 import { requireScheduleManager } from "@/lib/session";
 import { addLineAction, deleteLineAction, saveLineAction } from "./actions";
 
-export default async function RulesPage({ searchParams }: { searchParams: SP }) {
+export default async function RulesPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
+  const { slug } = await params;
   const { dept } = await requireScheduleManager();
   const editId = one(sp.edit);
   const [lines, people, templates] = await Promise.all([
@@ -22,7 +23,7 @@ export default async function RulesPage({ searchParams }: { searchParams: SP }) 
     return u ? displayName(u) : "?";
   };
   const tplOf = (id: string) => templates.find((t) => t.id === id)?.name ?? "?";
-  const back = "/settings/rules";
+  const back = `/${slug}/settings/rules`;
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
@@ -45,7 +46,7 @@ export default async function RulesPage({ searchParams }: { searchParams: SP }) 
                     {l.severity === "INFO" ? " · soft" : ""}
                   </span>
                 )}
-                <Link href={`/settings/rules?edit=${l.id}`} className="btn-ghost btn-sm">Edit</Link>
+                <Link href={`/${slug}/settings/rules?edit=${l.id}`} className="btn-ghost btn-sm">Edit</Link>
               </li>
             );
           }
@@ -109,7 +110,7 @@ export default async function RulesPage({ searchParams }: { searchParams: SP }) 
                 </fieldset>
                 <div className="flex gap-2">
                   <SubmitButton>Save</SubmitButton>
-                  <Link href="/settings/rules" className="btn-ghost">Cancel</Link>
+                  <Link href={`/${slug}/settings/rules`} className="btn-ghost">Cancel</Link>
                 </div>
               </form>
               <form action={deleteLineAction}>

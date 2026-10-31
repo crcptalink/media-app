@@ -58,6 +58,14 @@ export async function addPersonAction(form: FormData) {
       ? await db.user.update({ where: { id: existing.id }, data: { active: true, name: existing.name || str(form, "name") || null } })
       : await db.user.create({ data: { email, name: str(form, "name") || null, phone: str(form, "phone") || null } });
     await setDepartmentAccess(u.id, form, role);
+    const positionIds = form.getAll("position").map(String).filter(Boolean);
+    for (const pid of positionIds) {
+      await db.userSkill.upsert({
+        where: { userId_positionId: { userId: u.id, positionId: pid } },
+        create: { userId: u.id, positionId: pid, stage: "QUALIFIED" },
+        update: {},
+      });
+    }
     if (str(form, "role") === "ADMIN") {
       if (user.appRole !== "ADMIN") throw new WorkflowError("Only an admin can assign Admin");
       await db.user.update({ where: { id: u.id }, data: { appRole: "ADMIN" } });

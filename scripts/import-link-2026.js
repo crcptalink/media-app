@@ -10,7 +10,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { PrismaClient } = require("@prisma/client");
 
-const MARKER = "link-2026-sunday-clean-v2";
+const MARKER = "link-2026-sunday-clean-v3";
 const DATA = path.join(__dirname, "..", "prisma", "data", "link-2026-sunday-clean.json");
 
 const TIMES = {
@@ -23,7 +23,7 @@ const POSITIONS = [
   { name: "Service Leader", code: "SL", sort: 1, isTraining: false, coversCodes: [] },
   { name: "Livestream", code: "LS", sort: 2, isTraining: false, coversCodes: [] },
   { name: "Link", code: "L", sort: 3, isTraining: false, coversCodes: [] },
-  { name: "LS & Link", code: "LSL", sort: 4, isTraining: false, coversCodes: ["LS", "L"] },
+  { name: "LS & Link", code: "LSL", sort: 4, isTraining: false, coversCodes: ["LS", "L"], active: false },
   { name: "Training", code: "T", sort: 5, isTraining: true, coversCodes: [] },
   { name: "LS Training", code: "LST", sort: 6, isTraining: true, coversCodes: ["LS"] },
   { name: "Link Training", code: "LT", sort: 7, isTraining: true, coversCodes: ["L"] },
@@ -86,7 +86,7 @@ async function main() {
       const row = await prisma.position.upsert({
         where: { departmentId_code: { departmentId: dept.id, code: p.code } },
         create: { departmentId: dept.id, ...p },
-        update: { name: p.name, sort: p.sort, isTraining: p.isTraining },
+        update: { name: p.name, sort: p.sort, isTraining: p.isTraining, active: p.active !== false },
       });
       positionByName.set(p.name, row);
     }

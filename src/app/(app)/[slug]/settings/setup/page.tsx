@@ -31,7 +31,7 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
       <input type="hidden" name="groupId" value={groupId} />
       <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
         <label className="col-span-2">Name<input name="name" defaultValue={t?.name ?? ""} required className="input" /></label>
-        <label>Kind
+        <label>Type
           <select name="kind" defaultValue={t?.kind ?? "SERVICE"} className="input">
             <option value="SERVICE">Service</option>
             <option value="TRAINING">Training</option>
@@ -44,17 +44,17 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
             ))}
           </select>
         </label>
-        <label>Start<input name="startTime" defaultValue={t?.startTime ?? ""} placeholder="08:30" className="input" /></label>
-        <label>Arrive<input name="arrivalTime" defaultValue={t?.arrivalTime ?? ""} placeholder="07:00" className="input" /></label>
-        <label>Pre-prayer<input name="preprayerTime" defaultValue={t?.preprayerTime ?? ""} placeholder="optional" className="input" /></label>
+        <label>Service<input name="startTime" defaultValue={t?.startTime ?? ""} placeholder="08:30" className="input" /></label>
+        <label>Arrival Time<input name="arrivalTime" defaultValue={t?.arrivalTime ?? ""} placeholder="07:00" className="input" /></label>
+        <label>Pre-Prayer<input name="preprayerTime" defaultValue={t?.preprayerTime ?? ""} placeholder="optional" className="input" /></label>
         <label>Duration (minutes)<input name="durationMin" type="number" defaultValue={t?.durationMin ?? 120} className="input" /></label>
         <label>Sort<input name="sort" type="number" defaultValue={t?.sort ?? 0} className="input" /></label>
       </div>
-      <div className="flex flex-wrap gap-3 text-sm">
+      <div className="space-y-1 text-sm">
         <span className="font-medium">Positions</span>
         {positions.filter((p) => p.active).map((p) => (
-          <label key={p.id} className="flex items-center gap-1">
-            {p.code}
+          <label key={p.id} className="flex items-center gap-2">
+            <span className="w-40">{p.name}</span>
             <input name={`count_${p.id}`} type="number" min={0} max={10} defaultValue={t?.slots.find((s) => s.positionId === p.id)?.count ?? 0} className="w-14 rounded border px-1 py-1" />
           </label>
         ))}
@@ -74,7 +74,6 @@ export default async function SetupPage({ searchParams }: { searchParams: SP }) 
         <h2 className="h2">Screens</h2>
         <p className="text-sm">TV dashboard: <a className="break-all text-blue-700 underline" href={tv}>{tv}</a></p>
         <p className="text-sm">Check-in display: <a className="break-all text-blue-700 underline" href={checkinDisplay}>{checkinDisplay}</a></p>
-        <p className="muted">The old address /kiosk still opens the same display.</p>
         {(!config.tvToken || !config.kioskToken) && <p className="text-sm text-red-700">Set TV_TOKEN and KIOSK_TOKEN in .env — these pages are locked until you do.</p>}
       </section>
 

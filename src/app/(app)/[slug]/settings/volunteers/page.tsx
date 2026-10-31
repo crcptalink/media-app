@@ -41,8 +41,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
         <input type="hidden" name="back" value={back} />
         <input name="name" placeholder="Name" className="input sm:col-span-1" />
         <input name="email" type="email" required placeholder="Email" className="input sm:col-span-2" />
-        <input name="phone" type="tel" placeholder="Phone" className="input" />
-        <label className="text-sm">Role
+        <input name="phone" type="tel" placeholder="WhatsApp" className="input" />
+        <label className="text-sm">
           <select name="role" defaultValue="VOLUNTEER" className="input">
             {me.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
             <option value="LEADER">Leader</option>
@@ -50,9 +50,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
             <option value="VOLUNTEER">Member</option>
           </select>
         </label>
-        <fieldset className="sm:col-span-5">
-          <legend className="text-sm font-medium">Departments</legend>
-          <p className="muted">Tick the departments this person can open.</p>
+        <details className="sm:col-span-5">
+          <summary className="cursor-pointer text-sm font-medium">Departments</summary>
           <div className="mt-2 flex flex-wrap gap-3 text-sm">
             {departments.map((d) => (
               <label key={d.id} className="flex items-center gap-1">
@@ -60,11 +59,21 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
               </label>
             ))}
           </div>
-        </fieldset>
+        </details>
+        <details className="sm:col-span-5">
+          <summary className="cursor-pointer text-sm font-medium">Positions</summary>
+          <div className="mt-2 flex flex-wrap gap-3 text-sm">
+            {positions.map((pos) => (
+              <label key={pos.id} className="flex items-center gap-1">
+                <input type="checkbox" name="position" value={pos.id} /> {pos.name}
+              </label>
+            ))}
+          </div>
+        </details>
         <label className="flex items-center gap-2 text-sm sm:col-span-3">
-          <input type="checkbox" name="welcome" /> Email them a welcome note with the app link
+          <input type="checkbox" name="welcome" /> Send Invite Email
         </label>
-        <SubmitButton className="btn-primary sm:col-span-2">Add Person</SubmitButton>
+        <SubmitButton className="btn-primary sm:col-span-2">Add</SubmitButton>
       </form>}
       <p className="muted">
         Training stages per position: <b>Shadow</b> watches the leader set up (usually once) → <b>Trainee</b> sets up while the trainer watches → <b>Qualified</b> serves alone. Tick <b>Trainer</b> for LST / LT.
@@ -103,8 +112,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
                   <input type="hidden" name="back" value={back} />
                   <div className="grid gap-2 sm:grid-cols-4">
                     <input name="name" defaultValue={p.name || ""} placeholder="Name" className="input" />
-                    <input name="phone" defaultValue={p.phone || ""} placeholder="Phone" className="input" />
-                    <label className="text-sm">Role
+                    <input name="phone" defaultValue={p.phone || ""} placeholder="WhatsApp" className="input" />
+                    <label className="text-sm">
                       <select name="role" defaultValue={p.appRole === "ADMIN" ? "ADMIN" : m?.role || "VOLUNTEER"} className="input">
                         {me.appRole === "ADMIN" && <option value="ADMIN">Admin</option>}
                         <option value="LEADER">Leader</option>

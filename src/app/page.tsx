@@ -29,16 +29,24 @@ export default async function Home({ searchParams }: { searchParams: SP }) {
       viewingAs={user?.impersonatorId ? { name: user.name || user.email || "this person", stop: stopViewingAsAction } : undefined}
     >
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
+      <div className="mb-6 flex justify-center">
+        <img src="/crc-logo.png" alt="CRC" className="h-20 w-20 rounded-full object-contain" />
+      </div>
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((d) => (
           <li key={d.slug}>
-            <Link
-              href={d.href}
-              className="flex min-h-[7.5rem] flex-col items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-5 py-8 text-center text-blue-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-600 hover:bg-blue-100 hover:shadow-md"
-            >
-              <span className="text-lg font-semibold">{d.name}</span>
-              
-            </Link>
+            {d.ready ? (
+              <Link
+                href={d.href}
+                className="flex min-h-[7.5rem] flex-col items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-5 py-8 text-center text-blue-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-600 hover:bg-blue-100 hover:shadow-md"
+              >
+                <span className="text-lg font-semibold">{d.name}</span>
+              </Link>
+            ) : (
+              <div className="flex min-h-[7.5rem] cursor-not-allowed flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-100 px-5 py-8 text-center text-slate-400">
+                <span className="text-lg font-semibold">{d.name}</span>
+              </div>
+            )}
           </li>
         ))}
       </ul>

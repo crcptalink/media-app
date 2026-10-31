@@ -6,7 +6,7 @@
 export const DEPARTMENT_CATALOG = [
   { slug: "link", name: "Link", blurb: "Livestream, Link, and service leading. Answer slots, check in, and see who is serving.", sort: 1, ready: true },
   { slug: "cameras", name: "Cameras", blurb: "Cameras for services.", sort: 2, ready: false },
-  { slug: "directors", name: "Directors / Vision Mixers", blurb: "Directing and vision mixing.", sort: 3, ready: false },
+  { slug: "directors", name: "Directors/Vision Mixers", blurb: "Directing and vision mixing.", sort: 3, ready: false },
   { slug: "graphics", name: "Graphic Operators", blurb: "Lyrics and graphics.", sort: 4, ready: false },
   { slug: "comms", name: "Comms", blurb: "Communications.", sort: 5, ready: false },
 ] as const;
@@ -31,5 +31,9 @@ export function menuDepartments(
   const ordered = DEPARTMENT_ORDER.map((slug) => all.find((d) => d.slug === slug)).filter((d) => d != null);
   const visible = !user || user.appRole === "ADMIN" ? ordered : ordered.filter((d) => user.memberships.some((m) => m.departmentId === d.id));
   if (user && !showDepartmentMenu(user)) return [];
-  return visible.map((d) => ({ slug: d.slug, name: d.name, href: departmentHref(d), ready: d.ready }));
+  const catalog = Object.fromEntries(DEPARTMENT_CATALOG.map((d) => [d.slug, d]));
+  return visible.map((d) => {
+    const c = catalog[d.slug];
+    return { slug: d.slug, name: c?.name ?? d.name, href: departmentHref(d), ready: d.ready };
+  });
 }
