@@ -28,7 +28,7 @@ export default async function PeoplePage({ searchParams, params }: { searchParam
   return (
     <div>
       <h1 className="h1 mb-4">Volunteers</h1>
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="w-full space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       {inviteLink && <CopyInvite url={inviteLink} name={inviteName || undefined} failedSend={one(sp.inviteReason) === "send"} />}
       {!me.impersonatorId && (
@@ -85,6 +85,7 @@ export default async function PeoplePage({ searchParams, params }: { searchParam
               email: person.email || "",
               phone: person.phone || "",
               birthday: person.birthday || "",
+              joinedOn: person.joinedOn || "",
               shirtSize: person.shirtSize || "",
               role,
               roleValue,
@@ -96,7 +97,7 @@ export default async function PeoplePage({ searchParams, params }: { searchParam
               homecellLeader: person.homecellLeader || "",
               attendingHomecell: person.attendingHomecell === true ? "yes" : person.attendingHomecell === false ? "no" : "",
               attendingSundays: (person.attendingSundays || "").split(",").filter(Boolean),
-              joined: person.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Johannesburg" }),
+              joined: person.joinedOn || "",
               active: person.active,
               canSignIn: canGrantLogin(
                 { appRole: me.appRole, impersonatorId: me.impersonatorId },

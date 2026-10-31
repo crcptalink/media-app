@@ -78,7 +78,7 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
                 <p className="text-sm font-medium">Shirt Size</p>
                 <ChoiceChips name="shirtSize" options={SIZES.map((s) => ({ value: s, label: s }))} defaultValue={user.shirtSize || undefined} />
               </div>
-              <SubmitButton>Save Details</SubmitButton>
+              <SubmitButton>Save</SubmitButton>
               </div>
             </section>
           </form>
@@ -122,8 +122,7 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
                   <p className="muted sm:col-span-2">Only leaders and admins can change these.</p>
                 </div>
               )}
-              <p className="text-sm text-slate-800"><span className="font-medium">Joined Date</span><span className="mt-1 block">{user.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Johannesburg" })}</span></p>
-              {canEditRole && <SubmitButton>Save Serving</SubmitButton>}
+              {canEditRole && <SubmitButton>Save</SubmitButton>}
               </div>
             </section>
           </form>
@@ -144,7 +143,7 @@ export default async function ProfilePage({ searchParams, params }: { searchPara
                 <p className="text-sm font-medium">Attending Sundays</p>
                 <ChoiceChips name="services" multi options={[{ value: "08:30", label: "08:30" }, { value: "10:30", label: "10:30" }, { value: "18:00", label: "18:00" }]} defaultValue={sundayDefault} />
               </div>
-              <SubmitButton>Save Structure</SubmitButton>
+              <SubmitButton>Save</SubmitButton>
               </div>
             </section>
           </form>

@@ -23,7 +23,7 @@ export default async function PasswordPage({ searchParams }: { searchParams: SP 
             <p className="muted">{user.email}</p>
             <label className="block text-sm font-medium">Name<input name="name" defaultValue={user.name || ""} className="input mt-1" /></label>
             <label className="block text-sm font-medium">Phone<input name="phone" type="tel" defaultValue={user.phone || ""} className="input mt-1" /></label>
-            <SubmitButton>Save profile</SubmitButton>
+            <SubmitButton>Save</SubmitButton>
           </form>
           <form action={setPasswordAction} className="card space-y-3 border-l-4 border-l-blue-700">
             <input type="hidden" name="back" value={back} />
@@ -35,7 +35,7 @@ export default async function PasswordPage({ searchParams }: { searchParams: SP 
             <label className="block text-sm font-medium">New password<input name="password" type="password" autoComplete="new-password" minLength={8} required={user.mustChangePassword} className="input mt-1" /></label>
             <label className="block text-sm font-medium">Confirm<input name="confirm" type="password" autoComplete="new-password" required={user.mustChangePassword} className="input mt-1" /></label>
             <div className="flex gap-2">
-              <SubmitButton>Save password</SubmitButton>
+              <SubmitButton>Save</SubmitButton>
               {user.passwordHash && !user.mustChangePassword && <SubmitButton className="btn-ghost" name="remove" value="1">Remove password</SubmitButton>}
             </div>
           </form>

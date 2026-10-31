@@ -13,6 +13,7 @@ export type VolunteerRow = {
   email: string;
   phone: string;
   birthday: string;
+  joinedOn: string;
   shirtSize: string;
   role: string;
   roleValue: string;
@@ -87,7 +88,7 @@ export function VolunteerDirectory({
           {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
-      <div className="space-y-2 md:hidden">
+      <div className="hidden space-y-2">
         {rows.map((p) => (
           <article key={p.id} className={`card border-l-4 border-l-blue-700 ${p.active ? "" : "opacity-50"}`}>
             <p className="font-medium text-slate-900">{[p.name, p.surname].filter(Boolean).join(" ") || "No name"}</p>
@@ -99,7 +100,7 @@ export function VolunteerDirectory({
         ))}
         {rows.length === 0 && <p className="muted">No volunteers match.</p>}
       </div>
-      <div className="hidden overflow-x-auto rounded-xl border border-slate-200 bg-white md:block">
+      <div className="max-h-[70vh] w-full overflow-auto rounded-xl border border-slate-200 bg-white">
         <table className="w-full min-w-[72rem] text-left text-sm text-slate-800">
           <thead className="bg-blue-800 text-white">
             <tr>
@@ -189,7 +190,7 @@ export function VolunteerDirectory({
                 <p className="text-sm font-medium">Position</p>
                 <ChoiceChips name="position" multi options={positions.map((p) => ({ value: p.id, label: p.name }))} defaultValue={editing.positionIds} />
               </div>
-              <p className="text-sm text-slate-700">Joined Date {editing.joined}</p>
+                <label className="text-sm font-medium">Joined Date<input name="joinedOn" type="date" defaultValue={editing.joinedOn} className="input mt-1" /></label>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="active" defaultChecked={editing.active} /> Active</label>
               <SubmitButton>Save</SubmitButton>
             </form>

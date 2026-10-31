@@ -113,6 +113,8 @@ model User {
   /// Comma-separated Sunday services: 08:30,10:30,18:00
   attendingSundays String?
   shirtSize     String?
+  /// Calendar date the person joined, YYYY-MM-DD. Empty until a leader sets it.
+  joinedOn      String?
   emailVerified DateTime?
   image         String?
   passwordHash       String?

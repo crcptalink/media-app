@@ -15,6 +15,23 @@ import { getGraceMinutes } from "@/lib/settings";
 import { addDays, fmtDateOnly, localTime, todayLocal, WEEKDAYS, weekdayOf } from "@/lib/time";
 import { withdrawAction } from "@/app/(app)/actions";
 
+function roleLabel(a: { kind: string; slot: { label: string | null; position: { code: string; name: string }; assignments: { kind: string }[] } }) {
+  const code = a.slot.position.code;
+  const trainee = a.slot.assignments.some((x) => x.kind === "TRAINEE" || x.kind === "SHADOW");
+  if (a.kind === "TRAINEE" || a.kind === "SHADOW") {
+    if (code === "LS") return "Live Stream Trainee";
+    if (code === "L") return "Link Trainee";
+    return "Trainee";
+  }
+  if (code === "LSS") return "Live Stream Setup";
+  if (code === "LSU") return "Link Setup";
+  if (code === "SU") return "Setup";
+  if (code === "LS" && trainee) return "Live Stream Trainer";
+  if (code === "L" && trainee) return "Link Trainer";
+  if (code === "LSL" && trainee) return "Live Stream & Link Trainer";
+  return slotTitle(a.slot.position, a.slot.label);
+}
+
 export default async function MePage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
   const { slug } = await params;
@@ -22,7 +39,7 @@ export default async function MePage({ searchParams, params }: { searchParams: S
   const dept = await getDepartment(db, slug);
   const today = todayLocal();
   const grace = await getGraceMinutes(db);
-  const include = { user: true, slot: { include: { position: true, event: true } } } as const;
+  const include = { user: true, slot: { include: { position: true, event: true, assignments: { where: { status: { in: ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"] } }, select: { kind: true } } } } } as const;
   const mine = await db.assignment.findMany({
     where: { userId: user.id, status: { in: ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"] }, slot: { event: { date: { gte: today }, status: { not: "CANCELLED" } } } },
     include,
@@ -63,7 +80,7 @@ export default async function MePage({ searchParams, params }: { searchParams: S
           <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>
           <span className="text-base font-bold text-slate-900">{fmtDateOnly(e.date)}</span>
         </div>
-        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-blue-800">{slotTitle(a.slot.position, a.slot.label)}</p>
+        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-blue-800">{roleLabel(a)}</p>
         <div className="mt-3 text-sm text-slate-700">
           <p>Arrival {localTime(e.arriveBy)}</p>
           {e.preprayerAt && <p>Pre-Prayer {localTime(e.preprayerAt)}</p>}

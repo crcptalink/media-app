@@ -133,6 +133,7 @@ export async function updatePersonAction(form: FormData) {
         ...(email ? { email } : {}),
         phone: [str(form, "countryCode") || "+27", str(form, "phone")].filter(Boolean).join(" ") || null,
         birthday: str(form, "birthday") || null,
+        joinedOn: str(form, "joinedOn") || null,
         shirtSize: str(form, "shirtSize") || null,
         zonePastor: str(form, "zonePastor") || null,
         homecellLeader: str(form, "homecellLeader") || null,

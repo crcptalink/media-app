@@ -5,6 +5,7 @@ import { decideAction, proposeAction, removeAction } from "@/app/(app)/admin/act
 import { answersClosed } from "@/lib/answer-window";
 import { displayName, type RosterEvent } from "@/lib/roster";
 import { slotTitle } from "@/lib/positions";
+import { sundayRows } from "@/lib/sunday-roles";
 import type { Warning } from "@/lib/rules";
 import { fmtDateOnly, localTime, WEEKDAYS, weekdayOf } from "@/lib/time";
 import { TimePill } from "./TimePill";
@@ -51,7 +52,7 @@ export function RosterBoard({
             <span>{WEEKDAYS[weekdayOf(date)]}</span>
             <span className="font-medium">{fmtDateOnly(date)}</span>
           </h2>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {evs.map((e) => (
               <EventCard key={e.id} e={e} mode={mode} me={me} people={people} warnings={warnings.filter((w) => w.eventId === e.id)} back={back} />
             ))}
@@ -80,7 +81,8 @@ function EventCard({
   const thursday = weekdayOf(e.date) === 4 || e.kind === "TRAINING";
   const edge = weekdayOf(e.date) === 0 ? "border-l-4 border-l-blue-700" : thursday ? "border-l-4 border-l-sky-500 bg-sky-50" : "";
   const label = "text-sm text-slate-700";
-  return (
+  const planned = thursday ? [] : sundayRows(e);
+      return (
     <div className={`card ${edge}`}>
       <div className="flex flex-wrap items-center gap-2">
         {thursday ? (
@@ -102,6 +104,57 @@ function EventCard({
         )}
       </div>
       
+      {planned.length > 0 && (
+        <ul className="mt-3 divide-y divide-slate-100">
+          {planned.map((row) => {
+            const slot = row.slot;
+            const assigned = slot?.assignments.find((a) => (row.kind === "TRAINEE" ? a.kind === "TRAINEE" || a.kind === "SHADOW" : a.kind === "SERVING"));
+            return (
+              <li key={row.title} className="py-1.5">
+                <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-3">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-blue-800">{row.title}</span>
+                  {!slot ? (
+                    <span className="text-sm italic text-slate-400">Not ready yet</span>
+                  ) : assigned ? (
+                    <AssignmentLine a={assigned} mode={mode} me={me.id} back={back} serviceDate={e.date} />
+                  ) : mode === "admin" ? (
+                    <div className="sm:col-span-2">
+                      <ProposeForm slotId={slot.id} positionId={slot.positionId} people={people} kind={row.kind === "TRAINEE" ? "TRAINEE" : "SERVING"} back={back} />
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-sm italic text-slate-400">Open</span>
+                      {!answersClosed(e.date) && (
+                        <form action={claimAction} className="justify-self-end">
+                          <input type="hidden" name="slotId" value={slot.id} />
+                          <input type="hidden" name="kind" value={row.kind} />
+                          <input type="hidden" name="back" value={back} />
+                          <SubmitButton className="btn-primary btn-sm">Select</SubmitButton>
+                        </form>
+                      )}
+                    </>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+          {e.slots
+            .filter((s) => !planned.some((row) => row.slot?.id === s.id) && s.assignments.some((a) => a.kind === "SERVING" || a.kind === "TRAINEE"))
+            .map((s) => {
+              const serving = s.assignments.find((a) => a.kind === "SERVING") || s.assignments.find((a) => a.kind === "TRAINEE");
+              if (!serving) return null;
+              return (
+                <li key={s.id} className="py-1.5">
+                  <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-3">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-blue-800">{slotTitle(s.position, s.label)}</span>
+                    <AssignmentLine a={serving} mode={mode} me={me.id} back={back} serviceDate={e.date} />
+                  </div>
+                </li>
+              );
+            })}
+        </ul>
+      )}
+      {planned.length === 0 && (
       <ul className="mt-3 divide-y divide-slate-100">
         {e.slots.map((s) => {
           const serving = s.assignments.find((a) => a.kind === "SERVING");
@@ -161,6 +214,7 @@ function EventCard({
           );
         })}
       </ul>
+      )}
       {mode === "admin" && warnings.length > 0 && (
         <ul className="mt-3 space-y-1">
           {warnings.map((w, i) => (

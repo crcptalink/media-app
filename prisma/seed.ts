@@ -15,9 +15,12 @@ const db = new PrismaClient();
 
 const POSITIONS = [
   { code: "SL", name: "Service Leader", sort: 1, coversCodes: [] as string[] },
-  { code: "LS", name: "Livestream", sort: 2, coversCodes: [] },
+  { code: "LS", name: "Live Stream", sort: 2, coversCodes: [] },
   { code: "L", name: "Link", sort: 3, coversCodes: [] },
-  { code: "LSL", name: "LS + Link (10:30)", sort: 4, coversCodes: ["LS", "L"] },
+  { code: "LSL", name: "Live Stream & Link", sort: 4, coversCodes: ["LS", "L"] },
+  { code: "LSS", name: "Live Stream Setup", sort: 5, coversCodes: [] },
+  { code: "LSU", name: "Link Setup", sort: 6, coversCodes: [] },
+  { code: "SU", name: "Setup", sort: 7, coversCodes: [] },
   { code: "LST", name: "Live Stream Trainer", sort: 10, coversCodes: ["LS"] },
   { code: "LSTE", name: "Live Stream Trainee", sort: 11, coversCodes: ["LS"] },
   { code: "LT", name: "Link Trainer", sort: 12, coversCodes: ["L"] },
@@ -36,9 +39,9 @@ const TEMPLATES: {
   sort: number;
   slots: string[];
 }[] = [
-  { name: "Sunday 08:30", kind: "SERVICE", weekday: 0, startTime: "08:30", arrivalTime: "07:00", preprayerTime: "07:20", durationMin: 120, sort: 1, slots: ["SL", "LS", "L"] },
-  { name: "Sunday 10:30", kind: "SERVICE", weekday: 0, startTime: "10:30", arrivalTime: "09:30", preprayerTime: null, durationMin: 120, sort: 2, slots: ["SL", "LSL"] },
-  { name: "Sunday 18:00", kind: "SERVICE", weekday: 0, startTime: "18:00", arrivalTime: "16:15", preprayerTime: "16:45", durationMin: 120, sort: 3, slots: ["SL", "LS", "L"] },
+  { name: "Sunday 08:30", kind: "SERVICE", weekday: 0, startTime: "08:30", arrivalTime: "07:00", preprayerTime: "07:20", durationMin: 120, sort: 1, slots: ["SL", "LS", "L", "LSS", "LSU"] },
+  { name: "Sunday 10:30", kind: "SERVICE", weekday: 0, startTime: "10:30", arrivalTime: "09:30", preprayerTime: null, durationMin: 120, sort: 2, slots: ["LSL", "SU"] },
+  { name: "Sunday 18:00", kind: "SERVICE", weekday: 0, startTime: "18:00", arrivalTime: "16:15", preprayerTime: "16:45", durationMin: 120, sort: 3, slots: ["SL", "LS", "L", "LSS", "LSU"] },
   { name: "Thursday Training", kind: "TRAINING", weekday: 4, startTime: "19:00", arrivalTime: "18:30", preprayerTime: "18:30", durationMin: 90, sort: 4, slots: ["LST", "LSTE", "LT", "LTE", "TEC"] },
 ];
 

@@ -8,6 +8,7 @@ import { arrivalStatus, STATUS_LABEL } from "@/lib/checkin";
 import { db } from "@/lib/db";
 import { config } from "@/lib/env";
 import { slotTitle } from "@/lib/positions";
+import { sundayRows } from "@/lib/sunday-roles";
 import { displayName } from "@/lib/roster";
 import { requireScheduleManager } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
@@ -48,11 +49,15 @@ export default async function EventPage({ params, searchParams }: { params: Prom
   const qr = await QRCode.toDataURL(checkinUrl, { width: 320, margin: 1 });
   const back = `/admin/events/${e.id}`;
   const durationMin = Math.round((e.endsAt.getTime() - e.startsAt.getTime()) / 60000);
+  const planned = sundayRows(e);
+  const slotRows = planned.length
+    ? planned.flatMap((row) => (row.slot ? [{ title: row.title, slot: row.slot, kind: row.kind as string }] : []))
+    : e.slots.map((s) => ({ title: slotTitle(s.position, s.label), slot: s, kind: "" }));
   const scheduledIds = new Set(e.slots.flatMap((s) => s.assignments.filter((a) => a.status === "ACCEPTED").map((a) => a.userId)));
   const members = e.kind === "TRAINING" ? await db.user.findMany({ where: { active: true, memberships: { some: { departmentId: dept.id } } }, orderBy: { name: "asc" } }) : [];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="w-full space-y-6">
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
       <div>
         <Link href={`/${dept.slug}/manage-schedule`} className="text-sm text-blue-700 underline">Back To Manage Schedule</Link>
@@ -72,19 +77,24 @@ export default async function EventPage({ params, searchParams }: { params: Prom
       <section className="card border-l-4 border-l-blue-700">
         <h2 className="section-head">Slots</h2>
         <ul className="divide-y">
-          {e.slots.map((s) => (
-            <li key={s.id} className="py-3">
+          {slotRows.map((row) => {
+            const s = row.slot;
+            const shown = row.kind
+              ? s.assignments.filter((a) => (row.kind === "TRAINEE" ? a.kind === "TRAINEE" || a.kind === "SHADOW" : a.kind === "SERVING"))
+              : s.assignments;
+            return (
+            <li key={`${s.id}-${row.kind || "all"}`} className="py-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">{slotTitle(s.position, s.label)}</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-blue-800">{row.title}</span>
                 <form action={deleteSlotAction} className="ml-auto">
                   <input type="hidden" name="slotId" value={s.id} />
                   <input type="hidden" name="back" value="/admin/manage" />
                   <SubmitButton className="btn-ghost btn-sm" confirm="Delete this empty slot?">Delete slot</SubmitButton>
                 </form>
               </div>
-              {s.assignments.length === 0 && <p className="muted mt-1">Open</p>}
+              {shown.length === 0 && <p className="muted mt-1">Open</p>}
               <ul className="mt-2 space-y-2">
-                {s.assignments.map((a) => {
+                {shown.map((a) => {
                   const live = ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"].includes(a.status);
                   const st = arrivalStatus(a, e, grace);
                   return (
@@ -136,7 +146,8 @@ export default async function EventPage({ params, searchParams }: { params: Prom
                 })}
               </ul>
             </li>
-          ))}
+          );
+          })}
         </ul>
         <form action={addSlotAction} className="mt-3 flex gap-2">
           <input type="hidden" name="eventId" value={e.id} />
@@ -154,7 +165,8 @@ export default async function EventPage({ params, searchParams }: { params: Prom
         <section className="card">
           <h2 className="h2 mb-2">Training replies</h2>
           <p className="muted mb-2">People scheduled in a slot are required; everyone else is optional.</p>
-          <table className="w-full text-sm">
+          <div className="max-h-[70vh] w-full overflow-auto">
+          <table className="w-full min-w-[32rem] text-sm">
             <tbody>
               {members.map((m) => {
                 const r = e.rsvps.find((x) => x.userId === m.id);
@@ -168,6 +180,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
               })}
             </tbody>
           </table>
+          </div>
         </section>
       )}
 

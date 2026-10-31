@@ -60,7 +60,13 @@ export function AppShell({
 }) {
   const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    const wide = window.matchMedia("(min-width: 1024px)").matches;
+    setOpen(wide);
+  }, []);
+  useEffect(() => {
+    if (window.matchMedia("(max-width: 1023px)").matches) setOpen(false);
+  }, [pathname]);
   const title = titleFor(pathname);
 
   const sidebar = (
@@ -79,8 +85,8 @@ export function AppShell({
                 {d.ready ? (
                   <Link
                     href={d.href}
-                    className={`flex items-center rounded-md px-2.5 py-2 text-sm ${
-                      current ? "bg-blue-50 font-semibold text-blue-800" : "text-slate-700 hover:bg-slate-100"
+                    className={`flex items-center rounded-md px-2.5 py-2 text-sm font-medium ${
+                      current ? "bg-blue-700 text-white" : "text-slate-700 hover:bg-slate-100"
                     }`}
                   >
                     <span className="truncate">{d.name}</span>
@@ -137,17 +143,17 @@ export function AppShell({
         </div>
       )}
       {open && <button aria-label="Close menu" className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden" onClick={() => setOpen(false)} />}
-      <aside className={`fixed bottom-0 left-0 z-50 w-64 border-r border-slate-200 bg-white transition-transform lg:translate-x-0 ${viewingAs ? "top-10" : "top-0"} ${open ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed bottom-0 left-0 z-50 w-64 border-r border-slate-200 bg-white transition-transform ${viewingAs ? "top-10" : "top-0"} ${open ? "translate-x-0" : "-translate-x-full"}`}>
         {sidebar}
       </aside>
-      <div className="lg:pl-64">
+      <div className={open ? "lg:pl-64" : ""}>
         <header className={`sticky z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-4 ${viewingAs ? "top-10" : "top-0"}`}>
-          <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-700 lg:hidden" aria-label="Open menu" onClick={() => setOpen(true)}>
+          <button type="button" className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-700" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((v) => !v)}>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="flex items-center gap-2"><BrandLogo className="h-8" alt="" /><span className="truncate text-base font-semibold text-slate-900">Media</span></span>
+          {!open && <span className="flex items-center gap-2"><BrandLogo className="h-8" alt="" /><span className="truncate text-base font-semibold text-slate-900">Media</span></span>}
           <div className="ml-auto flex items-center gap-3">
             {user ? (
               <>
@@ -169,7 +175,7 @@ export function AppShell({
             )}
           </div>
         </header>
-        <main className="mx-auto w-full min-w-0 max-w-6xl overflow-x-auto px-4 py-6 lg:px-8">{children}</main>
+        <main className="w-full min-w-0 px-4 py-6 lg:px-8">{children}</main>
       </div>
     </div>
   );
