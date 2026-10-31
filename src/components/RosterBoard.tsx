@@ -21,7 +21,7 @@ export interface Person {
 function dayBand(date: string) {
   const wd = weekdayOf(date);
   if (wd === 0) return "bg-blue-800 text-white";
-  if (wd === 4) return "bg-amber-600 text-white";
+  if (wd === 4) return "bg-sky-500 text-white";
   return "bg-slate-200 text-slate-800";
 }
 
@@ -168,7 +168,7 @@ function EventCard({
       {mode === "admin" && warnings.length > 0 && (
         <ul className="mt-3 space-y-1">
           {warnings.map((w, i) => (
-            <li key={i} className={`rounded px-2 py-1 text-xs ${w.severity === "WARN" ? "bg-amber-50 text-amber-900" : "bg-slate-100 text-slate-700"}`}>
+            <li key={i} className={`rounded px-2 py-1 text-xs ${w.severity === "WARN" ? "bg-sky-50 text-amber-900" : "bg-slate-100 text-slate-700"}`}>
               {w.message}
             </li>
           ))}

@@ -125,7 +125,21 @@ export async function updateProfileAction(form: FormData) {
   const user = await requireUser();
   await runAction(form, async () => {
     if (user.impersonatorId) throw new WorkflowError("You can't change this profile while viewing as someone else");
-    await db.user.update({ where: { id: user.id }, data: { name: str(form, "name") || null, phone: str(form, "phone") || null } });
+    await db.user.update({
+      where: { id: user.id },
+      data: {
+        name: str(form, "name") || null,
+        surname: str(form, "surname") || null,
+        email: str(form, "email") || null,
+        phone: str(form, "phone") || null,
+        birthday: str(form, "birthday") || null,
+        homecellLeader: str(form, "homecellLeader") || null,
+        zonePastor: str(form, "zonePastor") || null,
+        attendingHomecell: form.get("attendingHomecell") === "on",
+        attendingChurch: form.get("attendingChurch") === "on",
+        shirtSize: str(form, "shirtSize") || null,
+      },
+    });
     return "Profile saved.";
   });
 }

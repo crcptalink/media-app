@@ -103,7 +103,14 @@ model User {
   /// Null for people imported from the sheet who do not sign in.
   email         String?   @unique
   name          String?
+  surname       String?
   phone         String?
+  birthday      String?
+  homecellLeader String?
+  zonePastor    String?
+  attendingHomecell Boolean?
+  attendingChurch Boolean?
+  shirtSize     String?
   emailVerified DateTime?
   image         String?
   passwordHash       String?

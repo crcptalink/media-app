@@ -1,0 +1,8 @@
+-- Add volunteer profile fields from the sheet
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "surname" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "birthday" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "homecellLeader" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "zonePastor" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "attendingHomecell" BOOLEAN;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "attendingChurch" BOOLEAN;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "shirtSize" TEXT;
