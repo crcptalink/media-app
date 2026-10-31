@@ -1,4 +1,5 @@
 import { CopyInvite } from "@/components/CopyInvite";
+import { VolunteerTable } from "@/components/VolunteerTable";
 import { Flash, one, type SP } from "@/components/Flash";
 import { SubmitButton } from "@/components/SubmitButton";
 import { startViewAsAction } from "@/app/(app)/impersonation-actions";
@@ -78,6 +79,12 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
       <p className="muted">
         Training stages per position: <b>Shadow</b> watches the leader set up (usually once) → <b>Trainee</b> sets up while the trainer watches → <b>Qualified</b> serves alone. Tick <b>Trainer</b> for LST / LT.
       </p>
+      <VolunteerTable people={people.map((p) => {
+          const m = p.memberships.find((x) => x.departmentId === dept.id);
+          const role = p.appRole === "ADMIN" ? "Admin" : m?.role === "LEADER" ? "Leader" : m?.role === "TWO_IC" ? "2IC" : "Member";
+          const positionsLabel = p.skills.map((s) => positions.find((x) => x.id === s.positionId)?.name).filter(Boolean).join(", ");
+          return { id: p.id, name: p.name || "", email: p.email || "", phone: p.phone || "", role, positions: positionsLabel, active: p.active };
+        })} />
       <ul className="space-y-3">
         {people.map((p) => {
           const m = p.memberships.find((x) => x.departmentId === dept.id);

@@ -24,13 +24,13 @@ function titleFor(pathname: string) {
     ["/my-training", "My Training"],
     ["/my-announcements", "Announcements"],
     ["/team-schedule", "Team Schedule"],
-    ["/d/", "Coming Soon"],
+    ["/d/", "Department"],
   ];
   for (const [prefix, title] of rules) {
     if (pathname === prefix || pathname.startsWith(prefix)) return title;
   }
   if (pathname === "/my-schedule") return "My Schedule";
-  return "CRC Media";
+  return "Media";
 }
 
 function navActive(pathname: string, href: string) {
@@ -67,24 +67,29 @@ export function AppShell({
     <div className="flex h-full flex-col">
       <Link href="/" className="flex items-center gap-2.5 px-4 py-4" onClick={() => setOpen(false)}>
         <BrandLogo className="h-9" alt="" />
-        <span className="text-sm font-semibold tracking-tight text-slate-900">{APP_NAME}</span>
+        <span className="text-sm font-semibold tracking-tight text-slate-900">Media</span>
       </Link>
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        {departments.length > 0 && <p className="px-2 pb-1 pt-2 text-xs font-medium text-slate-500">CRC Media</p>}
+        {departments.length > 0 && <p className="px-2 pb-1 pt-2 text-xs font-medium text-slate-500">Department</p>}
         <ul className="space-y-0.5">
           {departments.map((d) => {
             const current = d.slug === currentSlug;
             return (
               <li key={d.slug}>
-                <Link
-                  href={d.href}
-                  className={`flex items-center rounded-md px-2.5 py-2 text-sm ${
-                    current ? "bg-blue-50 font-semibold text-blue-800" : d.ready ? "text-slate-700 hover:bg-slate-100" : "text-slate-400 hover:bg-slate-100"
-                  }`}
-                >
-                  <span className="truncate">{d.name}</span>
-                  {!d.ready && <span className="ml-auto pl-2 text-[11px] font-medium text-slate-400">Coming Soon</span>}
-                </Link>
+                {d.ready ? (
+                  <Link
+                    href={d.href}
+                    className={`flex items-center rounded-md px-2.5 py-2 text-sm ${
+                      current ? "bg-blue-50 font-semibold text-blue-800" : "text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span className="truncate">{d.name}</span>
+                  </Link>
+                ) : (
+                  <span className="flex cursor-not-allowed items-center rounded-md px-2.5 py-2 text-sm text-slate-400">
+                    <span className="truncate">{d.name}</span>
+                  </span>
+                )}
               </li>
             );
           })}
@@ -142,7 +147,7 @@ export function AppShell({
               <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
           </button>
-          <h1 className="truncate text-base font-semibold text-slate-900">{title}</h1>
+          <span className="flex items-center gap-2"><BrandLogo className="h-8" alt="" /><span className="truncate text-base font-semibold text-slate-900">Media</span></span>
           <div className="ml-auto flex items-center gap-3">
             {user ? (
               <>

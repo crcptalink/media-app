@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { toggleUnavailableNow } from "@/app/(app)/actions";
 import { fmtDateOnly, WEEKDAYS, weekdayOf } from "@/lib/time";
-import { timePillClass } from "./TimePill";
 
 type Slot = { id: string; templateId: string | null; time: string };
 type Mark = { date: string; templateId: string | null };
@@ -61,7 +60,7 @@ export function AvailabilityBoard({ dates, slots, marks }: { dates: string[]; sl
                       type="button"
                       disabled={busy !== null}
                       onClick={() => toggle(date, slot.templateId)}
-                      className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full px-2.5 py-0.5 text-sm font-semibold tabular-nums ${marked ? "bg-red-600 text-white" : timePillClass(displayTime)}`}
+                      className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full border px-2.5 py-0.5 text-sm font-semibold tabular-nums ${marked ? "border-red-600 bg-red-600 text-white" : "border-slate-300 bg-white text-slate-800"}`}
                     >
                       {displayTime}
                     </button>

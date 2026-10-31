@@ -30,7 +30,7 @@ export default async function DepartmentPage({ params }: { params: Promise<{ slu
     >
       <div className="card max-w-lg">
         <h2 className="h2">{dept.name}</h2>
-        <p className="mt-2 text-slate-600">Coming Soon</p>
+        
         <Link href="/" className="mt-4 inline-block text-sm font-medium text-blue-700 hover:text-blue-800">All departments</Link>
       </div>
     </AppShell>

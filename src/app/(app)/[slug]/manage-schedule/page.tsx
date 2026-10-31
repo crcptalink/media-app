@@ -15,8 +15,9 @@ function fromParam(raw: string | undefined) {
   return raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : todayLocal();
 }
 
-export default async function AdminRosterPage({ searchParams }: { searchParams: SP }) {
+export default async function AdminRosterPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
+  const { slug } = await params;
   const { user, dept } = await requireScheduleManager();
   const from = fromParam(one(sp.from));
   const events = await loadRoster(db, dept.id, from, addDays(from, SCHEDULE_DAYS - 1));
@@ -33,7 +34,7 @@ export default async function AdminRosterPage({ searchParams }: { searchParams: 
     orderBy: { createdAt: "asc" },
   });
   const skills = await db.userSkill.findMany({ where: { userId: user.id } });
-  const back = `/manage-schedule?from=${from}`;
+  const back = `/${slug}/manage-schedule?from=${from}`;
   return (
     <div>
       <Flash ok={one(sp.ok)} error={one(sp.error)} />
@@ -44,7 +45,7 @@ export default async function AdminRosterPage({ searchParams }: { searchParams: 
           <ul className="space-y-1 text-sm">
             {suggestions.map((s) => (
               <li key={s.slotId} className="flex items-center gap-2">
-                <span className="flex-1">{s.userName} — {s.reason}</span>
+                <span className="flex-1">{s.userName} — {s.slotLabel} — {s.reason}</span>
                 <form action={proposeAction}>
                   <input type="hidden" name="slotId" value={s.slotId} />
                   <input type="hidden" name="userId" value={s.userId} />

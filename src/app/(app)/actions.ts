@@ -131,7 +131,7 @@ export async function updateProfileAction(form: FormData) {
         name: str(form, "name") || null,
         surname: str(form, "surname") || null,
         email: str(form, "email") || null,
-        phone: str(form, "phone") || null,
+        phone: [str(form, "countryCode") || "+27", str(form, "phone")].filter(Boolean).join(" ") || null,
         birthday: str(form, "birthday") || null,
         homecellLeader: str(form, "homecellLeader") || null,
         zonePastor: str(form, "zonePastor") || null,

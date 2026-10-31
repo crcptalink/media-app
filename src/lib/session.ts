@@ -38,7 +38,18 @@ export async function currentUser(): Promise<CurrentUser | null> {
  */
 export async function redirectIfPasswordChangeRequired(user: CurrentUser | null) {
   if (!user?.mustChangePassword || user.impersonatorId) return;
-  redirect("/my-profile");
+  redirect("/link/my-profile");
+}
+
+/** First sign-in must complete the profile before using the rest of the app. */
+export function profileIncomplete(user: CurrentUser | null) {
+  if (!user || user.impersonatorId) return false;
+  return !user.name || !user.surname || !user.phone || !user.birthday;
+}
+
+export async function redirectIfProfileIncomplete(user: CurrentUser | null, slug = "link") {
+  if (!profileIncomplete(user)) return;
+  redirect(`/${slug}/my-profile`);
 }
 
 export function departmentRole(u: CurrentUser, departmentId: string) {

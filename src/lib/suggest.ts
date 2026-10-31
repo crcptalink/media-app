@@ -1,12 +1,13 @@
 import type { Db } from "./db";
 import type { RosterEvent } from "./roster";
-import { isoWeek } from "./time";
+import { isoWeek, localTime, fmtDateOnly, WEEKDAYS, weekdayOf } from "./time";
 
 export interface Suggestion {
   slotId: string;
   userId: string;
   userName: string;
   reason: string;
+  slotLabel: string;
 }
 
 export async function suggestForEmptySlots(
@@ -65,7 +66,10 @@ export async function suggestForEmptySlots(
     });
     if (candidates.length) {
       const pick = candidates[0];
-      out.push({ slotId: slot.id, userId: pick.id, userName: pick.name || pick.email || "Volunteer", reason: "Qualified and available" });
+      const day = WEEKDAYS[weekdayOf(event.date)];
+      const time = localTime(event.startsAt);
+      const slotLabel = `${day} ${fmtDateOnly(event.date)} ${time} · ${slot.position.name}`;
+      out.push({ slotId: slot.id, userId: pick.id, userName: pick.name || pick.email || "Volunteer", reason: "Qualified and available", slotLabel });
     }
   }
   return out;

@@ -4,7 +4,7 @@ import { SCHEDULE_DAYS, WeekNav } from "@/components/WeekNav";
 import { db } from "@/lib/db";
 import { getDepartment } from "@/lib/events";
 import { loadRoster } from "@/lib/roster";
-import { requireUser } from "@/lib/session";
+import { redirectIfProfileIncomplete, requireUser } from "@/lib/session";
 import { addDays, localTime, todayLocal, weekdayOf } from "@/lib/time";
 
 function fromParam(raw: string | undefined) {
@@ -14,6 +14,7 @@ function fromParam(raw: string | undefined) {
 export default async function RosterPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const user = await requireUser("/team-schedule");
+  await redirectIfProfileIncomplete(user, "link");
   const dept = await getDepartment(db);
   const from = fromParam(one(sp.from));
   const events = await loadRoster(db, dept.id, from, addDays(from, SCHEDULE_DAYS - 1));
