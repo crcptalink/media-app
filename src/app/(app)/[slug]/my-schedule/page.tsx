@@ -9,6 +9,7 @@ import { arrivalStatus, STATUS_LABEL } from "@/lib/checkin";
 import { db } from "@/lib/db";
 import { getDepartment } from "@/lib/events";
 import { slotTitle } from "@/lib/positions";
+import { displayName } from "@/lib/roster";
 import { requireUser } from "@/lib/session";
 import { getGraceMinutes } from "@/lib/settings";
 import { addDays, fmtDateOnly, localTime, todayLocal, WEEKDAYS, weekdayOf } from "@/lib/time";
@@ -33,7 +34,7 @@ export default async function MePage({ searchParams, params }: { searchParams: S
     take: 4,
     include: {
       rsvps: { where: { userId: user.id } },
-      slots: { orderBy: { sort: "asc" }, include: { position: true, assignments: { where: { status: { in: ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"] } } } } },
+      slots: { orderBy: { sort: "asc" }, include: { position: true, assignments: { where: { status: { in: ["PROPOSED", "CLAIM_PENDING", "ACCEPTED"] } }, include: { user: { select: { id: true, name: true, surname: true, email: true } } } } } },
     },
   });
   const sundayDates = trainings.map((t) => addDays(t.date, 3));
@@ -62,7 +63,7 @@ export default async function MePage({ searchParams, params }: { searchParams: S
           <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>
           <span className="text-base font-bold text-slate-900">{fmtDateOnly(e.date)}</span>
         </div>
-        <p className="mt-1 text-sm text-slate-800">{slotTitle(a.slot.position, a.slot.label)}</p>
+        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-blue-800">{slotTitle(a.slot.position, a.slot.label)}</p>
         <div className="mt-3 text-sm text-slate-700">
           <p>Arrival {localTime(e.arriveBy)}</p>
           {e.preprayerAt && <p>Pre-Prayer {localTime(e.preprayerAt)}</p>}
@@ -105,11 +106,17 @@ export default async function MePage({ searchParams, params }: { searchParams: S
               required: servingSunday.has(addDays(t.date, 3)),
               preprayer: t.rsvps.find((r) => r.part === "PREPRAYER")?.response ?? null,
               back,
-              slots: t.slots.map((s) => ({
-                id: s.id,
-                label: slotTitle(s.position, s.label),
-                open: !s.assignments.some((a) => a.status === "ACCEPTED" || a.status === "PROPOSED" || a.status === "CLAIM_PENDING"),
-              })),
+              closed: answersClosed(t.date),
+              slots: t.slots.map((s) => {
+                const taken = s.assignments[0];
+                return {
+                  id: s.id,
+                  label: slotTitle(s.position, s.label),
+                  open: !taken,
+                  person: taken ? displayName(taken.user) : null,
+                  assignmentId: taken?.userId === user.id ? taken.id : null,
+                };
+              }),
             }))}
           />
         )}

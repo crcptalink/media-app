@@ -10,7 +10,7 @@ export const rosterInclude = {
       position: true,
       assignments: {
         where: { status: { in: LIVE_STATUSES } },
-        include: { user: { select: { id: true, name: true, email: true } } },
+        include: { user: { select: { id: true, name: true, surname: true, email: true } } },
       },
     },
   },

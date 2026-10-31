@@ -4,7 +4,7 @@ import { signOut } from "@/auth";
 import { runAction, str } from "@/lib/actions";
 import { revalidatePath } from "next/cache";
 import { answersClosed } from "@/lib/answer-window";
-import { cancelAssignment, claimSlot, declineAssignment, respondToProposal, WorkflowError } from "@/lib/assignments";
+import { cancelAssignment, claimSlot, declineAssignment, respondToProposal, LIVE_STATUSES, WorkflowError } from "@/lib/assignments";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
@@ -33,19 +33,34 @@ export async function declineAction(form: FormData) {
 export async function claimAction(form: FormData) {
   const user = await requireUser();
   await runAction(form, async () => {
+    const slotId = str(form, "slotId");
+    const slot = await db.slot.findUnique({ where: { id: slotId }, include: { event: true } });
+    if (!slot) throw new WorkflowError("Slot not found");
+    const thursday = slot.event.kind === "TRAINING";
+    if (thursday && answersClosed(slot.event.date)) throw new WorkflowError("Changes close on Wednesday at midnight");
+    const already = await db.assignment.findFirst({ where: { slotId, userId: user.id, status: { in: LIVE_STATUSES } } });
+    if (already) return "Already selected.";
+    if (thursday) {
+      const others = await db.assignment.findMany({
+        where: { userId: user.id, status: { in: LIVE_STATUSES }, slot: { eventId: slot.eventId }, NOT: { slotId } },
+      });
+      for (const other of others) await cancelAssignment(db, { assignmentId: other.id, actorId: user.id, reason: "changed role" });
+    }
     const kind = str(form, "kind") === "TRAINEE" ? "TRAINEE" : str(form, "kind") === "SHADOW" ? "SHADOW" : "SERVING";
-    await claimSlot(db, { slotId: str(form, "slotId"), userId: user.id, kind });
-    return "Request sent.";
+    await claimSlot(db, { slotId, userId: user.id, kind });
+    return thursday ? "Thursday selection updated." : "Request sent.";
   });
 }
 
 export async function withdrawAction(form: FormData) {
   const user = await requireUser();
   await runAction(form, async () => {
-    const a = await db.assignment.findUnique({ where: { id: str(form, "assignmentId") } });
-    if (!a || a.userId !== user.id || a.status !== "CLAIM_PENDING") throw new WorkflowError("You can only withdraw your own pending request");
+    const a = await db.assignment.findUnique({ where: { id: str(form, "assignmentId") }, include: { slot: { include: { event: true } } } });
+    if (!a || a.userId !== user.id || !LIVE_STATUSES.includes(a.status)) throw new WorkflowError("You can only change your own selection");
+    if (answersClosed(a.slot.event.date)) throw new WorkflowError("Changes close on Wednesday at midnight");
+    if (a.status !== "CLAIM_PENDING" && a.slot.event.kind !== "TRAINING") throw new WorkflowError("You can only withdraw your own pending request");
     await cancelAssignment(db, { assignmentId: a.id, actorId: user.id, reason: "withdrawn" });
-    return "Request withdrawn.";
+    return "Selection cleared.";
   });
 }
 

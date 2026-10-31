@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { SkillStage } from "@prisma/client";
-import { claimAction } from "@/app/(app)/actions";
+import { claimAction, withdrawAction } from "@/app/(app)/actions";
 import { decideAction, proposeAction, removeAction } from "@/app/(app)/admin/actions";
 import { answersClosed } from "@/lib/answer-window";
 import { displayName, type RosterEvent } from "@/lib/roster";
@@ -111,17 +111,17 @@ function EventCard({
           return (
             <li key={s.id} className="py-1.5">
               <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[9.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-3">
-                <span className="truncate text-sm text-slate-800">{slotTitle(s.position, s.label)}</span>
+                <span className="truncate text-xs font-semibold uppercase tracking-wide text-blue-800">{slotTitle(s.position, s.label)}</span>
                 {serving ? (
-                  <AssignmentLine a={serving} mode={mode} me={me.id} back={back} serviceDate={e.date} />
+                  <AssignmentLine a={serving} mode={mode} me={me.id} back={back} serviceDate={e.date} canClear={thursday && serving.userId === me.id && !answersClosed(e.date)} />
                 ) : mode === "admin" ? (
                   <div className="col-span-2">
                     <ProposeForm slotId={s.id} positionId={s.positionId} people={people} kind="SERVING" back={back} />
                   </div>
                 ) : (
                   <>
-                    <span className="text-sm text-slate-700">Open</span>
-                    {!mineHere ? (
+                    <span className="text-sm italic text-slate-400">Open</span>
+                    {!mineHere && !(thursday && answersClosed(e.date)) ? (
                       <form action={claimAction} className="justify-self-end">
                         <input type="hidden" name="slotId" value={s.id} />
                         <input type="hidden" name="kind" value="SERVING" />
@@ -137,7 +137,7 @@ function EventCard({
               {learner ? (
                 <div className="mt-1 flex flex-wrap items-center gap-2 pl-2">
                   <span className="chip bg-slate-100 text-slate-700">{KIND_LABEL[learner.kind]}</span>
-                  <AssignmentLine a={learner} mode={mode} me={me.id} back={back} serviceDate={e.date} />
+                  <AssignmentLine a={learner} mode={mode} me={me.id} back={back} serviceDate={e.date} canClear={thursday && learner.userId === me.id && !answersClosed(e.date)} />
                 </div>
               ) : mode === "admin" ? (
                 <details className="mt-1 pl-2">
@@ -146,6 +146,7 @@ function EventCard({
                 </details>
               ) : (
                 !mineHere &&
+                !(thursday && answersClosed(e.date)) &&
                 myStage &&
                 myStage !== "QUALIFIED" && (
                   <form action={claimAction} className="mt-1 pl-2">
@@ -179,22 +180,31 @@ function AssignmentLine({
   me,
   back,
   serviceDate,
+  canClear = false,
 }: {
   a: RosterEvent["slots"][number]["assignments"][number];
   mode: "volunteer" | "admin";
   me: string;
   back: string;
   serviceDate: string;
+  canClear?: boolean;
 }) {
   const awaiting = a.status === "CLAIM_PENDING" || (a.status === "PROPOSED" && !answersClosed(serviceDate));
   return (
     <>
-      <span className="truncate text-sm text-slate-800">
-        <span className={a.userId === me ? "rounded-full bg-green-600 px-2 py-0.5 font-medium text-white" : ""}>{displayName(a.user)}</span>
+      <span className="truncate text-sm font-semibold text-slate-900">
+        <span className={a.userId === me ? "rounded-full bg-green-600 px-2 py-0.5 font-semibold text-white" : ""}>{displayName(a.user)}</span>
         {a.status === "ACCEPTED" && <span className="ml-2 text-sm text-slate-700">Accepted</span>}
         {awaiting && <span className="ml-2 rounded bg-sky-100 px-1.5 py-0.5 text-sm text-slate-800">Awaiting</span>}
       </span>
       <span className="flex items-center justify-end gap-2">
+        {canClear && (
+          <form action={withdrawAction}>
+            <input type="hidden" name="assignmentId" value={a.id} />
+            <input type="hidden" name="back" value={back} />
+            <SubmitButton className="btn-ghost btn-sm">Clear</SubmitButton>
+          </form>
+        )}
         {mode === "admin" && a.status === "CLAIM_PENDING" && (
           <form action={decideAction} className="flex gap-1">
             <input type="hidden" name="assignmentId" value={a.id} />
