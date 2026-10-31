@@ -186,6 +186,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: SP })
         })}
       </ul>
     </div>
+    </div>
   );
 }
 
@@ -208,8 +209,6 @@ function SignInControls({
 }) {
   if (!grant && !viewAs && !note) return null;
   return (
-    <div>
-      <h1 className="h1 mb-4">Volunteers</h1>
     <div className="mt-4 space-y-4 border-t border-slate-200 pt-4">
       <h2 className="text-sm font-semibold text-slate-900">Sign-in</h2>
       {grant && (
