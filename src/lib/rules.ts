@@ -102,7 +102,13 @@ export function computeWarnings(input: {
     const people = ev.assignments;
     // unavailability
     for (const a of people) {
-      const u = input.unavailability.find((x) => x.userId === a.userId && x.date === ev.date && (x.templateId === null || x.templateId === ev.templateId));
+      const u = input.unavailability.find((x) => {
+        if (x.userId !== a.userId || x.date !== ev.date) return false;
+        if (x.templateId === null) return true;
+        if (x.templateId !== ev.templateId) return false;
+        if (x.note === "18:30") return false;
+        return true;
+      });
       if (u) out.push({ eventId: ev.id, assignmentId: a.id, severity: "WARN", message: `${a.userName} marked themselves unavailable${u.note ? ` (${u.note})` : ""}` });
     }
     // double booked in one event

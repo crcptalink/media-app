@@ -8,7 +8,7 @@ type Board = { date: string; isToday: boolean; grace: number; events: BoardEvent
 const STATUS: Record<string, [string, string]> = {
   not_yet: ["Not yet", "bg-slate-200 text-slate-800"],
   on_time: ["On time", "bg-emerald-700 text-white"],
-  late: ["Late", "bg-amber-100 text-amber-950"],
+  late: ["Late", "bg-blue-100 text-blue-950"],
   absent: ["Absent", "bg-red-700 text-white"],
 };
 
@@ -47,7 +47,7 @@ export function TvBoard({ initial, token }: { initial: Board; token: string }) {
         </div>
         <div className="text-6xl font-semibold tabular-nums text-blue-800">{time}</div>
       </header>
-      {stale && <p className="mb-4 text-xl text-amber-800">Connection lost. Retrying.</p>}
+      {stale && <p className="mb-4 text-xl text-blue-800">Connection lost. Retrying.</p>}
       <div className={`grid gap-6 ${board.events.length >= 3 ? "grid-cols-3" : board.events.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
         {board.events.map((e) => (
           <section key={e.id} className={`rounded-2xl border p-6 shadow-sm ${e.isNext ? "border-blue-600 bg-white ring-4 ring-blue-200" : e.isPast ? "border-slate-200 bg-white opacity-60" : "border-slate-200 bg-white"}`}>

@@ -57,7 +57,7 @@ export default async function MePage({ searchParams, params }: { searchParams: S
         const st = e.date === today ? arrivalStatus(a, e, grace) : null;
         const sunday = e.kind !== "TRAINING";
         return (
-          <article key={a.id} className={`card border-l-4 ${sunday ? "border-l-blue-700" : "border-l-amber-500"}`}>
+          <article key={a.id} className={`card border-l-4 ${sunday ? "border-l-blue-700" : "border-l-sky-500"}`}>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <TimePill time={localTime(e.startsAt)} />
               <h2 className="font-semibold">{WEEKDAYS[weekdayOf(e.date)]}</h2>

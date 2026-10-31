@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/session";
 import { fmtDateTime } from "@/lib/time";
 import { retryEmailAction } from "@/app/(app)/admin/actions";
 
-const CLS: Record<string, string> = { SENT: "bg-green-100 text-green-800", PENDING: "bg-amber-100 text-amber-800", FAILED: "bg-red-100 text-red-800" };
+const CLS: Record<string, string> = { SENT: "bg-green-100 text-green-800", PENDING: "bg-blue-100 text-blue-800", FAILED: "bg-red-100 text-red-800" };
 
 export default async function OutboxPage({ searchParams, params }: { searchParams: SP; params: Promise<{ slug: string }> }) {
   const sp = await searchParams;
@@ -24,7 +24,7 @@ export default async function OutboxPage({ searchParams, params }: { searchParam
           <SubmitButton className="btn-ghost btn-sm">{failed ? `Retry ${failed} failed` : "Send pending now"}</SubmitButton>
         </form>
       </div>
-      {!smtpConfigured() && <p className="rounded bg-amber-50 px-3 py-2 text-sm text-amber-900">SMTP is not configured (SMTP_USER / SMTP_APP_PASSWORD) — emails are only written to the app log.</p>}
+      {!smtpConfigured() && <p className="rounded bg-blue-50 px-3 py-2 text-sm text-blue-900">SMTP is not configured (SMTP_USER / SMTP_APP_PASSWORD) — emails are only written to the app log.</p>}
       <ul className="divide-y rounded-xl border bg-white">
         {rows.map((r) => (
           <li key={r.id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm">

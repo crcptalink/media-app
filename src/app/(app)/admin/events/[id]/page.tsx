@@ -25,7 +25,7 @@ import {
 
 const ARRIVAL_CLS: Record<string, string> = {
   on_time: "bg-green-100 text-green-800",
-  late: "bg-amber-100 text-amber-800",
+  late: "bg-blue-100 text-blue-800",
   absent: "bg-red-100 text-red-800",
   not_yet: "bg-slate-100 text-slate-600",
 };

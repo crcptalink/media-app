@@ -56,14 +56,14 @@ export async function markReadAction(form: FormData) {
   });
 }
 
-async function flipUnavailable(userId: string, date: string, templateId: string | null) {
+async function flipUnavailable(userId: string, date: string, templateId: string | null, note: string | null = null) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new WorkflowError("Bad date");
-  const existing = await db.unavailability.findFirst({ where: { userId, date, templateId } });
+  const existing = await db.unavailability.findFirst({ where: { userId, date, templateId, note } });
   if (existing) {
     await db.unavailability.delete({ where: { id: existing.id } });
     return false;
   }
-  await db.unavailability.create({ data: { userId, date, templateId } });
+  await db.unavailability.create({ data: { userId, date, templateId, note } });
   return true;
 }
 
@@ -76,9 +76,9 @@ export async function toggleUnavailableAction(form: FormData) {
 }
 
 /** Used by the availability page so the row updates before the server round-trip finishes. */
-export async function toggleUnavailableNow(date: string, templateId: string | null) {
+export async function toggleUnavailableNow(date: string, templateId: string | null, note: string | null = null) {
   const user = await requireUser();
-  await flipUnavailable(user.id, date, templateId);
+  await flipUnavailable(user.id, date, templateId, note);
   revalidatePath("/my-availability");
 }
 

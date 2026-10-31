@@ -30,11 +30,11 @@ export function ThursdayRows({ rows }: { rows: ThursdayRow[] }) {
   return (
     <section className="space-y-3">
       {answers.map((row) => (
-        <article key={row.eventId} className="card border-l-4 border-l-amber-500 space-y-3">
+        <article key={row.eventId} className="card border-l-4 border-l-sky-500 space-y-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h3 className="font-semibold">Thursday</h3>
             <span className="text-base font-bold text-slate-900">{fmtDateOnly(row.date)}</span>
-            <span className={`text-sm font-medium ${row.required ? "text-amber-700" : "text-slate-500"}`}>
+            <span className={`text-sm font-medium ${row.required ? "text-sky-700" : "text-slate-500"}`}>
               {row.required ? "Required" : "Optional"}
             </span>
           </div>
